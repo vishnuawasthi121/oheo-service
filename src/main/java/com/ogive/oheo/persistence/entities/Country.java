@@ -13,6 +13,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.ogive.oheo.constants.StatusCode;
 
 @Table(name = "COUNTRY")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_COUNTRY", sequenceName = "SEQ_COUNTRY")
@@ -31,6 +32,8 @@ public class Country {
 	@NotBlank(message = "countryName is mandatory")
 	@Column(name = "COUNTRY_NAME")
 	private String countryName;
+
+	private StatusCode status;
 
 	@JsonIgnore
 	@OneToMany(mappedBy = "country")
@@ -90,6 +93,14 @@ public class Country {
 
 	public void setZoneDetails(Set<ZoneDetail> zoneDetails) {
 		this.zoneDetails = zoneDetails;
+	}
+
+	public StatusCode getStatus() {
+		return status;
+	}
+
+	public void setStatus(StatusCode status) {
+		this.status = status;
 	}
 
 }

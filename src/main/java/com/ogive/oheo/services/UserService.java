@@ -1,7 +1,7 @@
 package com.ogive.oheo.services;
 
-import com.ogive.oheo.dto.UserDTO;
+import com.ogive.oheo.dto.UserRequestDTO;
 
 public interface UserService {
-	public Long addUser(UserDTO userDTO);
+	public Long addUser(UserRequestDTO userDTO);
 }

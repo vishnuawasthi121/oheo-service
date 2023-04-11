@@ -4,7 +4,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.ogive.oheo.dto.UserDTO;
+import com.ogive.oheo.dto.UserRequestDTO;
 import com.ogive.oheo.persistence.entities.UserInfo;
 import com.ogive.oheo.persistence.repo.UserRepository;
 
@@ -15,7 +15,7 @@ public class UserServiceImpl implements UserService {
 	private UserRepository userRepository;
 
 	@Override
-	public Long addUser(UserDTO userDTO) {
+	public Long addUser(UserRequestDTO userDTO) {
 		UserInfo user = new UserInfo();
 		// Object source, Object target
 		BeanUtils.copyProperties(userDTO, user);

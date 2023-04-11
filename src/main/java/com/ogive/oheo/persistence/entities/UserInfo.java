@@ -1,18 +1,16 @@
 package com.ogive.oheo.persistence.entities;
 
-import java.util.Set;
-
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+
+import com.ogive.oheo.constants.StatusCode;
 
 @Table(name = "USER_INFO")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_USER", sequenceName = "SEQ_USER")
@@ -21,29 +19,24 @@ public class UserInfo {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_USER")
-	@Column(name = "USER_ID")
+	@Column(name = "ID")
 	private Long id;
 
-	private String firstName;
+	@Column(nullable = false)
+	private String name;
 
-	private String lastName;
-
+	@Column(nullable = false, unique = true)
 	private String email;
 
+	@Column(nullable = false)
 	private String phone;
 
-	private String zone;
+	private StatusCode status;
 
-	private String region;
-
-	private String city;
-
-	private String zipcode;
-
-	private String status;
-
+	@Column
 	private String username;
 
+	@Column(nullable = false)
 	private String password;
 
 	// bi-directional many-to-many association to Role
@@ -52,10 +45,32 @@ public class UserInfo {
 	// inverseJoinColumns = {
 	// @JoinColumn(name = "ROLE_ID") })
 
-	@ManyToMany(cascade = { CascadeType.ALL })
-	@JoinTable(name = "USER_ROLE_MAPPING", joinColumns = { @JoinColumn(name = "USER_ID") }, inverseJoinColumns = {
-			@JoinColumn(name = "ROLE_ID") })
-	private Set<Role> roles;
+	/**
+	 * @ManyToMany(cascade = { CascadeType.ALL })
+	 * @JoinTable(name = "USER_GROUP_MAPPING", joinColumns = { @JoinColumn(name =
+	 *                 "USER_ID") }, inverseJoinColumns = {
+	 * @JoinColumn(name = "GROUP_ID") }) private Set<GroupDetail> groupDetails;
+	 **/
+
+	@ManyToOne
+	@JoinColumn(name = "GROUP_ID", nullable = false)
+	private GroupDetail groupDetail;
+
+	@ManyToOne
+	@JoinColumn(name = "ZONE_ID", nullable = false)
+	private ZoneDetail zoneDetail;
+
+	@ManyToOne
+	@JoinColumn(name = "STATE_ID", nullable = false)
+	private State state;
+
+	@ManyToOne
+	@JoinColumn(name = "CITY_ID", nullable = false)
+	private City city;
+
+	@ManyToOne
+	@JoinColumn(name = "ZIPCODE", nullable = false)
+	private Zipcode zipcode;
 
 	public long getId() {
 		return id;
@@ -63,22 +78,6 @@ public class UserInfo {
 
 	public void setId(long id) {
 		this.id = id;
-	}
-
-	public String getFirstName() {
-		return firstName;
-	}
-
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-
-	public String getLastName() {
-		return lastName;
-	}
-
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
 	}
 
 	public String getEmail() {
@@ -97,46 +96,6 @@ public class UserInfo {
 		this.phone = phone;
 	}
 
-	public String getZone() {
-		return zone;
-	}
-
-	public void setZone(String zone) {
-		this.zone = zone;
-	}
-
-	public String getRegion() {
-		return region;
-	}
-
-	public void setRegion(String region) {
-		this.region = region;
-	}
-
-	public String getCity() {
-		return city;
-	}
-
-	public void setCity(String city) {
-		this.city = city;
-	}
-
-	public String getZipcode() {
-		return zipcode;
-	}
-
-	public void setZipcode(String zipcode) {
-		this.zipcode = zipcode;
-	}
-
-	public String getStatus() {
-		return status;
-	}
-
-	public void setStatus(String status) {
-		this.status = status;
-	}
-
 	public String getUsername() {
 		return username;
 	}
@@ -153,16 +112,64 @@ public class UserInfo {
 		this.password = password;
 	}
 
-	public Set<Role> getRoles() {
-		return roles;
-	}
-
-	public void setRoles(Set<Role> roles) {
-		this.roles = roles;
-	}
-
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public GroupDetail getGroupDetail() {
+		return groupDetail;
+	}
+
+	public void setGroupDetail(GroupDetail groupDetail) {
+		this.groupDetail = groupDetail;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public StatusCode getStatus() {
+		return status;
+	}
+
+	public void setStatus(StatusCode status) {
+		this.status = status;
+	}
+
+	public ZoneDetail getZoneDetail() {
+		return zoneDetail;
+	}
+
+	public void setZoneDetail(ZoneDetail zoneDetail) {
+		this.zoneDetail = zoneDetail;
+	}
+
+	public State getState() {
+		return state;
+	}
+
+	public void setState(State state) {
+		this.state = state;
+	}
+
+	public City getCity() {
+		return city;
+	}
+
+	public void setCity(City city) {
+		this.city = city;
+	}
+
+	public Zipcode getZipcode() {
+		return zipcode;
+	}
+
+	public void setZipcode(Zipcode zipcode) {
+		this.zipcode = zipcode;
 	}
 
 }

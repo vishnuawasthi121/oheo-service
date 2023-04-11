@@ -31,6 +31,7 @@ import com.ogive.oheo.constants.StatusCode;
 import com.ogive.oheo.dto.CityRequestDTO;
 import com.ogive.oheo.dto.CityResponseDTO;
 import com.ogive.oheo.dto.CountryDTO;
+import com.ogive.oheo.dto.CountryResponseDTO;
 import com.ogive.oheo.dto.ErrorResponseDTO;
 import com.ogive.oheo.dto.StateDTO;
 import com.ogive.oheo.dto.StateResponseDTO;
@@ -74,7 +75,7 @@ public class LocationManagementController {
 	@Autowired
 	private ZipcodeRepository zipcodeRepository;
 
-	@ApiOperation(value = "Saves a given entity. Use the returned instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@PostMapping(path = "/countries", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> addCountry(@Valid @RequestBody CountryDTO countryDTO) {
 		LOG.info("addCountry request received@@   {}", countryDTO);
@@ -101,7 +102,8 @@ public class LocationManagementController {
 			Country updatedCountry = countryRepository.save(countryToUpdate);
 			return new ResponseEntity<Object>(updatedCountry, HttpStatus.OK);
 		}
-		return new ResponseEntity<Object>("Did not find a record to update with given id " + id, HttpStatus.OK);
+		return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a country with id=" + id),
+				HttpStatus.BAD_REQUEST);
 	}
 
 	@ApiOperation(value = "Retrieves an entity by its id", notes = "Return Id of the record if saved correctly otherwise null", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -111,9 +113,43 @@ public class LocationManagementController {
 		Optional<Country> fetchedCountry = countryRepository.findById(id);
 		if (fetchedCountry.isPresent()) {
 			LOG.info("Found data against ID {} and returing response   {}", id, fetchedCountry);
-			return new ResponseEntity<Object>(fetchedCountry.get(), HttpStatus.OK);
+			Country entity = fetchedCountry.get();
+			CountryResponseDTO dto = new CountryResponseDTO();
+
+			BeanUtils.copyProperties(entity, dto);
+
+			dto.setStatus(entity.getStatus());
+
+			dto.add(linkTo(methodOn(LocationManagementController.class).getCountry(entity.getId())).withSelfRel());
+
+			return new ResponseEntity<Object>(dto, HttpStatus.OK);
 		}
 		return new ResponseEntity<Object>(HttpStatus.OK);
+	}
+
+	@ApiOperation(value = "Returns all instances of the type", notes = "Returns all instances of the type", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/countries", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> getAllCountries() {
+		LOG.info("getAllCountries request received");
+
+		Iterable<Country> allCountries = countryRepository.findAll();
+
+		List<CountryResponseDTO> allCountriesDTOList = new ArrayList<>();
+
+		if (null != allCountries) {
+			allCountries.forEach(entity -> {
+				CountryResponseDTO dto = new CountryResponseDTO();
+
+				BeanUtils.copyProperties(entity, dto);
+
+				dto.setStatus(entity.getStatus());
+
+				dto.add(linkTo(methodOn(LocationManagementController.class).getCountry(entity.getId())).withSelfRel());
+				allCountriesDTOList.add(dto);
+			});
+		}
+		LOG.info("Total zones count {}", allCountriesDTOList.size());
+		return new ResponseEntity<Object>(allCountriesDTOList, HttpStatus.OK);
 	}
 
 	@ApiOperation(value = "Deletes the entity with the given id", notes = "If the entity is not found in the persistence store it is silently ignored.", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -126,7 +162,7 @@ public class LocationManagementController {
 
 	// State Api
 
-	@ApiOperation(value = "Saves a given entity. Use the returned instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@PostMapping(path = "/countries/{countryCode}/states", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> addState(@PathVariable String countryCode, @Valid @RequestBody StateDTO stateDTO) {
 		LOG.info("addState request received@@   {}", stateDTO);
@@ -141,7 +177,7 @@ public class LocationManagementController {
 		state.setStatus(stateDTO.getSatus());
 		state.setCountry(findByCountryCode);
 		State saved = stateRepository.save(state);
-		return new ResponseEntity<Object>(saved, HttpStatus.OK);
+		return new ResponseEntity<Object>(saved.getId(), HttpStatus.OK);
 	}
 
 	@PutMapping(path = "/countries/{countryCode}/states/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -163,7 +199,8 @@ public class LocationManagementController {
 			State updated = stateRepository.save(stateToUpdate);
 			return new ResponseEntity<Object>(updated, HttpStatus.OK);
 		}
-		return new ResponseEntity<Object>("Did not find a record to update with given id " + id, HttpStatus.OK);
+		return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a state with id=" + id),
+				HttpStatus.BAD_REQUEST);
 	}
 
 	@ApiOperation(value = "Retrieves an entity by its id", notes = "Return Id of the record if saved correctly otherwise null", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -237,7 +274,7 @@ public class LocationManagementController {
 	// Zone Api
 	// India is divided into four zones based on the lifestyle of people. These are
 	// Western India, Eastern India, Northern India and Southern India
-	@ApiOperation(value = "Saves a given entity. Use the returned instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@PostMapping(path = "/countries/{countryCode}/zones", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> addZone(@Valid @RequestBody ZoneDetailRequestDTO zoneDetailDTO,
 			@PathVariable String countryCode) {
@@ -282,7 +319,8 @@ public class LocationManagementController {
 
 			return new ResponseEntity<Object>(updated, HttpStatus.OK);
 		}
-		return new ResponseEntity<Object>("Did not find a record to update with given id " + id, HttpStatus.OK);
+		return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a zone with id=" + id),
+				HttpStatus.BAD_REQUEST);
 	}
 
 	@ApiOperation(value = "Retrieves an entity by its id", notes = "Return Id of the record if saved correctly otherwise null", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -354,7 +392,7 @@ public class LocationManagementController {
 
 	// City API
 
-	@ApiOperation(value = "Saves a given entity. Use the returned instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@PostMapping(path = "/cities", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> addCity(@PathVariable Long stateId, @Valid @RequestBody CityRequestDTO cityDTO) {
 		LOG.info("addCity request received@@   {}", cityDTO);
@@ -412,7 +450,8 @@ public class LocationManagementController {
 
 			return new ResponseEntity<Object>(updated, HttpStatus.OK);
 		}
-		return new ResponseEntity<Object>("Did not find a record to update with given id " + id, HttpStatus.OK);
+		return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a city with id=" + id),
+				HttpStatus.BAD_REQUEST);
 	}
 
 	@ApiOperation(value = "Retrieves an entity by its id", notes = "Return Id of the record if saved correctly otherwise null", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -463,7 +502,7 @@ public class LocationManagementController {
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
 
-	@ApiOperation(value = "Delete an entity by its id", notes = "Return Id of the record if saved correctly otherwise null", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@ApiOperation(value = "Delete an entity by its id", notes = "Delete an entity by its id", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@DeleteMapping(path = "/cities/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Object> deleteCity(@PathVariable Long id) {
 		LOG.info("deleteCity request received@@   {}", id);
@@ -472,7 +511,7 @@ public class LocationManagementController {
 	}
 
 	// Zipcode
-	@ApiOperation(value = "Saves a given entity. Use the returned instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@PostMapping(path = "/zipcodes", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> addZipcode(@Valid @RequestBody ZipcodeRequestDTO zipcodeDTO) {
 		LOG.info("addZipcode request received@@   {}", zipcodeDTO);
@@ -487,16 +526,16 @@ public class LocationManagementController {
 		}
 		Zipcode zipcode = new Zipcode();
 		BeanUtils.copyProperties(zipcodeDTO, zipcode);
-		
+
 		zipcode.setCode(zipcodeDTO.getZipcode());
-		
+
 		zipcode.setStatus(zipcodeDTO.getStatus());
 		zipcode.setCity(cityData.get());
 		Zipcode saved = zipcodeRepository.save(zipcode);
 		return new ResponseEntity<Object>(saved.getId(), HttpStatus.OK);
 	}
 
-	@ApiOperation(value = "Saves a given entity. Use the returned instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@PutMapping(path = "/zipcodes/{zipcode}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> updateZipcode(@PathVariable Long zipcode,
 			@Valid @RequestBody ZipcodeRequestDTO zipcodeDTO) {
@@ -511,8 +550,6 @@ public class LocationManagementController {
 		}
 
 		Zipcode zipcodeEntity = zipcodeRepository.findByCode(zipcode);
-
-		
 		if (Objects.isNull(zipcodeEntity)) {
 			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a Zipcode with code=" + zipcode),
 					HttpStatus.BAD_REQUEST);
@@ -524,7 +561,7 @@ public class LocationManagementController {
 		Zipcode saved = zipcodeRepository.save(zipcodeEntity);
 		return new ResponseEntity<Object>(saved, HttpStatus.OK);
 	}
-	
+
 	@ApiOperation(value = "Retrieves an entity by its id", notes = "Return Id of the record if saved correctly otherwise null", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/zipcodes/{zipcode}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Object> getZipcode(@PathVariable Long zipcode) {
@@ -534,12 +571,12 @@ public class LocationManagementController {
 		if (Objects.nonNull(zipcodeEntity)) {
 			ZipcodeResponseDTO dto = new ZipcodeResponseDTO();
 			BeanUtils.copyProperties(zipcodeEntity, dto);
-			
+
 			dto.setCityId(zipcodeEntity.getCity().getId());
 			dto.setCityName(zipcodeEntity.getCity().getName());
 			dto.setStatus(zipcodeEntity.getStatus());
 			dto.setZipcode(zipcodeEntity.getCode());
-			
+
 			dto.add(linkTo(methodOn(LocationManagementController.class).getZipcode(zipcode)).withSelfRel());
 			LOG.info("Found data against ID {} and returing response   {}", zipcode, zipcodeEntity);
 			return new ResponseEntity<Object>(dto, HttpStatus.OK);
@@ -566,7 +603,7 @@ public class LocationManagementController {
 				dto.setCityName(zipcode.getCity().getName());
 				dto.setStatus(zipcode.getStatus());
 				dto.setZipcode(zipcode.getCode());
-				
+
 				dto.add(linkTo(methodOn(LocationManagementController.class).getZipcode(zipcode.getCode()))
 						.withSelfRel());
 				zipcodesLists.add(dto);
@@ -576,8 +613,8 @@ public class LocationManagementController {
 		LOG.info("Did not find any records  getAllZipcodes {}", zipcodesLists);
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
-	
-	@ApiOperation(value = "Delete an entity by its id", notes = "Return Id of the record if saved correctly otherwise null", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+
+	@ApiOperation(value = "Delete an entity by its id", notes = "If the entity is not found in the persistence store it is silently ignored", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@DeleteMapping(path = "/zipcodes/{zipcode}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Object> deleteZipcode(@PathVariable Long zipcode) {
 		LOG.info("deleteCity request received@@   {}", zipcode);
