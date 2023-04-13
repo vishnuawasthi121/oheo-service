@@ -1,18 +1,16 @@
 package com.ogive.oheo.dto;
 
-import javax.validation.constraints.NotEmpty;
+import org.springframework.hateoas.RepresentationModel;
 
 import com.ogive.oheo.constants.StatusCode;
 
-public class CityRequestDTO {
+public class VehicleFuelTypeResponseDTO extends RepresentationModel<VehicleFuelTypeResponseDTO> {
 
-	@NotEmpty(message = "name is mandatory")
 	private String name;
 
 	private StatusCode status;
 
-	@NotEmpty(message = "stateId is mandatory")
-	private Long stateId;
+	private Long id;
 
 	public String getName() {
 		return name;
@@ -30,12 +28,12 @@ public class CityRequestDTO {
 		this.status = status;
 	}
 
-	public Long getStateId() {
-		return stateId;
+	public Long getId() {
+		return id;
 	}
 
-	public void setStateId(Long stateId) {
-		this.stateId = stateId;
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 }

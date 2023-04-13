@@ -89,7 +89,7 @@ public class LocationManagementController {
 	}
 
 	@PutMapping(path = "/countries/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> updateCountry(@PathVariable Long id, @RequestBody Country country) {
+	public ResponseEntity<Object> updateCountry(@PathVariable Long id,@Valid @RequestBody Country country) {
 		LOG.info("updateCountry requested record id {} ", id);
 		LOG.info("updateCountry request body@@   {}", country);
 
@@ -182,7 +182,7 @@ public class LocationManagementController {
 
 	@PutMapping(path = "/countries/{countryCode}/states/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> updateState(@PathVariable String countryCode, @PathVariable Long id,
-			@RequestBody StateDTO stateDTO) {
+			@Valid	@RequestBody StateDTO stateDTO) {
 		LOG.info("updateState requested record id {} ", id);
 		LOG.info("updateState request body@@   {}", stateDTO);
 
@@ -302,7 +302,7 @@ public class LocationManagementController {
 
 	@PutMapping(path = "/countries/{countryCode}/zones/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> updateZone(@PathVariable String countryCode, @PathVariable Long id,
-			@RequestBody ZoneDetailDTO zoneDetailDTO) {
+			@Valid	@RequestBody ZoneDetailDTO zoneDetailDTO) {
 		LOG.info("updateZone requested record countryCode {} ", countryCode);
 		LOG.info("updateZone requested record id {} ", id);
 		LOG.info("updateZone request body@@   {}", zoneDetailDTO);
@@ -417,7 +417,7 @@ public class LocationManagementController {
 	}
 
 	@PutMapping(path = "/cities/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> updateCity(@PathVariable Long id, @RequestBody CityRequestDTO cityDTO) {
+	public ResponseEntity<Object> updateCity(@PathVariable Long id,@Valid @RequestBody CityRequestDTO cityDTO) {
 		LOG.info("updateCity request body@@   {}", cityDTO);
 
 		Optional<City> cityOptionalData = cityRepository.findById(id);

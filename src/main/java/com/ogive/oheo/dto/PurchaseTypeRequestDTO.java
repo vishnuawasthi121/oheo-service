@@ -4,15 +4,12 @@ import javax.validation.constraints.NotEmpty;
 
 import com.ogive.oheo.constants.StatusCode;
 
-public class CityRequestDTO {
+public class PurchaseTypeRequestDTO {
 
 	@NotEmpty(message = "name is mandatory")
 	private String name;
 
 	private StatusCode status;
-
-	@NotEmpty(message = "stateId is mandatory")
-	private Long stateId;
 
 	public String getName() {
 		return name;
@@ -28,14 +25,6 @@ public class CityRequestDTO {
 
 	public void setStatus(StatusCode status) {
 		this.status = status;
-	}
-
-	public Long getStateId() {
-		return stateId;
-	}
-
-	public void setStateId(Long stateId) {
-		this.stateId = stateId;
 	}
 
 }
