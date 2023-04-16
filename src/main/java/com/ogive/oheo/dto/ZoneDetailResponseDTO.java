@@ -2,13 +2,15 @@ package com.ogive.oheo.dto;
 
 import org.springframework.hateoas.RepresentationModel;
 
-public class ZoneDetailDTO extends RepresentationModel<ZoneDetailDTO> {
+import com.ogive.oheo.constants.StatusCode;
+
+public class ZoneDetailResponseDTO extends RepresentationModel<ZoneDetailResponseDTO> {
 
 	private Long id;
 
 	private String name;
 
-	private String status;
+	private StatusCode status;
 
 	public Long getId() {
 		return id;
@@ -26,11 +28,11 @@ public class ZoneDetailDTO extends RepresentationModel<ZoneDetailDTO> {
 		this.name = name;
 	}
 
-	public String getStatus() {
+	public StatusCode getStatus() {
 		return status;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(StatusCode status) {
 		this.status = status;
 	}
 

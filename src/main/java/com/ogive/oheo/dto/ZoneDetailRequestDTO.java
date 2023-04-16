@@ -1,12 +1,14 @@
 package com.ogive.oheo.dto;
 
-public class ZoneDetailRequestDTO{
+import com.ogive.oheo.constants.StatusCode;
+
+public class ZoneDetailRequestDTO {
 
 	private Long id;
 
 	private String name;
 
-	private String status;
+	private StatusCode status;
 
 	public Long getId() {
 		return id;
@@ -24,11 +26,11 @@ public class ZoneDetailRequestDTO{
 		this.name = name;
 	}
 
-	public String getStatus() {
+	public StatusCode getStatus() {
 		return status;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(StatusCode status) {
 		this.status = status;
 	}
 

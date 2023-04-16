@@ -6,7 +6,7 @@ import com.ogive.oheo.constants.StatusCode;
 
 public class ZipcodeResponseDTO extends RepresentationModel<StateResponseDTO> {
 
-	private Long zipcode;
+	private Long code;
 
 	private Long cityId;
 
@@ -14,12 +14,12 @@ public class ZipcodeResponseDTO extends RepresentationModel<StateResponseDTO> {
 
 	private String cityName;
 
-	public Long getZipcode() {
-		return zipcode;
+	public Long getCode() {
+		return code;
 	}
 
-	public void setZipcode(Long zipcode) {
-		this.zipcode = zipcode;
+	public void setCode(Long code) {
+		this.code = code;
 	}
 
 	public Long getCityId() {
@@ -46,5 +46,4 @@ public class ZipcodeResponseDTO extends RepresentationModel<StateResponseDTO> {
 		this.cityName = cityName;
 	}
 
-	
 }

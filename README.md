@@ -29,3 +29,12 @@ http://localhost:8081/oheo-service/h2-console
 
 # List of regions in India
 https://india.fandom.com/wiki/List_of_regions_in_India
+
+# How to save file in postgres Database using spring boot
+https://frontbackend.com/spring-boot/spring-boot-upload-file-to-postgresql-database
+https://stackoverflow.com/questions/49845355/spring-boot-controller-upload-multipart-and-json-to-dto
+
+# Specification problems 
+
+https://stackoverflow.com/questions/60009797/jpa-specification-and-null-parameter-in-where-clause
+

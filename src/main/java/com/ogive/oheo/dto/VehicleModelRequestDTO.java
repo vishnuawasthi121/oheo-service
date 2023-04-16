@@ -1,6 +1,7 @@
 package com.ogive.oheo.dto;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 import com.ogive.oheo.constants.StatusCode;
 
@@ -11,7 +12,7 @@ public class VehicleModelRequestDTO {
 
 	private StatusCode status;
 
-	@NotEmpty(message = "companyId is mandatory")
+	@NotNull(message = "companyId is mandatory")
 	private Long companyId;
 
 	public String getModelName() {

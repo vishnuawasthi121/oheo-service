@@ -1,6 +1,7 @@
 package com.ogive.oheo.dto;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 import com.ogive.oheo.constants.StatusCode;
 
@@ -11,7 +12,7 @@ public class CityRequestDTO {
 
 	private StatusCode status;
 
-	@NotEmpty(message = "stateId is mandatory")
+	@NotNull(message = "stateId is mandatory")
 	private Long stateId;
 
 	public String getName() {
