@@ -30,14 +30,14 @@ public class GeographicLocationSpecifications {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public Predicate toPredicate(Root<ZoneDetail> zone, CriteriaQuery<?> query,
+			public Predicate toPredicate(Root<ZoneDetail> root, CriteriaQuery<?> query,
 					CriteriaBuilder criteriaBuilder) {
 
 				if (ObjectUtils.isEmpty(filter.getFilterByName())) {
 					return criteriaBuilder.conjunction();
 				}
-
-				return criteriaBuilder.like(zone.get("name"), "%" + filter.getFilterByName() + "%");
+				return criteriaBuilder.like(criteriaBuilder.upper(root.get("name")), "%" + filter.getFilterByName().toUpperCase() + "%");
+				//return criteriaBuilder.like(zone.get("name"), "%" + filter.getFilterByName() + "%");
 
 				// builder.like(root.get("address"), "%" + address + "%");
 			}
@@ -51,19 +51,15 @@ public class GeographicLocationSpecifications {
 				if (ObjectUtils.isEmpty(filter.getFilterByName())) {
 					return criteriaBuilder.conjunction();
 				}
-				return criteriaBuilder.like(root.get("companyName"), "%" + filter.getFilterByName() + "%");
+				//return criteriaBuilder.like(root.get("companyName"), "%" + filter.getFilterByName() + "%");
+				return criteriaBuilder.like(criteriaBuilder.upper(root.get("companyName")), "%" + filter.getFilterByName().toUpperCase() + "%");
 			}
 		};
 	}
-	
-	
-
 	public static Specification<Company> filterCompanyByStatus(FilterCriteria filter) {
 		return new Specification<Company>() {
-			
 			@Override
 			public Predicate toPredicate(Root<Company> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-				
 				if (ObjectUtils.isEmpty(filter.getStatus())) {
 					return criteriaBuilder.conjunction();
 				}
@@ -82,7 +78,8 @@ public class GeographicLocationSpecifications {
 				if (ObjectUtils.isEmpty(filter.getFilterByName())) {
 					return criteriaBuilder.conjunction();
 				}
-				return criteriaBuilder.like(root.get("modelName"), "%" + filter.getFilterByName() + "%");
+				//return criteriaBuilder.like(root.get("modelName"), "%" + filter.getFilterByName() + "%");
+				return criteriaBuilder.like(criteriaBuilder.upper(root.get("modelName")), "%" + filter.getFilterByName().toUpperCase() + "%");
 			}
 		};
 	}
@@ -105,7 +102,8 @@ public class GeographicLocationSpecifications {
 				if (ObjectUtils.isEmpty(filter.getFilterByName())) {
 					return criteriaBuilder.conjunction();
 				}
-				return criteriaBuilder.like(root.get("name"), "%" + filter.getFilterByName() + "%");
+				//return criteriaBuilder.like(root.get("name"), "%" + filter.getFilterByName() + "%");
+				return criteriaBuilder.like(criteriaBuilder.upper(root.get("name")), "%" + filter.getFilterByName().toUpperCase() + "%");
 			}
 		};
 	}
@@ -130,7 +128,7 @@ public class GeographicLocationSpecifications {
 				if (ObjectUtils.isEmpty(filter.getFilterByName())) {
 					return criteriaBuilder.conjunction();
 				}
-				return criteriaBuilder.like(root.get("name"), "%" + filter.getFilterByName() + "%");
+				return criteriaBuilder.like(criteriaBuilder.upper(root.get("name")), "%" + filter.getFilterByName().toUpperCase() + "%");
 			}
 		};
 	}
@@ -154,7 +152,7 @@ public class GeographicLocationSpecifications {
 				if (ObjectUtils.isEmpty(filter.getFilterByName())) {
 					return criteriaBuilder.conjunction();
 				}
-				return criteriaBuilder.like(root.get("name"), "%" + filter.getFilterByName() + "%");
+				return criteriaBuilder.like(criteriaBuilder.upper(root.get("name")), "%" + filter.getFilterByName().toUpperCase() + "%");
 			}
 		};
 	}
@@ -177,7 +175,7 @@ public class GeographicLocationSpecifications {
 				if (ObjectUtils.isEmpty(filter.getFilterByName())) {
 					return criteriaBuilder.conjunction();
 				}
-				return criteriaBuilder.like(root.get("name"), "%" + filter.getFilterByName() + "%");
+				return criteriaBuilder.like(criteriaBuilder.upper(root.get("name")), "%" + filter.getFilterByName().toUpperCase() + "%");
 			}
 		};
 	}
@@ -200,7 +198,7 @@ public class GeographicLocationSpecifications {
 				if (ObjectUtils.isEmpty(filter.getFilterByName())) {
 					return criteriaBuilder.conjunction();
 				}
-				return criteriaBuilder.like(root.get("name"), "%" + filter.getFilterByName() + "%");
+				return criteriaBuilder.like(criteriaBuilder.upper(root.get("name")), "%" + filter.getFilterByName().toUpperCase() + "%");
 			}
 		};
 	}
@@ -224,7 +222,7 @@ public class GeographicLocationSpecifications {
 				if (ObjectUtils.isEmpty(filter.getFilterByName())) {
 					return criteriaBuilder.conjunction();
 				}
-				return criteriaBuilder.like(root.get("name"), "%" + filter.getFilterByName() + "%");
+				return criteriaBuilder.like(criteriaBuilder.upper(root.get("name")), "%" + filter.getFilterByName().toUpperCase() + "%");
 			}
 		};
 	}
@@ -250,22 +248,22 @@ public class GeographicLocationSpecifications {
 	}
 
 	public static Specification<Zipcode> findZipcodeByCode(FilterCriteria filter) {
-		return (root, query, builder) -> {
+		return (root, query, criteriaBuilder) -> {
 			if (ObjectUtils.isEmpty(filter.getFilterByCode())) {
-				return builder.conjunction();
+				return criteriaBuilder.conjunction();
 			}
-
-			return builder.equal(root.get("code"), filter.getFilterByCode());
+			return criteriaBuilder.like(criteriaBuilder.upper(root.get("code")), "%" + filter.getFilterByCode().toUpperCase() + "%");
 		};
 	}
 
 	public static Specification<Zipcode> findZipcodeByCityName(FilterCriteria filter) {
-		return (root, query, builder) -> {
+		return (root, query, criteriaBuilder) -> {
 			if (ObjectUtils.isEmpty(filter.getFilterByCityName())) {
-				return builder.conjunction();
+				return criteriaBuilder.conjunction();
 			}
 			Join<Zipcode, City> zipcodeCity = root.join("city");
-			return builder.like(zipcodeCity.get("name"), "%" + filter.getFilterByCityName() + "%");
+		//	return builder.like(zipcodeCity.get("name"), "%" + filter.getFilterByCityName() + "%");
+			return criteriaBuilder.like(criteriaBuilder.upper(zipcodeCity.get("name")), "%" + filter.getFilterByCityName().toUpperCase() + "%");
 		};
 
 	}

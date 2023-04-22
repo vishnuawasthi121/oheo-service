@@ -24,8 +24,8 @@ public class SpringFoxConfig {
 	}
 
 	private ApiInfo apiInfo() {
-		return new ApiInfo("OHEO Services", "OHEO Service interface", "API TOS", "Terms of service",
-				new Contact("Vishnu Awasthi", "https://www.linkedin.com/in/vishnu-awasthi-36099b77/", "VishnuAwasthi121@gmail.com"), "License of API",
+		return new ApiInfo("OHEO Services", "OHEO Service interface - Developed by Ogive Technology", "API TOS", "Terms of service",
+				new Contact("Ogive Technology", "https://www.ogivetechnology.com/", "info@ogivetechnology.com"), "License of API",
 				"API license URL", Collections.emptyList());
 	}
 }

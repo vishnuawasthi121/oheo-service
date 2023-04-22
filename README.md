@@ -38,3 +38,10 @@ https://stackoverflow.com/questions/49845355/spring-boot-controller-upload-multi
 
 https://stackoverflow.com/questions/60009797/jpa-specification-and-null-parameter-in-where-clause
 
+#TODO  
+1.Search case insensitive search - https://www.tabnine.com/code/java/methods/javax.persistence.criteria.CriteriaBuilder/upper
+
+# Save content using restful api
+https://www.dotcms.com/docs/latest/save-content-using-the-rest-api
+
+ 
