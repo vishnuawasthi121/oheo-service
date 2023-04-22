@@ -94,24 +94,23 @@ public class LocationManagementController {
 		LOG.info("addCountry request received@@   {}", countryDTO);
 		Country entity = new Country();
 		BeanUtils.copyProperties(countryDTO, entity);
-
 		Country persistedCountry = countryRepository.save(entity);
-
 		LOG.info("Saved @@   {}", persistedCountry);
 		return new ResponseEntity<Object>(persistedCountry.getId(), HttpStatus.OK);
 	}
 
 	@PutMapping(path = "/countries/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> updateCountry(@PathVariable Long id,@Valid @RequestBody Country country) {
+	public ResponseEntity<Object> updateCountry(@PathVariable Long id,@Valid @RequestBody CountryDTO request) {
 		LOG.info("updateCountry requested record id {} ", id);
-		LOG.info("updateCountry request body@@   {}", country);
+		LOG.info("updateCountry request body@@   {}", request);
 
 		Optional<Country> foundCountry = countryRepository.findById(id);
 		if (foundCountry.isPresent()) {
-
 			Country countryToUpdate = foundCountry.get();
-			countryToUpdate.setCountryCode(country.getCountryCode());
-			countryToUpdate.setCountryName(country.getCountryName());
+			countryToUpdate.setCountryCode(request.getCountryCode());
+			countryToUpdate.setCountryName(request.getCountryName());
+			countryToUpdate.setStatus(request.getStatus());
+			
 			Country updatedCountry = countryRepository.save(countryToUpdate);
 			return new ResponseEntity<Object>(updatedCountry, HttpStatus.OK);
 		}
@@ -128,13 +127,8 @@ public class LocationManagementController {
 			LOG.info("Found data against ID {} and returing response   {}", id, fetchedCountry);
 			Country entity = fetchedCountry.get();
 			CountryResponseDTO dto = new CountryResponseDTO();
-
 			BeanUtils.copyProperties(entity, dto);
-
-			dto.setStatus(entity.getStatus());
-
 			dto.add(linkTo(methodOn(LocationManagementController.class).getCountry(entity.getId())).withSelfRel());
-
 			return new ResponseEntity<Object>(dto, HttpStatus.OK);
 		}
 		return new ResponseEntity<Object>(HttpStatus.OK);
@@ -144,19 +138,13 @@ public class LocationManagementController {
 	@GetMapping(path = "/countries", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Object> getAllCountries() {
 		LOG.info("getAllCountries request received");
-
 		Iterable<Country> allCountries = countryRepository.findAll();
-
 		List<CountryResponseDTO> allCountriesDTOList = new ArrayList<>();
-
 		if (null != allCountries) {
 			allCountries.forEach(entity -> {
 				CountryResponseDTO dto = new CountryResponseDTO();
-
 				BeanUtils.copyProperties(entity, dto);
-
 				dto.setStatus(entity.getStatus());
-
 				dto.add(linkTo(methodOn(LocationManagementController.class).getCountry(entity.getId())).withSelfRel());
 				allCountriesDTOList.add(dto);
 			});

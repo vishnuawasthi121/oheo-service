@@ -2,9 +2,9 @@ package com.ogive.oheo.dto;
 
 import javax.validation.constraints.NotNull;
 
-public class CountryDTO {
+import com.ogive.oheo.constants.StatusCode;
 
-	private Long id;
+public class CountryDTO {
 
 	@NotNull(message = "countryCode is mandatory")
 	private String countryCode;
@@ -12,13 +12,7 @@ public class CountryDTO {
 	@NotNull(message = "countryName is mandatory")
 	private String countryName;
 
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
+	private StatusCode status;
 
 	public String getCountryCode() {
 		return countryCode;
@@ -34,6 +28,14 @@ public class CountryDTO {
 
 	public void setCountryName(String countryName) {
 		this.countryName = countryName;
+	}
+
+	public StatusCode getStatus() {
+		return status;
+	}
+
+	public void setStatus(StatusCode status) {
+		this.status = status;
 	}
 
 }
