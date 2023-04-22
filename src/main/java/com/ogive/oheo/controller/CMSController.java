@@ -177,7 +177,7 @@ public class CMSController {
 			Set<Position> positionEntities = new HashSet<>();
 			positions.forEach(position -> {
 				Optional<Position> positionData = positionRepository.findById(position);
-				if (positionData.isEmpty()) {
+				if (!positionData.isPresent()) {
 					throw new ValidationException("Unable to find Position against id " + position);
 				}
 				positionEntities.add(positionData.get());
@@ -207,7 +207,7 @@ public class CMSController {
 				Set<Position> positionEntities = new HashSet<>();
 				positions.forEach(position -> {
 					Optional<Position> positionData = positionRepository.findById(position);
-					if (positionData.isEmpty()) {
+					if (!positionData.isPresent()) {
 						throw new ValidationException("Unable to find Position against id " + position);
 					}
 					positionEntities.add(positionData.get());

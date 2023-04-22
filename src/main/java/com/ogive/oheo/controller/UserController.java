@@ -91,21 +91,21 @@ public class UserController {
 		BeanUtils.copyProperties(requestBody, entity);
 		Optional<State> stateData = stateRepository.findById(requestBody.getStateId());
 
-		if (stateData.isEmpty()) {
+		if (!stateData.isPresent()) {
 			return new ResponseEntity<Object>(
 					new ErrorResponseDTO("Did not find a state with id=" + requestBody.getStateId()),
 					HttpStatus.BAD_REQUEST);
 		}
 
 		Optional<ZoneDetail> zoneData = zoneDetailRepository.findById(requestBody.getZoneId());
-		if (zoneData.isEmpty()) {
+		if (!zoneData.isPresent()) {
 			return new ResponseEntity<Object>(
 					new ErrorResponseDTO("Did not find a zone with id=" + requestBody.getZoneId()),
 					HttpStatus.BAD_REQUEST);
 		}
 
 		Optional<City> cityData = cityRepository.findById(requestBody.getCityId());
-		if (cityData.isEmpty()) {
+		if (!cityData.isPresent()) {
 			return new ResponseEntity<Object>(
 					new ErrorResponseDTO("Did not find a city with id=" + requestBody.getCityId()),
 					HttpStatus.BAD_REQUEST);
@@ -119,7 +119,7 @@ public class UserController {
 		}
 
 		Optional<GroupDetail> groupData = groupDetailRepository.findById(requestBody.getGroupId());
-		if (groupData.isEmpty()) {
+		if (!groupData.isPresent()) {
 			return new ResponseEntity<Object>(
 					new ErrorResponseDTO("Did not find a group with id=" + requestBody.getGroupId()),
 					HttpStatus.BAD_REQUEST);
@@ -146,7 +146,7 @@ public class UserController {
 
 		Optional<UserInfo> entityData = userRepository.findById(id);
 
-		if (entityData.isEmpty()) {
+		if (!entityData.isPresent()) {
 			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a UserInfo with id=" + id),
 					HttpStatus.BAD_REQUEST);
 		}
@@ -156,21 +156,21 @@ public class UserController {
 
 		Optional<State> stateData = stateRepository.findById(requestBody.getStateId());
 
-		if (stateData.isEmpty()) {
+		if (!stateData.isPresent()) {
 			return new ResponseEntity<Object>(
 					new ErrorResponseDTO("Did not find a state with id=" + requestBody.getStateId()),
 					HttpStatus.BAD_REQUEST);
 		}
 
 		Optional<ZoneDetail> zoneData = zoneDetailRepository.findById(requestBody.getZoneId());
-		if (zoneData.isEmpty()) {
+		if (!zoneData.isPresent()) {
 			return new ResponseEntity<Object>(
 					new ErrorResponseDTO("Did not find a zone with id=" + requestBody.getZoneId()),
 					HttpStatus.BAD_REQUEST);
 		}
 
 		Optional<City> cityData = cityRepository.findById(requestBody.getCityId());
-		if (cityData.isEmpty()) {
+		if (!cityData.isPresent()) {
 			return new ResponseEntity<Object>(
 					new ErrorResponseDTO("Did not find a city with id=" + requestBody.getCityId()),
 					HttpStatus.BAD_REQUEST);
@@ -184,7 +184,7 @@ public class UserController {
 		}
 
 		Optional<GroupDetail> groupData = groupDetailRepository.findById(requestBody.getGroupId());
-		if (groupData.isEmpty()) {
+		if (!groupData.isPresent()) {
 			return new ResponseEntity<Object>(
 					new ErrorResponseDTO("Did not find a group with id=" + requestBody.getGroupId()),
 					HttpStatus.BAD_REQUEST);

@@ -1,8 +1,23 @@
 package com.ogive.oheo.controller;
 
+import static com.ogive.oheo.dto.utils.GeographicLocationSpecifications.filterCompanyByCompanyName;
+import static com.ogive.oheo.dto.utils.GeographicLocationSpecifications.filterCompanyByStatus;
+import static com.ogive.oheo.dto.utils.GeographicLocationSpecifications.filterPurchaseTypeByName;
+import static com.ogive.oheo.dto.utils.GeographicLocationSpecifications.filterPurchaseTypeByStatus;
+import static com.ogive.oheo.dto.utils.GeographicLocationSpecifications.filterVehicleBodyTypeByName;
+import static com.ogive.oheo.dto.utils.GeographicLocationSpecifications.filterVehicleBodyTypeByStatus;
+import static com.ogive.oheo.dto.utils.GeographicLocationSpecifications.filterVehicleDetailByName;
+import static com.ogive.oheo.dto.utils.GeographicLocationSpecifications.filterVehicleDetailByStatus;
+import static com.ogive.oheo.dto.utils.GeographicLocationSpecifications.filterVehicleFuelTypeByName;
+import static com.ogive.oheo.dto.utils.GeographicLocationSpecifications.filterVehicleFuelTypeByStatus;
+import static com.ogive.oheo.dto.utils.GeographicLocationSpecifications.filterVehicleModelByModelName;
+import static com.ogive.oheo.dto.utils.GeographicLocationSpecifications.filterVehicleModelByStatus;
+import static com.ogive.oheo.dto.utils.GeographicLocationSpecifications.filterVehicleTransmissionByName;
+import static com.ogive.oheo.dto.utils.GeographicLocationSpecifications.filterVehicleTransmissionByStatus;
+import static com.ogive.oheo.dto.utils.GeographicLocationSpecifications.filterVehicleTypeByName;
+import static com.ogive.oheo.dto.utils.GeographicLocationSpecifications.filterVehicleTypeByStatus;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-import static com.ogive.oheo.dto.utils.GeographicLocationSpecifications.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -62,7 +77,6 @@ import com.ogive.oheo.dto.VehicleTransmissionRequestDTO;
 import com.ogive.oheo.dto.VehicleTransmissionResponseDTO;
 import com.ogive.oheo.dto.VehicleTypeRequestDTO;
 import com.ogive.oheo.dto.VehicleTypeResponseDTO;
-import com.ogive.oheo.dto.ZipcodeResponseDTO;
 import com.ogive.oheo.dto.utils.CommonsUtil;
 import com.ogive.oheo.persistence.entities.Address;
 import com.ogive.oheo.persistence.entities.AddressRequestDTO;
@@ -249,7 +263,7 @@ public class VehicleSetupController {
 		
 		Optional<Company> companyData = companyRepository.findById(requestBody.getCompanyId());
 
-		if (companyData.isEmpty()) {
+		if (!companyData.isPresent()) {
 			return new ResponseEntity<Object>(
 					new ErrorResponseDTO("Did not find a Company with id=" + requestBody.getCompanyId()),
 					HttpStatus.BAD_REQUEST);
@@ -273,7 +287,7 @@ public class VehicleSetupController {
 
 		Optional<Company> companyData = companyRepository.findById(requestBody.getCompanyId());
 
-		if (companyData.isEmpty()) {
+		if (!companyData.isPresent()) {
 			return new ResponseEntity<Object>(
 					new ErrorResponseDTO("Did not find a Company with id=" + requestBody.getCompanyId()),
 					HttpStatus.BAD_REQUEST);
@@ -898,7 +912,7 @@ public class VehicleSetupController {
 
 		Optional<VehicleType> vehicleTypeData = vehicleTypeRepository.findById(requestBody.getVehicleTypeId());
 
-		if (vehicleTypeData.isEmpty()) {
+		if (!vehicleTypeData.isPresent()) {
 			return new ResponseEntity<Object>(
 					new ErrorResponseDTO("Did not find VehicleType by id=" + requestBody.getVehicleTypeId()),
 					HttpStatus.BAD_REQUEST);
@@ -906,7 +920,7 @@ public class VehicleSetupController {
 
 		Optional<VehicleBodyType> vehicleBodyTypeData = vehicleBodyTypeRepository
 				.findById(requestBody.getVehicleBodyTypeId());
-		if (vehicleBodyTypeData.isEmpty()) {
+		if (!vehicleBodyTypeData.isPresent()) {
 			return new ResponseEntity<Object>(
 					new ErrorResponseDTO("Did not find VehicleBodyType by id=" + requestBody.getVehicleBodyTypeId()),
 					HttpStatus.BAD_REQUEST);
@@ -916,7 +930,7 @@ public class VehicleSetupController {
 		Address address = new Address();
 
 		Optional<City> cityData = cityRepository.findById(addressDTO.getCityId());
-		if (cityData.isEmpty()) {
+		if (!cityData.isPresent()) {
 			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find City by id=" + addressDTO.getCityId()),
 					HttpStatus.BAD_REQUEST);
 		}
@@ -931,7 +945,7 @@ public class VehicleSetupController {
 
 		Optional<ZoneDetail> zoneData = zoneDetailRepository.findById(addressDTO.getZoneId());
 
-		if (zoneData.isEmpty()) {
+		if (!zoneData.isPresent()) {
 			return new ResponseEntity<Object>(
 					new ErrorResponseDTO("Did not find ZoneDetail by id=" + addressDTO.getZoneId()),
 					HttpStatus.BAD_REQUEST);
@@ -939,7 +953,7 @@ public class VehicleSetupController {
 
 		Optional<State> stateData = stateRepository.findById(addressDTO.getStateId());
 
-		if (stateData.isEmpty()) {
+		if (!stateData.isPresent()) {
 			return new ResponseEntity<Object>(
 					new ErrorResponseDTO("Did not find State by id=" + addressDTO.getStateId()),
 					HttpStatus.BAD_REQUEST);

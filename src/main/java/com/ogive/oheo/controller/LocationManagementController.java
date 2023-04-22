@@ -244,7 +244,7 @@ public class LocationManagementController {
 		LOG.info("filter {}", filterByName);
 		LOG.info("orderBy {}", orderBy);
 		
-		Direction sort = (sortDirection == null || sortDirection.isBlank()) ? Direction.ASC: Direction.valueOf(sortDirection.toUpperCase());
+		Direction sort = (sortDirection == null || sortDirection.isEmpty()) ? Direction.ASC: Direction.valueOf(sortDirection.toUpperCase());
 		Pageable paging = PageRequest.of(page, size, Sort.by(sort, orderBy));
 
 		Page<State> pagedResult = null;
@@ -422,13 +422,13 @@ public class LocationManagementController {
 
 		Optional<State> stateOptionalData = stateRepository.findById(cityDTO.getStateId());
 
-		if (cityOptionalData.isEmpty()) {
+		if (!cityOptionalData.isPresent()) {
 			LOG.info("Did not find City by id   {}", id);
 			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a City by id=" + id),
 					HttpStatus.BAD_REQUEST);
 		}
 
-		if (stateOptionalData.isEmpty()) {
+		if (!stateOptionalData.isPresent()) {
 			LOG.info("Did not find State by id   {}", id);
 			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a State by id=" + id),
 					HttpStatus.BAD_REQUEST);
@@ -487,7 +487,7 @@ public class LocationManagementController {
 		LOG.info("filter {}", filterByName);
 		LOG.info("orderBy {}", orderBy);
 		
-		Direction sort = (sortDirection == null || sortDirection.isBlank()) ? Direction.ASC : Direction.valueOf(sortDirection.toUpperCase());
+		Direction sort = (sortDirection == null || sortDirection.isEmpty()) ? Direction.ASC : Direction.valueOf(sortDirection.toUpperCase());
 		Pageable paging = PageRequest.of(page, size, Sort.by(sort, orderBy));
 
 		Page<City> pagedResult = null;
