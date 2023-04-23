@@ -6,11 +6,12 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.ogive.oheo.constants.StatusCode;
-
+@NamedQuery(name="VehicleType.dropDown", query="SELECT id , name FROM VehicleType")
 @Table(name = "VEHICLE_TYPE")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_VEHICLE_TYPE", sequenceName = "SEQ_VEHICLE_TYPE")
 @Entity

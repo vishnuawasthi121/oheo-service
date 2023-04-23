@@ -11,6 +11,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -22,6 +23,7 @@ import com.ogive.oheo.constants.StatusCode;
  * @author Vishnu Awasthi
  *
  */
+@NamedQuery(name="Company.dropDown", query="SELECT id , companyName FROM Company")
 
 @Table(name = "VEHICLE_COMPANY")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_VEHICLE_COMPANY", sequenceName = "SEQ_VEHICLE_COMPANY")

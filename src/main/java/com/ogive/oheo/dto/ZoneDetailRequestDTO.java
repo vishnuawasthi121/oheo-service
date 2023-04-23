@@ -4,19 +4,9 @@ import com.ogive.oheo.constants.StatusCode;
 
 public class ZoneDetailRequestDTO {
 
-	private Long id;
-
 	private String name;
 
 	private StatusCode status;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
 
 	public String getName() {
 		return name;

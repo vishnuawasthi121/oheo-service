@@ -100,7 +100,7 @@ public class LocationManagementController {
 	}
 
 	@PutMapping(path = "/countries/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> updateCountry(@PathVariable Long id,@Valid @RequestBody CountryDTO request) {
+	public ResponseEntity<Object> updateCountry(@PathVariable Long id, @Valid @RequestBody CountryDTO request) {
 		LOG.info("updateCountry requested record id {} ", id);
 		LOG.info("updateCountry request body@@   {}", request);
 
@@ -110,13 +110,27 @@ public class LocationManagementController {
 			countryToUpdate.setCountryCode(request.getCountryCode());
 			countryToUpdate.setCountryName(request.getCountryName());
 			countryToUpdate.setStatus(request.getStatus());
-			
 			Country updatedCountry = countryRepository.save(countryToUpdate);
 			return new ResponseEntity<Object>(updatedCountry, HttpStatus.OK);
 		}
-		return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a country with id=" + id),
-				HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a country with id=" + id),HttpStatus.BAD_REQUEST);
 	}
+	
+	@ApiOperation(value = "Retrieves countries list along with city name", notes = "Retrieves countries list along with city name", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/countries/dropdown", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> countriesDropdown() {
+		LOG.info("countriesDropdown request received@@");
+		List<Object[]> zipcodeData = countryRepository.dropDown();
+		List<Map<Object,Object>> dropDowns = new ArrayList<>();
+		zipcodeData.forEach(data -> {
+			Map<Object,Object> map = new HashMap<>();
+			map.put(data[0], data[1]);
+			dropDowns.add(map);
+		});
+		return new ResponseEntity<Object>(dropDowns,HttpStatus.OK);
+	}
+	
+	
 
 	@ApiOperation(value = "Retrieves an entity by its id", notes = "Return Id of the record if saved correctly otherwise null", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/countries/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -182,7 +196,7 @@ public class LocationManagementController {
 	}
 
 	@PutMapping(path = "/states/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> updateState(@PathVariable Long id,@Valid	@RequestBody StateDTO stateDTO) {
+	public ResponseEntity<Object> updateState(@PathVariable Long id, @Valid @RequestBody StateDTO stateDTO) {
 		LOG.info("updateState requested record id {} ", id);
 		Optional<State> stateData = stateRepository.findById(id);
 
@@ -193,7 +207,8 @@ public class LocationManagementController {
 			State updated = stateRepository.save(stateToUpdate);
 			return new ResponseEntity<Object>(updated, HttpStatus.OK);
 		}
-		return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a state with id=" + id),HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a state with id=" + id),
+				HttpStatus.BAD_REQUEST);
 	}
 
 	@ApiOperation(value = "Retrieves an entity by its id", notes = "Return Id of the record if saved correctly otherwise null", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -220,10 +235,8 @@ public class LocationManagementController {
 
 	@ApiOperation(value = "Returns all instances of the type for a country", notes = "Returns all instances of the type for a country", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/states/", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<Object> getAllState(
-			@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "10") int size, 
-			@RequestParam(required = false) String filterByName,
+	public ResponseEntity<Object> getAllState(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size, @RequestParam(required = false) String filterByName,
 			@RequestParam(required = false, defaultValue = "ASC") String sortDirection,
 			@RequestParam(required = false, defaultValue = "stateName") String[] orderBy) {
 		LOG.info("getAllState request received");
@@ -231,8 +244,9 @@ public class LocationManagementController {
 		LOG.info("size {}", size);
 		LOG.info("filter {}", filterByName);
 		LOG.info("orderBy {}", orderBy);
-		
-		Direction sort = (sortDirection == null || sortDirection.isEmpty()) ? Direction.ASC: Direction.valueOf(sortDirection.toUpperCase());
+
+		Direction sort = (sortDirection == null || sortDirection.isEmpty()) ? Direction.ASC
+				: Direction.valueOf(sortDirection.toUpperCase());
 		Pageable paging = PageRequest.of(page, size, Sort.by(sort, orderBy));
 
 		Page<State> pagedResult = null;
@@ -262,6 +276,22 @@ public class LocationManagementController {
 		}
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
+	
+	@ApiOperation(value = "Retrieves states along with city name in key value pair", notes = "Retrieves states list along with city name", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/states/dropdown", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> stateDropdown() {
+		LOG.info("citiesDropdown request received@@");
+		List<Object[]> citiesData = stateRepository.dropDown();
+		List<Map<Object,Object>> dropDowns = new ArrayList<>();
+		citiesData.forEach(data -> {
+			Map<Object,Object> map = new HashMap<>();
+			map.put(data[0], data[1]);
+			dropDowns.add(map);
+		});
+		return new ResponseEntity<Object>(dropDowns,HttpStatus.OK);
+	}
+	
+	
 
 	@ApiOperation(value = "Deletes the entity with the given id", notes = "If the entity is not found in the persistence store it is silently ignored.", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@DeleteMapping(path = "/states/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -298,15 +328,14 @@ public class LocationManagementController {
 		return new ResponseEntity<Object>(saved.getId(), HttpStatus.OK);
 	}
 
-	
 	@PutMapping(path = "/zones/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> updateZone(@PathVariable Long id,
-			@Valid	@RequestBody ZoneDetailRequestDTO zoneDetailDTO) {
+			@Valid @RequestBody ZoneDetailRequestDTO zoneDetailDTO) {
 		LOG.info("updateZone requested record id {} ", id);
 		LOG.info("updateZone request body@@   {}", zoneDetailDTO);
 
 		Optional<ZoneDetail> zoneData = zoneDetailRepository.findById(id);
-		
+
 		if (zoneData.isPresent()) {
 			ZoneDetail zoneDetailToUpdate = zoneData.get();
 			zoneDetailToUpdate.setName(zoneDetailDTO.getName());
@@ -323,14 +352,14 @@ public class LocationManagementController {
 	public ResponseEntity<Object> getZone(@PathVariable Long id) {
 		LOG.info("getZone request received@@id   {}", id);
 		Optional<ZoneDetail> zoneDetailOption = zoneDetailRepository.findById(id);
-		
+
 		if (zoneDetailOption.isPresent()) {
 			ZoneDetailResponseDTO dto = new ZoneDetailResponseDTO();
 			ZoneDetail zoneDetail = zoneDetailOption.get();
 			BeanUtils.copyProperties(zoneDetail, dto);
 			dto.setStatus(zoneDetail.getStatus());
 			// dto.add(linkTo(methodOn(LocationManagementController.class).deleteZone(id)).withRel("delete-zone"));
-			dto.add(linkTo(methodOn(LocationManagementController.class).getZone( id)).withSelfRel());
+			dto.add(linkTo(methodOn(LocationManagementController.class).getZone(id)).withSelfRel());
 			LOG.info("Found data against ID {} and returing response   {}", id, zoneDetail);
 			return new ResponseEntity<Object>(dto, HttpStatus.OK);
 		}
@@ -340,23 +369,22 @@ public class LocationManagementController {
 
 	@ApiOperation(value = "Returns all instances of the type", notes = "Returns all instances of the type", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/zones", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<Object> getAllZone(
-			@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "10") int size, 
-			@RequestParam(required = false) String filterByName,
+	public ResponseEntity<Object> getAllZone(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size, @RequestParam(required = false) String filterByName,
 			@RequestParam(required = false, defaultValue = "ASC") Direction sortDirection,
 			@RequestParam(required = false, defaultValue = "id") String[] orderBy,
 			@RequestParam(required = false) StatusCode status) {
 		LOG.info("getAllZone request received");
-		
-		FilterCriteria criteria = new FilterCriteria(page,size,filterByName,sortDirection,orderBy,status);
+
+		FilterCriteria criteria = new FilterCriteria(page, size, filterByName, sortDirection, orderBy, status);
 		Direction sort = sortDirection == null ? Direction.ASC : sortDirection;
 
 		Pageable paging = PageRequest.of(page, size, Sort.by(sort, orderBy));
 		Map<String, Object> response = new HashMap<>();
 		List<ZoneDetailResponseDTO> allZonesDTO = new ArrayList<>();
-		Page<ZoneDetail> pages = zoneDetailRepository.findAll(filterByName(criteria).and(filterByStatus(criteria)),paging);
-		if(pages.hasContent()) {
+		Page<ZoneDetail> pages = zoneDetailRepository.findAll(filterByName(criteria).and(filterByStatus(criteria)),
+				paging);
+		if (pages.hasContent()) {
 			pages.getContent().forEach(entity -> {
 				ZoneDetailResponseDTO dto = new ZoneDetailResponseDTO();
 				BeanUtils.copyProperties(entity, dto);
@@ -370,7 +398,7 @@ public class LocationManagementController {
 		response.put("totalElements", pages.getTotalElements());
 		response.put("totalPages", pages.getTotalPages());
 		LOG.info("Total zones count {}", allZonesDTO.size());
-		
+
 		return new ResponseEntity<Object>(response, HttpStatus.OK);
 	}
 
@@ -394,7 +422,8 @@ public class LocationManagementController {
 		Optional<State> stateOptional = stateRepository.findById(cityDTO.getStateId());
 
 		if (!stateOptional.isPresent()) {
-			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a State with stateId=" + cityDTO.getStateId()),
+			return new ResponseEntity<Object>(
+					new ErrorResponseDTO("Did not find a State with stateId=" + cityDTO.getStateId()),
 					HttpStatus.BAD_REQUEST);
 		}
 		city.setState(stateOptional.get());
@@ -403,17 +432,14 @@ public class LocationManagementController {
 	}
 
 	@PutMapping(path = "/cities/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> updateCity(@PathVariable Long id,@Valid @RequestBody CityRequestDTO cityDTO) {
+	public ResponseEntity<Object> updateCity(@PathVariable Long id, @Valid @RequestBody CityRequestDTO cityDTO) {
 		LOG.info("updateCity request body@@   {}", cityDTO);
-
 		Optional<City> cityOptionalData = cityRepository.findById(id);
-
 		Optional<State> stateOptionalData = stateRepository.findById(cityDTO.getStateId());
 
 		if (!cityOptionalData.isPresent()) {
 			LOG.info("Did not find City by id   {}", id);
-			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a City by id=" + id),
-					HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a City by id=" + id),HttpStatus.BAD_REQUEST);
 		}
 
 		if (!stateOptionalData.isPresent()) {
@@ -421,23 +447,16 @@ public class LocationManagementController {
 			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a State by id=" + id),
 					HttpStatus.BAD_REQUEST);
 		}
-
 		City cityToUpdate = cityOptionalData.get();
 
 		if (Objects.nonNull(cityToUpdate)) {
-
 			cityToUpdate.setName(cityDTO.getName());
-
 			cityToUpdate.setStatus(cityDTO.getStatus());
-
 			cityToUpdate.setState(stateOptionalData.get());
-
 			City updated = cityRepository.save(cityToUpdate);
-
 			return new ResponseEntity<Object>(updated, HttpStatus.OK);
 		}
 		return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a city with id=" + id),HttpStatus.BAD_REQUEST);
-				
 	}
 
 	@ApiOperation(value = "Retrieves an entity by its id", notes = "Return Id of the record if saved correctly otherwise null", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -465,8 +484,7 @@ public class LocationManagementController {
 	@ApiOperation(value = "Returns all instances of the type. It accepts zero-based page index and the size of the page to be returned ", notes = "Returns all instances of the type", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/cities/", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Object> getAllCities(@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "10") int size, 
-			@RequestParam(required = false) String filterByName,
+			@RequestParam(defaultValue = "10") int size, @RequestParam(required = false) String filterByName,
 			@RequestParam(required = false, defaultValue = "ASC") String sortDirection,
 			@RequestParam(required = false, defaultValue = "name") String[] orderBy) {
 		LOG.info("getAllCities request received");
@@ -474,8 +492,9 @@ public class LocationManagementController {
 		LOG.info("size {}", size);
 		LOG.info("filter {}", filterByName);
 		LOG.info("orderBy {}", orderBy);
-		
-		Direction sort = (sortDirection == null || sortDirection.isEmpty()) ? Direction.ASC : Direction.valueOf(sortDirection.toUpperCase());
+
+		Direction sort = (sortDirection == null || sortDirection.isEmpty()) ? Direction.ASC
+				: Direction.valueOf(sortDirection.toUpperCase());
 		Pageable paging = PageRequest.of(page, size, Sort.by(sort, orderBy));
 
 		Page<City> pagedResult = null;
@@ -512,6 +531,20 @@ public class LocationManagementController {
 		LOG.info("deleteCity request received@@   {}", id);
 		cityRepository.deleteById(id);
 		return new ResponseEntity<Object>(HttpStatus.OK);
+	}
+	
+	@ApiOperation(value = "Retrieves cities along with city name in key value pair", notes = "Retrieves cities list along with city name", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/cities/dropdown", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> citiesDropdown() {
+		LOG.info("citiesDropdown request received@@");
+		List<Object[]> citiesData = cityRepository.dropDown();
+		List<Map<Object,Object>> dropDowns = new ArrayList<>();
+		citiesData.forEach(data -> {
+			Map<Object,Object> map = new HashMap<>();
+			map.put(data[0], data[1]);
+			dropDowns.add(map);
+		});
+		return new ResponseEntity<Object>(dropDowns,HttpStatus.OK);
 	}
 
 	// Zipcode
@@ -550,8 +583,7 @@ public class LocationManagementController {
 
 		Zipcode zipcodeEntity = zipcodeRepository.findByCode(zipcode);
 		if (Objects.isNull(zipcodeEntity)) {
-			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a Zipcode with code=" + zipcode),
-					HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a Zipcode with code=" + zipcode),HttpStatus.BAD_REQUEST);
 		}
 		BeanUtils.copyProperties(zipcodeDTO, zipcodeEntity);
 		zipcodeEntity.setCode(zipcode);
@@ -569,12 +601,10 @@ public class LocationManagementController {
 		if (Objects.nonNull(zipcodeEntity)) {
 			ZipcodeResponseDTO dto = new ZipcodeResponseDTO();
 			BeanUtils.copyProperties(zipcodeEntity, dto);
-
 			dto.setCityId(zipcodeEntity.getCity().getId());
 			dto.setCityName(zipcodeEntity.getCity().getName());
 			dto.setStatus(zipcodeEntity.getStatus());
 			dto.setCode(zipcodeEntity.getCode());
-
 			dto.add(linkTo(methodOn(LocationManagementController.class).getZipcode(zipcode)).withSelfRel());
 			LOG.info("Found data against ID {} and returing response   {}", zipcode, zipcodeEntity);
 			return new ResponseEntity<Object>(dto, HttpStatus.OK);
@@ -585,23 +615,23 @@ public class LocationManagementController {
 
 	@ApiOperation(value = "Returns all instances of the type", notes = "Returns all instances of the type", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/zipcodes/", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<Object> getAllZipcodes(
-			@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "10") int size, 
-			@RequestParam(required = false) String filterByCode,
+	public ResponseEntity<Object> getAllZipcodes(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size, @RequestParam(required = false) String filterByCode,
 			@RequestParam(required = false) String filterByCityName,
 			@RequestParam(required = false, defaultValue = "ASC") Direction sortDirection,
 			@RequestParam(required = false, defaultValue = "id") String[] orderBy,
 			@RequestParam(required = false) StatusCode status) {
 		LOG.info("getAllZipcodes request received");
-		FilterCriteria filterCriteria = new FilterCriteria(page, size, filterByCode, filterByCityName, sortDirection,status);
-				
+		FilterCriteria filterCriteria = new FilterCriteria(page, size, filterByCode, filterByCityName, sortDirection,
+				status);
+
 		Direction sort = sortDirection == null ? Direction.ASC : sortDirection;
 		Pageable paging = PageRequest.of(page, size, Sort.by(sort, orderBy));
 		Map<String, Object> response = new HashMap<>();
 		List<ZipcodeResponseDTO> zipcodesLists = new ArrayList<>();
-		
-		Page<Zipcode> pages = zipcodeRepository.findAll(findZipcodeByCode(filterCriteria).and(findZipcodeByCityName(filterCriteria)), paging);
+
+		Page<Zipcode> pages = zipcodeRepository
+				.findAll(findZipcodeByCode(filterCriteria).and(findZipcodeByCityName(filterCriteria)), paging);
 
 		if (pages.hasContent()) {
 			pages.getContent().forEach(zipcode -> {
@@ -611,8 +641,7 @@ public class LocationManagementController {
 				dto.setCityName(zipcode.getCity().getName());
 				dto.setStatus(zipcode.getStatus());
 				dto.setCode(zipcode.getCode());
-				dto.add(linkTo(methodOn(LocationManagementController.class).getZipcode(zipcode.getCode()))
-						.withSelfRel());
+				dto.add(linkTo(methodOn(LocationManagementController.class).getZipcode(zipcode.getCode())).withSelfRel());
 				zipcodesLists.add(dto);
 			});
 		}
@@ -622,7 +651,21 @@ public class LocationManagementController {
 		response.put("totalPages", pages.getTotalPages());
 		LOG.info("Total zipcode count {}", zipcodesLists.size());
 		LOG.info("Did not find any records  getAllZipcodes {}", zipcodesLists);
-		return new ResponseEntity<Object>(response,HttpStatus.OK);
+		return new ResponseEntity<Object>(response, HttpStatus.OK);
+	}
+
+	@ApiOperation(value = "Retrieves zipcodes list along with city name", notes = "Retrieves zipcodes list along with city name", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/zipcodes/dropdown", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> zipcodeDropdown() {
+		LOG.info("zipcodeDropdown request received@@");
+		List<Object[]> zipcodeData = zipcodeRepository.dropDown();
+		List<Map<Object,Object>> dropDowns = new ArrayList<>();
+		zipcodeData.forEach(data -> {
+			Map<Object,Object> map = new HashMap<>();
+			map.put(data[0], data[1]);
+			dropDowns.add(map);
+		});
+		return new ResponseEntity<Object>(dropDowns,HttpStatus.OK);
 	}
 
 	@ApiOperation(value = "Delete an entity by its id", notes = "If the entity is not found in the persistence store it is silently ignored", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -633,4 +676,5 @@ public class LocationManagementController {
 		zipcodeRepository.delete(zipcodeEntity);
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
+
 }

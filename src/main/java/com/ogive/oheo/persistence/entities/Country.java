@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -15,6 +16,8 @@ import javax.validation.constraints.NotBlank;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ogive.oheo.constants.StatusCode;
 
+
+@NamedQuery(name="Country.dropDown", query="SELECT countryCode ,countryName FROM Country")
 @Table(name = "COUNTRY")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_COUNTRY", sequenceName = "SEQ_COUNTRY")
 @Entity

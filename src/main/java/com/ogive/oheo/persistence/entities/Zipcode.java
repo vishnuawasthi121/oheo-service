@@ -8,11 +8,14 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ogive.oheo.constants.StatusCode;
+
+@NamedQuery(name="Zipcode.dropDown", query="SELECT zipcode.code AS code , city.name AS cityName FROM Zipcode zipcode join City city ON zipcode.city.id = city.id ")
 
 @Table(name = "ZIPCODE")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_ZIPCODE", sequenceName = "SEQ_ZIPCODE")
@@ -66,4 +69,10 @@ public class Zipcode {
 		this.city = city;
 	}
 
+	@Override
+	public String toString() {
+		return "Zipcode [id=" + id + ", status=" + status + ", code=" + code + ", city=" + city + "]";
+	}
+
+	
 }

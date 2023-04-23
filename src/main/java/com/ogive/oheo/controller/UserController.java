@@ -26,13 +26,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ogive.oheo.dto.CountryResponseDTO;
+import com.ogive.oheo.dto.EmailDetails;
 import com.ogive.oheo.dto.ErrorResponseDTO;
 import com.ogive.oheo.dto.GroupDetailResponseDTO;
 import com.ogive.oheo.dto.UserRequestDTO;
 import com.ogive.oheo.dto.UserResponseDTO;
 import com.ogive.oheo.persistence.entities.City;
-import com.ogive.oheo.persistence.entities.Country;
 import com.ogive.oheo.persistence.entities.GroupDetail;
 import com.ogive.oheo.persistence.entities.State;
 import com.ogive.oheo.persistence.entities.UserInfo;
@@ -45,6 +44,7 @@ import com.ogive.oheo.persistence.repo.StateRepository;
 import com.ogive.oheo.persistence.repo.UserRepository;
 import com.ogive.oheo.persistence.repo.ZipcodeRepository;
 import com.ogive.oheo.persistence.repo.ZoneDetailRepository;
+import com.ogive.oheo.services.EmailService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -81,6 +81,9 @@ public class UserController {
 
 	@Autowired
 	private UserRepository userRepository;
+	
+	@Autowired
+	private EmailService emailService;
 
 	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -269,5 +272,20 @@ public class UserController {
 		dto.setStatus(entity.getStatus());
 		dto.add(linkTo(methodOn(UserController.class).getUser(entity.getId())).withSelfRel());
 	}
+	
+	
+	/*
+	 * @ApiOperation(value = "Send email to targetted audiance", produces =
+	 * MediaType.APPLICATION_JSON_VALUE, consumes =
+	 * MediaType.APPLICATION_JSON_VALUE)
+	 * 
+	 * @PostMapping(path = "/email",consumes = MediaType.APPLICATION_JSON_VALUE,
+	 * produces = MediaType.APPLICATION_JSON_VALUE) public ResponseEntity<Object>
+	 * sendEmail(@Valid @RequestBody EmailDetails requestBody) {
+	 * LOG.info("addUser request received@@   {}", requestBody);
+	 * emailService.sendEmail();
+	 * 
+	 * return new ResponseEntity<Object>(HttpStatus.OK); }
+	 */
 
 }

@@ -4,7 +4,9 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.validation.Valid;
@@ -128,4 +130,21 @@ public class GroupDetailController {
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
 	
+	@ApiOperation(value = "Retrieves GroupDetail dropdown list", notes = "Retrieves GroupDetail dropdown list", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/dropdown", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> groupDropdown() {
+		LOG.info("groupDropdown request received@@");
+		
+		List<Object[]> zipcodeData = groupDetailRepository.dropDown();
+		List<Map<Object,Object>> dropDowns = new ArrayList<>();
+		zipcodeData.forEach(data -> {
+			Map<Object,Object> map = new HashMap<>();
+			map.put(data[0], data[1]);
+			dropDowns.add(map);
+		});
+		return new ResponseEntity<Object>(dropDowns,HttpStatus.OK);
+	}
+	
 }
+
+

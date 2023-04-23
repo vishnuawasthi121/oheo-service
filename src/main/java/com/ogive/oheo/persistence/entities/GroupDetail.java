@@ -7,11 +7,14 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.ogive.oheo.constants.StatusCode;
+
+@NamedQuery(name="GroupDetail.dropDown", query="SELECT id ,groupName FROM GroupDetail")
 
 @Table(name = "GROUP_DETAIL")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_GROUP_DETAIL", sequenceName = "SEQ_Role")

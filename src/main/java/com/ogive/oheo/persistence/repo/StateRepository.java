@@ -18,6 +18,8 @@ public interface StateRepository extends PagingAndSortingRepository<State, Long>
 	void deleteByCountryAndId(Country country, Long id);
 	
 	Page<State> findByStateNameContaining(String stateName, Pageable pageable);
+
+	List<Object[]> dropDown();
 	
 	
 }

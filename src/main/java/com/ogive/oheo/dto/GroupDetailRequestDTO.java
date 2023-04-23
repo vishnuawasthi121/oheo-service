@@ -6,7 +6,6 @@ import com.ogive.oheo.constants.StatusCode;
 
 public class GroupDetailRequestDTO {
 
-	private Long id;
 
 	@NotNull(message = "groupName is mandatory")
 	private String groupName;
@@ -14,14 +13,6 @@ public class GroupDetailRequestDTO {
 	private StatusCode status;
 
 	private String description;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
 
 	public String getGroupName() {
 		return groupName;

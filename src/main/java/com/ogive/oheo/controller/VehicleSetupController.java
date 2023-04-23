@@ -253,6 +253,21 @@ public class VehicleSetupController {
 		companyRepository.deleteById(id);
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
+	
+	
+	@ApiOperation(value = "Retrieves Company dropdown list", notes = "Retrieves Company dropdown list", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/vehicle-companies/dropdown", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> vehicleCompanyDropdown() {
+		LOG.info("vehicleCompanyDropdown request received@@");
+		List<Object[]> listData = companyRepository.dropDown();
+		List<Map<Object,Object>> dropDowns = new ArrayList<>();
+		listData.forEach(data -> {
+			Map<Object,Object> map = new HashMap<>();
+			map.put(data[0], data[1]);
+			dropDowns.add(map);
+		});
+		return new ResponseEntity<Object>(dropDowns,HttpStatus.OK);
+	}
 
 	// Vehicle Model API
 	@ApiOperation(value = "Saves a given entity. Use the returned instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -260,7 +275,6 @@ public class VehicleSetupController {
 	public ResponseEntity<Object> addVehicleModel(@Valid @RequestBody VehicleModelRequestDTO requestBody) {
 		LOG.info("addVehicleModel request received@@   {}", requestBody);
 		VehicleModel entity = new VehicleModel();
-		
 		Optional<Company> companyData = companyRepository.findById(requestBody.getCompanyId());
 
 		if (!companyData.isPresent()) {
@@ -268,11 +282,9 @@ public class VehicleSetupController {
 					new ErrorResponseDTO("Did not find a Company with id=" + requestBody.getCompanyId()),
 					HttpStatus.BAD_REQUEST);
 		}
-
 		BeanUtils.copyProperties(requestBody, entity);
 		entity.setStatus(requestBody.getStatus());
 		entity.setCompany(companyData.get());
-
 		VehicleModel saved = vehicleModelRepository.save(entity);
 		LOG.info("Saved @@   {}", saved);
 		return new ResponseEntity<Object>(saved.getId(), HttpStatus.OK);
@@ -284,7 +296,6 @@ public class VehicleSetupController {
 		LOG.info("updateVehicleModel requested record id {} ", id);
 		LOG.info("updateVehicleModel request body@@   {}", requestBody);
 		// TODO - Need to pull the company details
-
 		Optional<Company> companyData = companyRepository.findById(requestBody.getCompanyId());
 
 		if (!companyData.isPresent()) {
@@ -376,6 +387,21 @@ public class VehicleSetupController {
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
 
+	@ApiOperation(value = "Retrieves VehicleModel dropdown list", notes = "Retrieves VehicleModel dropdown list", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/vehicle-models/dropdown", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> vehicleModelDropdown() {
+		LOG.info("vehicleModelDropdown request received@@");
+		List<Object[]> listData = vehicleModelRepository.dropDown();
+		List<Map<Object,Object>> dropDowns = new ArrayList<>();
+		listData.forEach(data -> {
+			Map<Object,Object> map = new HashMap<>();
+			map.put(data[0], data[1]);
+			dropDowns.add(map);
+		});
+		return new ResponseEntity<Object>(dropDowns,HttpStatus.OK);
+	}
+	
+	
 	// Vehicle Type : VehicleTypeRequestDTO
 	@ApiOperation(value = "Saves a given entity. Use the returned instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@PostMapping(path = "/vehicle-types", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -469,6 +495,20 @@ public class VehicleSetupController {
 		LOG.info("deleteVehicleType request received @@   {}", id);
 		vehicleTypeRepository.deleteById(id);
 		return new ResponseEntity<Object>(HttpStatus.OK);
+	}
+	
+	@ApiOperation(value = "Retrieves VehicleModel dropdown list", notes = "Retrieves VehicleModel dropdown list", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/vehicle-types/dropdown", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> vehicleTypeDropdown() {
+		LOG.info("vehicleTypeDropdown request received@@");
+		List<Object[]> listData = vehicleTypeRepository.dropDown();
+		List<Map<Object,Object>> dropDowns = new ArrayList<>();
+		listData.forEach(data -> {
+			Map<Object,Object> map = new HashMap<>();
+			map.put(data[0], data[1]);
+			dropDowns.add(map);
+		});
+		return new ResponseEntity<Object>(dropDowns,HttpStatus.OK);
 	}
 
 	// Vehicle Fuel Type
@@ -564,6 +604,21 @@ public class VehicleSetupController {
 		vehicleFuelTypeRepository.deleteById(id);
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
+	
+	@ApiOperation(value = "Retrieves VehicleModel dropdown list", notes = "Retrieves VehicleModel dropdown list", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/vehicle-fuel-types/dropdown", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> vehicleFuelTypeDropdown() {
+		LOG.info("vehicleFuelTypeDropdown request received@@");
+		List<Object[]> listData = vehicleFuelTypeRepository.dropDown();
+		List<Map<Object,Object>> dropDowns = new ArrayList<>();
+		listData.forEach(data -> {
+			Map<Object,Object> map = new HashMap<>();
+			map.put(data[0], data[1]);
+			dropDowns.add(map);
+		});
+		return new ResponseEntity<Object>(dropDowns,HttpStatus.OK);
+	}
+	
 
 	// Vehicle body type
 	@ApiOperation(value = "Saves a given entity. Use the returned instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -661,6 +716,20 @@ public class VehicleSetupController {
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
 
+	@ApiOperation(value = "Retrieves BodyType dropdown list", notes = "Retrieves Body Type dropdown list", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/vehicle-body-types/dropdown", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> vehicleBodyTypeDropdown() {
+		LOG.info("vehicleFuelTypeDropdown request received@@");
+		List<Object[]> listData = vehicleBodyTypeRepository.dropDown();
+		List<Map<Object,Object>> dropDowns = new ArrayList<>();
+		listData.forEach(data -> {
+			Map<Object,Object> map = new HashMap<>();
+			map.put(data[0], data[1]);
+			dropDowns.add(map);
+		});
+		return new ResponseEntity<Object>(dropDowns,HttpStatus.OK);
+	}
+	
 	// Purchase Type
 	@ApiOperation(value = "Saves a given entity. Use the returned instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@PostMapping(path = "/purchase-types", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -755,6 +824,22 @@ public class VehicleSetupController {
 		purchaseTypeRepository.deleteById(id);
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
+	
+	
+	@ApiOperation(value = "Retrieves purchase type dropdown list", notes = "Retrieves purchase type dropdown list", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/purchase-types/dropdown", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> purchaseTypeDropdown() {
+		LOG.info("vehicleFuelTypeDropdown request received@@");
+		List<Object[]> listData = purchaseTypeRepository.dropDown();
+		List<Map<Object,Object>> dropDowns = new ArrayList<>();
+		listData.forEach(data -> {
+			Map<Object,Object> map = new HashMap<>();
+			map.put(data[0], data[1]);
+			dropDowns.add(map);
+		});
+		return new ResponseEntity<Object>(dropDowns,HttpStatus.OK);
+	}
+	
 
 	//Vehicle Transmission
 	@ApiOperation(value = "Saves a given entity. Use the returned instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -853,6 +938,22 @@ public class VehicleSetupController {
 		vehicleTransmissionRepository.deleteById(id);
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
+	
+	@ApiOperation(value = "Retrieves VehicleTransmission dropdown list", notes = "Retrieves VehicleTransmission dropdown list", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/vehicle-transmissions/dropdown", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> vehicleTransmissionDropdown() {
+		LOG.info("vehicleTransmissionDropdown request received@@");
+		List<Object[]> listData = vehicleTransmissionRepository.dropDown();
+		List<Map<Object,Object>> dropDowns = new ArrayList<>();
+		listData.forEach(data -> {
+			Map<Object,Object> map = new HashMap<>();
+			map.put(data[0], data[1]);
+			dropDowns.add(map);
+		});
+		return new ResponseEntity<Object>(dropDowns,HttpStatus.OK);
+	}
+	
+	
 
 	// Vehicle API
 	@Transactional
