@@ -1059,6 +1059,15 @@ public class VehicleSetupController {
 					new ErrorResponseDTO("Did not find State by id=" + addressDTO.getStateId()),
 					HttpStatus.BAD_REQUEST);
 		}
+		
+		Optional<Company> companyData = companyRepository.findById(requestBody.getCompanyId());
+		
+		if (!companyData.isPresent()) {
+			return new ResponseEntity<Object>(
+					new ErrorResponseDTO("Did not find Company by id=" + addressDTO.getStateId()),
+					HttpStatus.BAD_REQUEST);
+		}
+		
 		address.setCity(cityData.get());
 		address.setState(stateData.get());
 		address.setZipcode(zipcode);
@@ -1085,6 +1094,8 @@ public class VehicleSetupController {
 
 		vehicleDetail.setVehicleType(vehicleTypeData.get());
 		vehicleDetail.setVehicleBodyType(vehicleBodyTypeData.get());
+		vehicleDetail.setCompany(companyData.get());
+		
 		vehicleDetail.setAddress(savedAddress);
 
 		// Save Vehicle details
@@ -1139,7 +1150,7 @@ public class VehicleSetupController {
 				vehicleDetailDTOList.add(dto);
 			});
 		}
-		response.put("vehicleDetails", vehicleDetailDTOList);
+		response.put("vehicles", vehicleDetailDTOList);
 		response.put("currentPage", pages.getNumber());
 		response.put("totalElements", pages.getTotalElements());
 		response.put("totalPages", pages.getTotalPages());

@@ -63,7 +63,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(tags = "CMS")
 @RestController
 
-@RequestMapping("/cms")
+@RequestMapping("/cms/v1")
 public class CMSController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(CMSController.class);

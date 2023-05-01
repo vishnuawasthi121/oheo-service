@@ -44,9 +44,15 @@ public class VehicleDetail {
 	private VehicleType vehicleType;
 
 	@ManyToOne()
+	@JoinColumn(name = "VEHICLE_COMPANY_ID", nullable = true)
+	private Company company;
+	
+	@ManyToOne()
 	@JoinColumn(name = "VEHICLE_BODY_TYPE_ID", nullable = false)
 	// BODY TYPE
 	private VehicleBodyType vehicleBodyType;
+	
+	
 
 	@OneToMany(mappedBy = "vehicleDetail",cascade = CascadeType.ALL)
 	private Set<Images> images;
@@ -127,4 +133,13 @@ public class VehicleDetail {
 		this.address = address;
 	}
 
+	public Company getCompany() {
+		return company;
+	}
+
+	public void setCompany(Company company) {
+		this.company = company;
+	}
+
+	
 }

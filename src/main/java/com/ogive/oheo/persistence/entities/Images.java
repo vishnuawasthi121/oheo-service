@@ -1,6 +1,7 @@
 package com.ogive.oheo.persistence.entities;
 
 import javax.persistence.Entity;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -9,6 +10,9 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.ogive.oheo.constants.ImageType;
 
 @Table(name = "IMAGES")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_IMAGES", sequenceName = "SEQ_IMAGES")
@@ -19,7 +23,6 @@ public class Images {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_IMAGES")
 	private Long id;
 
-	
 	private String name;
 
 	private String contentType;
@@ -29,9 +32,26 @@ public class Images {
 	@Lob
 	private byte[] data;
 
+	@Enumerated
+	private ImageType imageType;
+
+	@JsonIgnore
 	@ManyToOne
 	@JoinColumn(name = "VEHICLE_DETAIL_ID")
 	private VehicleDetail vehicleDetail;
+
+	public Product getProduct() {
+		return product;
+	}
+
+	public void setProduct(Product product) {
+		this.product = product;
+	}
+	
+	@JsonIgnore
+	@ManyToOne
+	@JoinColumn(name = "PRODUCT_ID")
+	private Product product;
 
 	public Long getId() {
 		return id;
@@ -79,6 +99,14 @@ public class Images {
 
 	public void setVehicleDetail(VehicleDetail vehicleDetail) {
 		this.vehicleDetail = vehicleDetail;
+	}
+
+	public ImageType getImageType() {
+		return imageType;
+	}
+
+	public void setImageType(ImageType imageType) {
+		this.imageType = imageType;
 	}
 
 }
