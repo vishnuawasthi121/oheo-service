@@ -343,7 +343,7 @@ public class CMSControllerNew {
 		return new ResponseEntity<Object>(savedData.getId(), HttpStatus.OK);
 	}
 	
-	@ApiOperation(value = "This api is used to create sider data in backend. Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@ApiOperation(value = "Get all sliders along with product link", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/products-live/sliders")
 	public ResponseEntity<Object> getSliders() throws IOException {
 		LOG.info("getSliders request received@@ ");
