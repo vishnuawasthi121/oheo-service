@@ -272,7 +272,7 @@ public class CMSControllerNew {
 	
 	@Transactional 
 	@ApiOperation(value = "Returns all instances of the type if they are live. Live product are one will be visible to shop", notes = "Returns all instances of the type", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	@GetMapping(path = "/products/shop", produces = { MediaType.APPLICATION_JSON_VALUE })
+	@GetMapping(path = "/products-live", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Object> getLiveProduct(
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size, 
@@ -304,7 +304,7 @@ public class CMSControllerNew {
 	}
 	
 	@ApiOperation(value = "Retrieves states along with city name in key value pair", notes = "Retrieves states list along with city name", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	@GetMapping(path = "/products/shop/dropdown-live", produces = { MediaType.APPLICATION_JSON_VALUE })
+	@GetMapping(path = "/products-live/dropdown-live", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Object> getLiveProductDropdown() {
 		LOG.info("getLiveProductDropdown request received@@");
 		List<Object[]> productData = productRepository.dropDownLive("Y");
@@ -319,7 +319,7 @@ public class CMSControllerNew {
 	}
 	
 	@ApiOperation(value = "This api is used to create sider data in backend. Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	@PostMapping(path = "/products/shop/slider", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = "/products-live/slider", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> addSlider(@Valid @ModelAttribute SliderRequestDTO sliderRequest) throws IOException {
 		LOG.info("addSlider request received@@   {}", sliderRequest);
 		Slider entity = new Slider();
@@ -344,7 +344,7 @@ public class CMSControllerNew {
 	}
 	
 	@ApiOperation(value = "This api is used to create sider data in backend. Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	@GetMapping(path = "/products/shop/slider")
+	@GetMapping(path = "/products-live/sliders")
 	public ResponseEntity<Object> getSliders() throws IOException {
 		LOG.info("getSliders request received@@ ");
 		Iterable<Slider> allSliderEntity = sliderRepository.findAll();
@@ -371,12 +371,11 @@ public class CMSControllerNew {
 		return new ResponseEntity<Object>(allDTO, HttpStatus.OK);
 	}
 	
-	@ApiOperation(value = "This api is used to create sider data in backend. Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	@GetMapping(path = "/products/shop/slider/{id}",produces = { MediaType.APPLICATION_JSON_VALUE })
+	@ApiOperation(value = "Pull slider", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/products-live/sliders/{id}",produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Object> getSliderById(@PathVariable Long id) throws IOException {
 		LOG.info("getSliderbyId request received@@ ");
 		Optional<Slider> sliderData = sliderRepository.findById(id);
-
 		if (!sliderData.isPresent()) {
 			return ResponseEntity.notFound().build();
 		}
