@@ -3,11 +3,16 @@ package com.ogive.oheo.dto.utils;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -34,12 +39,14 @@ import com.ogive.oheo.persistence.entities.ZoneDetail;
 
 public class CommonsUtil {
 
+	private static final Logger LOG = LoggerFactory.getLogger(CommonsUtil.class);
+
 	public static void entityToDTO(VehicleDetail entity, VehicleDetailResponseDTO dto) {
 		BeanUtils.copyProperties(entity, dto);
-		//dto.setStatus(entity.getStatus());
+		// dto.setStatus(entity.getStatus());
 		dto.add(linkTo(methodOn(VehicleSetupController.class).getVehicleDetails(entity.getId())).withSelfRel());
 		Address address = entity.getAddress();
-		
+
 		if (Objects.nonNull(address)) {
 			AddressResponseDTO addressResponseDTO = new AddressResponseDTO();
 			addressResponseDTO.setId(address.getId());
@@ -104,6 +111,19 @@ public class CommonsUtil {
 			});
 			dto.setImages(files);
 		}
+
+	}
+
+	public static Date convertStringToDate(String dateStr, String pattern) {
+		LOG.info("convertStringToDate   .. ");
+		Date date = null;
+		SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
+		try {
+			date = dateFormat.parse(dateStr);
+		} catch (ParseException e) {
+			LOG.error("Exception in date format..", e);
+		}
+		return date;
 
 	}
 }

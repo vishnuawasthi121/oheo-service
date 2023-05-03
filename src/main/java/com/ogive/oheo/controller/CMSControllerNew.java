@@ -58,27 +58,38 @@ import com.ogive.oheo.dto.SliderResponseDTO;
 import com.ogive.oheo.dto.SpecificationDTO;
 import com.ogive.oheo.dto.VehicleDetailResponseDTO;
 import com.ogive.oheo.dto.VehicleFuelTypeResponseDTO;
+import com.ogive.oheo.dto.VehicleMaintenanceRecordRequestDTO;
+import com.ogive.oheo.dto.VehicleMaintenanceRecordResponseDTO;
 import com.ogive.oheo.dto.VehicleModelResponseDTO;
 import com.ogive.oheo.dto.VehicleTypeResponseDTO;
+import com.ogive.oheo.dto.utils.CommonsUtil;
 import com.ogive.oheo.exception.ValidationException;
+import com.ogive.oheo.persistence.entities.City;
+import com.ogive.oheo.persistence.entities.Company;
 import com.ogive.oheo.persistence.entities.Features;
 import com.ogive.oheo.persistence.entities.Images;
 import com.ogive.oheo.persistence.entities.Product;
 import com.ogive.oheo.persistence.entities.ProductSpecification;
 import com.ogive.oheo.persistence.entities.Slider;
+import com.ogive.oheo.persistence.entities.State;
 import com.ogive.oheo.persistence.entities.VehicleDetail;
 import com.ogive.oheo.persistence.entities.VehicleFuelType;
+import com.ogive.oheo.persistence.entities.VehicleMaintenanceRecord;
 import com.ogive.oheo.persistence.entities.VehicleModel;
 import com.ogive.oheo.persistence.entities.VehicleTransmission;
 import com.ogive.oheo.persistence.entities.VehicleType;
+import com.ogive.oheo.persistence.repo.CityRepository;
+import com.ogive.oheo.persistence.repo.CompanyRepository;
 import com.ogive.oheo.persistence.repo.FeaturesRepository;
 import com.ogive.oheo.persistence.repo.ImagesRepository;
 import com.ogive.oheo.persistence.repo.ProductRepository;
 import com.ogive.oheo.persistence.repo.ProductSpecificationRepository;
 import com.ogive.oheo.persistence.repo.SliderRepository;
+import com.ogive.oheo.persistence.repo.StateRepository;
 import com.ogive.oheo.persistence.repo.VehicleBodyTypeRepository;
 import com.ogive.oheo.persistence.repo.VehicleDetailRepository;
 import com.ogive.oheo.persistence.repo.VehicleFuelTypeRepository;
+import com.ogive.oheo.persistence.repo.VehicleMaintenanceRecordRepository;
 import com.ogive.oheo.persistence.repo.VehicleModelRepository;
 import com.ogive.oheo.persistence.repo.VehicleTransmissionRepository;
 import com.ogive.oheo.persistence.repo.VehicleTypeRepository;
@@ -126,6 +137,18 @@ public class CMSControllerNew {
 	
 	@Autowired
 	private SliderRepository sliderRepository;
+	
+	@Autowired
+	private VehicleMaintenanceRecordRepository vehicleMaintenanceRecordRepository;
+	
+	@Autowired
+	private CityRepository cityRepository;
+	
+	@Autowired
+	private CompanyRepository companyRepository;
+	
+	@Autowired
+	private StateRepository stateRepository;
 
 	//Product API
 	
@@ -472,9 +495,136 @@ public class CMSControllerNew {
 	}
 	
 	
-	// Slider API 
+	// Manage Vehicle Maintenance record
 	
+	@Transactional
+	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = "/vehicle-maintenance-record", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> addVehicleMaintenanceRecord(
+			@ModelAttribute VehicleMaintenanceRecordRequestDTO requestBody) {
+		LOG.info("addVehicleMaintenanceRecord request received@@   {}", requestBody);
+		VehicleMaintenanceRecord entity = new VehicleMaintenanceRecord();
+		BeanUtils.copyProperties(requestBody, entity);
+		
+		entity.setMaintenanceExpirationDate(CommonsUtil.convertStringToDate(requestBody.getMaintenanceExpirationDate(), "yyyy-MM-dd"));
+		entity.setRegistrationDate(CommonsUtil.convertStringToDate(requestBody.getRegistrationDate(), "yyyy-MM-dd"));
+		
+		// VehicleFuelType
+		Long vehicleFuelTypeId = requestBody.getVehicleFuelTypeId();
+
+		Optional<VehicleFuelType> vehicleFuelTypeData = vehicleFuelTypeRepository.findById(vehicleFuelTypeId);
+		if (!vehicleFuelTypeData.isPresent()) {
+			return new ResponseEntity<Object>(
+					new ErrorResponseDTO("Did not find a Entity with id=" + vehicleFuelTypeId), HttpStatus.BAD_REQUEST);
+		}
+
+		// VehicleModel
+		Long vehicleModelId = requestBody.getVehicleModelId();
+		Optional<VehicleModel> vehicleModelData = vehicleModelRepository.findById(vehicleModelId);
+		if (!vehicleModelData.isPresent()) {
+			return new ResponseEntity<Object>(
+					new ErrorResponseDTO("Did not find a Entity with id=" + vehicleFuelTypeId), HttpStatus.BAD_REQUEST);
+		}
+		// VehicleType
+		Long vehicleTypeId = requestBody.getVehicleTypeId();
+		Optional<VehicleType> vehicleTypeData = vehicleTypeRepository.findById(vehicleTypeId);
+
+		if (!vehicleTypeData.isPresent()) {
+			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a Entity with id=" + vehicleTypeId),
+					HttpStatus.BAD_REQUEST);
+		}
+		// State
+		Long stateId = requestBody.getStateId();
+		Optional<State> stateData = stateRepository.findById(stateId);
+		if (!stateData.isPresent()) {
+			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a Entity with id=" + vehicleTypeId),
+					HttpStatus.BAD_REQUEST);
+		}
+		
+		// City 
+		Long cityId = requestBody.getCityId();
+		Optional<City> cityData = cityRepository.findById(cityId);
+		if (!cityData.isPresent()) {
+			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a Entity with id=" + vehicleTypeId),
+					HttpStatus.BAD_REQUEST);
+		}
+		// Company 
+		Long companyId = requestBody.getCompanyId();
+		Optional<Company> companyData = companyRepository.findById(companyId);
+		
+		if (!companyData.isPresent()) {
+			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a Entity with id=" + vehicleTypeId),
+					HttpStatus.BAD_REQUEST);
+		}
+		entity.setVehicleFuelType(vehicleFuelTypeData.get());
+		entity.setVehicleModel(vehicleModelData.get());
+		entity.setVehicleType(vehicleTypeData.get());
+		entity.setCity(cityData.get());
+		entity.setState(stateData.get());
+		entity.setCompany(companyData.get());
+
+		// Save Image
+		MultipartFile image = requestBody.getImage();
+		if (null != image) {
+			Images fileEntity = new Images();
+			multiPartToFileEntity(image, fileEntity, ImageType.Other);
+			Images savedImage = imagesRepository.save(fileEntity);
+			entity.setImage(savedImage);
+		}
+
+		VehicleMaintenanceRecord savedEntity = vehicleMaintenanceRecordRepository.save(entity);
+		return new ResponseEntity<Object>(savedEntity.getId(), HttpStatus.OK);
+	}
 	
+	@Transactional
+	@ApiOperation(value = "Returns all instances of the type", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/vehicle-maintenance-record/{email}")
+	public ResponseEntity<Object> getMaintenaceRecord(@PathVariable String email) throws IOException {
+		LOG.info("getMaintenaceRecord request received@@ ");
+		Iterable<VehicleMaintenanceRecord> allEntity = vehicleMaintenanceRecordRepository.findByEmail(email);
+		List<VehicleMaintenanceRecordResponseDTO> allDTO = new ArrayList<>();
+		
+		allEntity.forEach(record -> {
+			VehicleMaintenanceRecordResponseDTO dto = new VehicleMaintenanceRecordResponseDTO();
+
+			BeanUtils.copyProperties(record, dto);
+
+			City city = record.getCity();
+			dto.setCityId(city.getId());
+			dto.setCityName(city.getName());
+
+			Company company = record.getCompany();
+			dto.setCompanyId(company.getId());
+			dto.setCompanyName(company.getCompanyName());
+
+			State state = record.getState();
+			dto.setStateId(state.getId());
+			dto.setStateCode(state.getStateCode());
+			dto.setStateName(state.getStateName());
+
+			VehicleFuelType vehicleFuelType = record.getVehicleFuelType();
+			dto.setVehicleFuelTypeId(vehicleFuelType.getId());
+			dto.setVehicleFuelTypeName(vehicleFuelType.getName());
+			
+			VehicleType vehicleType = record.getVehicleType();
+			dto.setVehicleTypeId(vehicleType.getId());
+			dto.setVehicleTypeName(vehicleType.getName());
+
+			VehicleModel vehicleModel = record.getVehicleModel();
+			dto.setModelId(vehicleModel.getId());
+			dto.setModelName(vehicleModel.getModelName());
+			Images image = record.getImage();
+			
+			dto.setMaintenanceExpirationDate(record.getMaintenanceExpirationDate());
+			dto.setRegistrationDate(record.getRegistrationDate());
+			
+			dto.add(linkTo(methodOn(FileProcessingController.class).readFile(image.getId())).withRel("Image"));
+			allDTO.add(dto);
+
+		});
+
+		return new ResponseEntity<Object>(allDTO, HttpStatus.OK);
+	}
 	
 	
 }
