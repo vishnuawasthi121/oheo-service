@@ -15,4 +15,6 @@ public interface ZoneDetailRepository extends CrudRepository<ZoneDetail, Long>, 
 	List<ZoneDetail> findByCountry(Country country);
 
 	void deleteByCountryAndId(Country country, Long id);
+
+	List<Object[]> dropDown();
 }

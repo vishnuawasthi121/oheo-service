@@ -46,7 +46,7 @@ import com.ogive.oheo.dto.CountryDTO;
 import com.ogive.oheo.dto.CountryResponseDTO;
 import com.ogive.oheo.dto.ErrorResponseDTO;
 import com.ogive.oheo.dto.FilterCriteria;
-import com.ogive.oheo.dto.StateDTO;
+import com.ogive.oheo.dto.StateRequestDTO;
 import com.ogive.oheo.dto.StateResponseDTO;
 import com.ogive.oheo.dto.ZipcodeRequestDTO;
 import com.ogive.oheo.dto.ZipcodeResponseDTO;
@@ -129,8 +129,6 @@ public class LocationManagementController {
 		});
 		return new ResponseEntity<Object>(dropDowns,HttpStatus.OK);
 	}
-	
-	
 
 	@ApiOperation(value = "Retrieves an entity by its id", notes = "Return Id of the record if saved correctly otherwise null", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/countries/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -179,34 +177,59 @@ public class LocationManagementController {
 
 	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@PostMapping(path = "/{countryCode}/states", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> addState(@PathVariable String countryCode, @Valid @RequestBody StateDTO stateDTO) {
+	public ResponseEntity<Object> addState(@PathVariable String countryCode, @Valid @RequestBody StateRequestDTO stateDTO) {
 		LOG.info("addState request received@@   {}", stateDTO);
 		State state = new State();
+		
 		BeanUtils.copyProperties(stateDTO, state);
-		Country findByCountryCode = countryRepository.findByCountryCode(countryCode);
-		if (null == findByCountryCode) {
+		Country country = countryRepository.findByCountryCode(countryCode);
+		
+		if (null == country) {
 			return new ResponseEntity<Object>(
 					new ErrorResponseDTO("Did not find a country with countryCode=" + countryCode),
 					HttpStatus.BAD_REQUEST);
 		}
+		
+		Long zoneId = stateDTO.getZoneId();
+		Optional<ZoneDetail> zoneData = zoneDetailRepository.findById(zoneId);
+		
+		if (!zoneData.isPresent()) {
+			return new ResponseEntity<Object>(
+					new ErrorResponseDTO("Did not find ZoneDetail with zoneId=" + zoneId),
+					HttpStatus.BAD_REQUEST);
+		}
+		
+		state.setZone(zoneData.get());
 		state.setStatus(stateDTO.getSatus());
-		state.setCountry(findByCountryCode);
+		state.setCountry(country);
 		State saved = stateRepository.save(state);
 		return new ResponseEntity<Object>(saved.getId(), HttpStatus.OK);
 	}
 
 	@PutMapping(path = "/states/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> updateState(@PathVariable Long id, @Valid @RequestBody StateDTO stateDTO) {
+	public ResponseEntity<Object> updateState(@PathVariable Long id, @Valid @RequestBody StateRequestDTO stateDTO) {
 		LOG.info("updateState requested record id {} ", id);
 		Optional<State> stateData = stateRepository.findById(id);
+		Long zoneId = stateDTO.getZoneId();
+		
+		Optional<ZoneDetail> zoneData = zoneDetailRepository.findById(zoneId);
+		
+		if (!zoneData.isPresent()) {
+			return new ResponseEntity<Object>(
+					new ErrorResponseDTO("Did not find ZoneDetail with zoneId=" + zoneId),
+					HttpStatus.BAD_REQUEST);
+		}
 
 		if (stateData.isPresent()) {
 			State stateToUpdate = stateData.get();
 			stateToUpdate.setStateName(stateDTO.getStateName());
 			stateToUpdate.setStateCode(stateDTO.getStateCode());
+			stateToUpdate.setZone(zoneData.get());
+			
 			State updated = stateRepository.save(stateToUpdate);
 			return new ResponseEntity<Object>(updated, HttpStatus.OK);
 		}
+		
 		return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a state with id=" + id),
 				HttpStatus.BAD_REQUEST);
 	}
@@ -227,6 +250,10 @@ public class LocationManagementController {
 			// responseDTO.add(linkTo(methodOn(LocationManagementController.class).getZone(countryCode,
 			// id)).withRel("Put - update operation"));
 
+			
+			responseDTO.setCountryCode(state.getCountry().getCountryCode());
+			responseDTO.setZoneId(state.getZone().getId());
+			responseDTO.setZoneName(state.getZone().getName());
 			LOG.info("Found data against ID {} and returing response   {}", id, state);
 			return new ResponseEntity<Object>(responseDTO, HttpStatus.OK);
 		}
@@ -265,6 +292,9 @@ public class LocationManagementController {
 				BeanUtils.copyProperties(state, responseDTO);
 				responseDTO.add(
 						linkTo(methodOn(LocationManagementController.class).getState(state.getId())).withSelfRel());
+				responseDTO.setCountryCode(state.getCountry().getCountryCode());
+				responseDTO.setZoneId(state.getZone().getId());
+				responseDTO.setZoneName(state.getZone().getName());
 				stateDTOList.add(responseDTO);
 
 			});
@@ -290,8 +320,6 @@ public class LocationManagementController {
 		});
 		return new ResponseEntity<Object>(dropDowns,HttpStatus.OK);
 	}
-	
-	
 
 	@ApiOperation(value = "Deletes the entity with the given id", notes = "If the entity is not found in the persistence store it is silently ignored.", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@DeleteMapping(path = "/states/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -310,9 +338,7 @@ public class LocationManagementController {
 	public ResponseEntity<Object> addZone(@Valid @RequestBody ZoneDetailRequestDTO zoneDetailDTO,
 			@PathVariable String countryCode) {
 		LOG.info("addZone request received@@   {}", zoneDetailDTO);
-
 		ZoneDetail zone = new ZoneDetail();
-
 		BeanUtils.copyProperties(zoneDetailDTO, zone);
 
 		Country findByCountryCode = countryRepository.findByCountryCode(countryCode);
@@ -408,6 +434,20 @@ public class LocationManagementController {
 		LOG.info("deleteZone request received@@   {}", id);
 		zoneDetailRepository.deleteById(id);
 		return new ResponseEntity<Object>(HttpStatus.OK);
+	}
+	
+	@ApiOperation(value = "Retrieves zones along with  name and id in key value pair", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/zones/dropdown", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> zonesDropdown() {
+		LOG.info("zonesDropdown request received@@");
+		List<Object[]> zoneData = zoneDetailRepository.dropDown();
+		List<Map<Object,Object>> dropDowns = new ArrayList<>();
+		zoneData.forEach(data -> {
+			Map<Object,Object> map = new HashMap<>();
+			map.put(data[0], data[1]);
+			dropDowns.add(map);
+		});
+		return new ResponseEntity<Object>(dropDowns,HttpStatus.OK);
 	}
 
 	// City API

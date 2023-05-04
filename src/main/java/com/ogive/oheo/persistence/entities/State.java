@@ -17,7 +17,17 @@ import javax.persistence.Table;
 
 import com.ogive.oheo.constants.StatusCode;
 
-@NamedQuery(name="State.dropDown", query="SELECT id ,stateName FROM State")
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+@NamedQuery(name = "State.dropDown", query = "SELECT id ,stateName FROM State")
+
+@Setter
+@Getter
+@NoArgsConstructor
+@ToString
 
 @Table(name = "STATE")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_STATE", sequenceName = "SEQ_STATE")
@@ -49,60 +59,8 @@ public class State {
 	@OneToMany(mappedBy = "state")
 	private Set<City> cities;
 
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getStateName() {
-		return stateName;
-	}
-
-	public void setStateName(String stateName) {
-		this.stateName = stateName;
-	}
-
-	public String getStateCode() {
-		return stateCode;
-	}
-
-	public void setStateCode(String stateCode) {
-		this.stateCode = stateCode;
-	}
-
-	public Country getCountry() {
-		return country;
-	}
-
-	public void setCountry(Country country) {
-		this.country = country;
-	}
-
-	public Regions getRegion() {
-		return region;
-	}
-
-	public void setRegion(Regions region) {
-		this.region = region;
-	}
-
-	public Set<City> getCities() {
-		return cities;
-	}
-
-	public void setCities(Set<City> cities) {
-		this.cities = cities;
-	}
-
-	public StatusCode getStatus() {
-		return status;
-	}
-
-	public void setStatus(StatusCode status) {
-		this.status = status;
-	}
+	@ManyToOne
+	@JoinColumn(name = "ZONE_ID")
+	private ZoneDetail zone;
 
 }

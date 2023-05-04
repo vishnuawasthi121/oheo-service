@@ -9,6 +9,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.ObjectUtils;
 
 import com.ogive.oheo.dto.FilterCriteria;
+import com.ogive.oheo.persistence.entities.BuyRequest;
 import com.ogive.oheo.persistence.entities.Frame;
 import com.ogive.oheo.persistence.entities.Images;
 import com.ogive.oheo.persistence.entities.Position;
@@ -161,4 +162,32 @@ public class CMSSpecifications {
 		};
 	}
 
+	
+	//BuyRequest 
+	public static Specification<BuyRequest> filterBuyRequestByName(FilterCriteria filter) {
+		return new Specification<BuyRequest>() {
+			@Override
+			public Predicate toPredicate(Root<BuyRequest> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+				if (ObjectUtils.isEmpty(filter.getFilterByName())) {
+					return criteriaBuilder.conjunction();
+				}
+				return criteriaBuilder.like(criteriaBuilder.upper(root.get("name")),
+						"%" + filter.getFilterByName().toUpperCase() + "%");
+				// return criteriaBuilder.like(root.get("name"), "%" + filter.getFilterByName()
+				// + "%");
+			}
+		};
+	}
+
+	public static Specification<BuyRequest> filterBuyRequestByEmail(FilterCriteria filter) {
+		return new Specification<BuyRequest>() {
+			@Override
+			public Predicate toPredicate(Root<BuyRequest> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+				if (ObjectUtils.isEmpty(filter.getStatus())) {
+					return criteriaBuilder.conjunction();
+				}
+				return criteriaBuilder.equal(root.get("email"), filter.getEmail());
+			}
+		};
+	}
 }

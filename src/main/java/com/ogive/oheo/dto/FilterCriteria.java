@@ -25,6 +25,7 @@ public class FilterCriteria {
 	private String[] orderBy;
 
 	private StatusCode status;
+	private String email;
 
 	public FilterCriteria() {
 		super();
@@ -124,14 +125,15 @@ public class FilterCriteria {
 		this.filterByCode = filterByCode;
 	}
 
-	@Override
-	public String toString() {
-		return "FilterCriteria [page=" + page + ", size=" + size + ", filterByName=" + filterByName + ", filterByCode="
-				+ filterByCode + ", filterByCityName=" + filterByCityName + ", filterByStatus=" + filterByStatus
-				+ ", sortDirection=" + sortDirection + ", orderBy=" + Arrays.toString(orderBy) + ", status=" + status
-				+ "]";
+	public String getEmail() {
+		return email;
 	}
 
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	
 	
 
 }

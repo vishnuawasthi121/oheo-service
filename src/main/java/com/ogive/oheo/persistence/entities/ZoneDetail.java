@@ -8,11 +8,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.ogive.oheo.constants.StatusCode;
-
+@NamedQuery(name="ZoneDetail.dropDown", query="SELECT id ,name FROM ZoneDetail")
 @Table(name = "ZONE")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_ZONE", sequenceName = "SEQ_ZONE")
 @Entity

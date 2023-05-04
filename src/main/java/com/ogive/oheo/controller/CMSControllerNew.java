@@ -1,5 +1,7 @@
 package com.ogive.oheo.controller;
 
+import static com.ogive.oheo.dto.utils.CMSSpecifications.filterBuyRequestByEmail;
+import static com.ogive.oheo.dto.utils.CMSSpecifications.filterBuyRequestByName;
 import static com.ogive.oheo.dto.utils.CMSSpecifications.filterLiveProduct;
 import static com.ogive.oheo.dto.utils.CMSSpecifications.filterProductByName;
 import static com.ogive.oheo.dto.utils.CMSSpecifications.filterProductByStatus;
@@ -40,6 +42,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,6 +50,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ogive.oheo.constants.ImageType;
 import com.ogive.oheo.constants.StatusCode;
+import com.ogive.oheo.dto.BuyRequestDTO;
+import com.ogive.oheo.dto.BuyRequestResponseDTO;
 import com.ogive.oheo.dto.ErrorResponseDTO;
 import com.ogive.oheo.dto.FilterCriteria;
 import com.ogive.oheo.dto.ImagesResponseDTO;
@@ -64,6 +69,7 @@ import com.ogive.oheo.dto.VehicleModelResponseDTO;
 import com.ogive.oheo.dto.VehicleTypeResponseDTO;
 import com.ogive.oheo.dto.utils.CommonsUtil;
 import com.ogive.oheo.exception.ValidationException;
+import com.ogive.oheo.persistence.entities.BuyRequest;
 import com.ogive.oheo.persistence.entities.City;
 import com.ogive.oheo.persistence.entities.Company;
 import com.ogive.oheo.persistence.entities.Features;
@@ -78,6 +84,7 @@ import com.ogive.oheo.persistence.entities.VehicleMaintenanceRecord;
 import com.ogive.oheo.persistence.entities.VehicleModel;
 import com.ogive.oheo.persistence.entities.VehicleTransmission;
 import com.ogive.oheo.persistence.entities.VehicleType;
+import com.ogive.oheo.persistence.repo.BuyRequestRepository;
 import com.ogive.oheo.persistence.repo.CityRepository;
 import com.ogive.oheo.persistence.repo.CompanyRepository;
 import com.ogive.oheo.persistence.repo.FeaturesRepository;
@@ -86,6 +93,7 @@ import com.ogive.oheo.persistence.repo.ProductRepository;
 import com.ogive.oheo.persistence.repo.ProductSpecificationRepository;
 import com.ogive.oheo.persistence.repo.SliderRepository;
 import com.ogive.oheo.persistence.repo.StateRepository;
+import com.ogive.oheo.persistence.repo.UserRepository;
 import com.ogive.oheo.persistence.repo.VehicleBodyTypeRepository;
 import com.ogive.oheo.persistence.repo.VehicleDetailRepository;
 import com.ogive.oheo.persistence.repo.VehicleFuelTypeRepository;
@@ -149,6 +157,12 @@ public class CMSControllerNew {
 	
 	@Autowired
 	private StateRepository stateRepository;
+	
+	@Autowired
+	private UserRepository userRepository;
+	
+	@Autowired
+	private BuyRequestRepository buyRequestRepository;
 
 	//Product API
 	
@@ -496,7 +510,6 @@ public class CMSControllerNew {
 	
 	
 	// Manage Vehicle Maintenance record
-	
 	@Transactional
 	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@PostMapping(path = "/vehicle-maintenance-record", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -626,5 +639,145 @@ public class CMSControllerNew {
 		return new ResponseEntity<Object>(allDTO, HttpStatus.OK);
 	}
 	
+	// Buy Request Api
+	@Transactional
+	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = "/buy-requests", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> addBuyRequest(@Valid @RequestBody BuyRequestDTO buyRequest) {
+		LOG.info("addBuyRequest request received@@   {}", buyRequest);
+		// BuyRequest Entity
+		BuyRequest entity = new BuyRequest();
+		BeanUtils.copyProperties(buyRequest, entity);
+		
+		//TODO - Dealer Mapping 
+		buyRequest.getDealerId();
+		//userRepository.findById(buyRequest.getDealerId());
+		
+		//City 
+		Optional<City> cityData = cityRepository.findById(buyRequest.getCityId());
+		if (!cityData.isPresent()) {
+			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a Entity with id=" + buyRequest.getCityId()),
+					HttpStatus.BAD_REQUEST);
+		}
+		
+		//Company 
+		Optional<Company> companyData = companyRepository.findById(buyRequest.getCompanyId());
+		if (!companyData.isPresent()) {
+			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a Entity with id=" + buyRequest.getCompanyId()),
+					HttpStatus.BAD_REQUEST);
+		}
+		
+		//State
+		Optional<State> stateData = stateRepository.findById(buyRequest.getStateId());
+		if (!stateData.isPresent()) {
+			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a Entity with id=" + buyRequest.getStateId()),
+					HttpStatus.BAD_REQUEST);
+		}
+		//Vehicle Model
+		Optional<VehicleModel> modelData = vehicleModelRepository.findById(buyRequest.getModelId());
+		if (!modelData.isPresent()) {
+			return new ResponseEntity<Object>(
+					new ErrorResponseDTO("Did not find a Entity with id=" + buyRequest.getModelId()),
+					HttpStatus.BAD_REQUEST);
+		}	
+		
+		entity.setCity(cityData.get());
+		entity.setState(stateData.get());
+		entity.setCompany(companyData.get());
+		entity.setModel(modelData.get());
+		
+		BuyRequest savedEntity = buyRequestRepository.save(entity);
+		return new ResponseEntity<Object>(savedEntity.getId(), HttpStatus.OK);
+	}
 	
+	@Transactional
+	@ApiOperation(value = "Retrieves an entity by its id", notes = "Return Id of the record if saved correctly otherwise null", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/buy-requests/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> getBuyRequest(@PathVariable Long id) {
+		LOG.info("getBuyRequest request received@@   {}", id);
+		Optional<BuyRequest> entityData = buyRequestRepository.findById(id);
+		if (entityData.isPresent()) {
+			BuyRequest entity = entityData.get();
+			BuyRequestResponseDTO dto = new BuyRequestResponseDTO();
+			BeanUtils.copyProperties(entity, dto);
+			// Requested City
+			dto.setRequestedCityId(entity.getCity().getId());
+			dto.setRequestedCityName(entity.getCity().getName());
+			// State
+			dto.setRequestedStateId(entity.getState().getId());
+			dto.setRequestedStateName(entity.getState().getStateName());
+			// Model
+			dto.setModelId(entity.getModel().getId());
+			dto.setModelName(entity.getModel().getModelName());
+			// Company
+			dto.setCompanyId(entity.getCompany().getId());
+			dto.setCompanyName(entity.getCompany().getCompanyName());
+			// TODO - Dealer Mapping
+			dto.add(linkTo(methodOn(CMSControllerNew.class).getBuyRequest(entity.getId())).withSelfRel());
+			return new ResponseEntity<Object>(dto, HttpStatus.OK);
+		}
+		return new ResponseEntity<Object>(HttpStatus.OK);
+	}
+	
+	@Transactional
+	@ApiOperation(value = "Returns all instances of the type", notes = "Returns all instances of the type", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/buy-requests",produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> getAllBuyRequest(
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size, 
+			@RequestParam(required = false) String filterByName,
+			@RequestParam(required = false, defaultValue = "ASC") Direction sortDirection,
+			@RequestParam(required = false, defaultValue = "id") String[] orderBy,
+			@RequestParam(required = false) String email) {
+		LOG.info("getAllVehicleDetails request received");
+
+		FilterCriteria filterCriteria = new FilterCriteria(page, size, filterByName, sortDirection, orderBy, null);
+		filterCriteria.setEmail(email);
+		
+		LOG.info("filterCriteria    {} ", filterCriteria);
+		Direction sort = sortDirection == null ? Direction.ASC : sortDirection;
+		Pageable paging = PageRequest.of(page, size, Sort.by(sort, orderBy));
+		Map<String, Object> response = new HashMap<>();
+		List<BuyRequestResponseDTO> buyRequestDTOList = new ArrayList<>();
+
+		Page<BuyRequest> pages = buyRequestRepository.findAll(
+				filterBuyRequestByName(filterCriteria).and(filterBuyRequestByEmail(filterCriteria)), paging);
+		
+		if (pages.hasContent()) {
+			pages.getContent().forEach(entity -> {
+				BuyRequestResponseDTO dto = new BuyRequestResponseDTO();
+				BeanUtils.copyProperties(entity, dto);
+				//Requested City 
+				dto.setRequestedCityId(entity.getCity().getId());
+				dto.setRequestedCityName(entity.getCity().getName());
+				//State 
+				dto.setRequestedStateId(entity.getState().getId());
+				dto.setRequestedStateName(entity.getState().getStateName());
+				//Model
+				dto.setModelId(entity.getModel().getId());
+				dto.setModelName(entity.getModel().getModelName());
+				//Company
+				dto.setCompanyId(entity.getCompany().getId());
+				dto.setCompanyName(entity.getCompany().getCompanyName());
+				//TODO - Dealer Mapping 
+				
+				dto.add(linkTo(methodOn(CMSControllerNew.class).getBuyRequest(entity.getId())).withSelfRel());
+				buyRequestDTOList.add(dto);
+				
+			});
+		}
+		response.put("buyRequests", buyRequestDTOList);
+		response.put("currentPage", pages.getNumber());
+		response.put("totalElements", pages.getTotalElements());
+		response.put("totalPages", pages.getTotalPages());
+		return new ResponseEntity<Object>(response, HttpStatus.OK);
+	}
+
+	@ApiOperation(value = "Deletes the entity with the given id", notes = "If the entity is not found in the persistence store it is silently ignored.", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@DeleteMapping(path = "/buy-requests/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> deleteBuyRequest(@PathVariable Long id) {
+		LOG.info("deleteBuyRequest request received @@   {}", id);
+		buyRequestRepository.deleteById(id);
+		return new ResponseEntity<Object>(HttpStatus.OK);
+	}
 }
