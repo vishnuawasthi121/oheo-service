@@ -14,6 +14,16 @@ import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ogive.oheo.constants.ImageType;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+@Setter
+@Getter
+@ToString
+@NoArgsConstructor
+
 @Table(name = "IMAGES")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_IMAGES", sequenceName = "SEQ_IMAGES")
 @Entity
@@ -47,66 +57,14 @@ public class Images {
 	public void setProduct(Product product) {
 		this.product = product;
 	}
-	
+
 	@JsonIgnore
 	@ManyToOne
 	@JoinColumn(name = "PRODUCT_ID")
 	private Product product;
 
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getContentType() {
-		return contentType;
-	}
-
-	public void setContentType(String contentType) {
-		this.contentType = contentType;
-	}
-
-	public Long getSize() {
-		return size;
-	}
-
-	public void setSize(Long size) {
-		this.size = size;
-	}
-
-	public byte[] getData() {
-		return data;
-	}
-
-	public void setData(byte[] data) {
-		this.data = data;
-	}
-
-	public VehicleDetail getVehicleDetail() {
-		return vehicleDetail;
-	}
-
-	public void setVehicleDetail(VehicleDetail vehicleDetail) {
-		this.vehicleDetail = vehicleDetail;
-	}
-
-	public ImageType getImageType() {
-		return imageType;
-	}
-
-	public void setImageType(ImageType imageType) {
-		this.imageType = imageType;
-	}
+	@ManyToOne
+	@JoinColumn(name = "CHARGING_PRODUCT_ID")
+	private ChargingProduct chargingProduct;
 
 }

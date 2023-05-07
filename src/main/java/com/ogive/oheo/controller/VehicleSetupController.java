@@ -19,14 +19,11 @@ import static com.ogive.oheo.dto.utils.GeographicLocationSpecifications.filterVe
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
@@ -43,12 +40,8 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -56,7 +49,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.ogive.oheo.constants.StatusCode;
 import com.ogive.oheo.dto.CompanyRequestDTO;
@@ -65,6 +57,7 @@ import com.ogive.oheo.dto.ErrorResponseDTO;
 import com.ogive.oheo.dto.FilterCriteria;
 import com.ogive.oheo.dto.PurchaseTypeRequestDTO;
 import com.ogive.oheo.dto.PurchaseTypeResponseDTO;
+import com.ogive.oheo.dto.TermAndConditionsRequestDTO;
 import com.ogive.oheo.dto.VehicleBodyTypeRequestDTO;
 import com.ogive.oheo.dto.VehicleBodyTypeResponseDTO;
 import com.ogive.oheo.dto.VehicleDetailRequestDTO;
@@ -78,27 +71,22 @@ import com.ogive.oheo.dto.VehicleTransmissionResponseDTO;
 import com.ogive.oheo.dto.VehicleTypeRequestDTO;
 import com.ogive.oheo.dto.VehicleTypeResponseDTO;
 import com.ogive.oheo.dto.utils.CommonsUtil;
-import com.ogive.oheo.persistence.entities.Address;
-import com.ogive.oheo.persistence.entities.AddressRequestDTO;
-import com.ogive.oheo.persistence.entities.City;
 import com.ogive.oheo.persistence.entities.Company;
-import com.ogive.oheo.persistence.entities.Images;
 import com.ogive.oheo.persistence.entities.PurchaseType;
-import com.ogive.oheo.persistence.entities.State;
+import com.ogive.oheo.persistence.entities.TermAndConditions;
 import com.ogive.oheo.persistence.entities.VehicleBodyType;
 import com.ogive.oheo.persistence.entities.VehicleDetail;
 import com.ogive.oheo.persistence.entities.VehicleFuelType;
 import com.ogive.oheo.persistence.entities.VehicleModel;
 import com.ogive.oheo.persistence.entities.VehicleTransmission;
 import com.ogive.oheo.persistence.entities.VehicleType;
-import com.ogive.oheo.persistence.entities.Zipcode;
-import com.ogive.oheo.persistence.entities.ZoneDetail;
 import com.ogive.oheo.persistence.repo.AddressRepository;
 import com.ogive.oheo.persistence.repo.CityRepository;
 import com.ogive.oheo.persistence.repo.CompanyRepository;
 import com.ogive.oheo.persistence.repo.ImagesRepository;
 import com.ogive.oheo.persistence.repo.PurchaseTypeRepository;
 import com.ogive.oheo.persistence.repo.StateRepository;
+import com.ogive.oheo.persistence.repo.TermAndConditionsRepository;
 import com.ogive.oheo.persistence.repo.VehicleBodyTypeRepository;
 import com.ogive.oheo.persistence.repo.VehicleDetailRepository;
 import com.ogive.oheo.persistence.repo.VehicleFuelTypeRepository;
@@ -159,6 +147,9 @@ public class VehicleSetupController {
 
 	@Autowired
 	private ZipcodeRepository zipcodeRepository;
+	
+	@Autowired
+	private TermAndConditionsRepository termAndConditionsRepository;
 
 	// Vehicle company api
 	@ApiOperation(value = "Saves a given entity. Use the returned instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -952,61 +943,16 @@ public class VehicleSetupController {
 		});
 		return new ResponseEntity<Object>(dropDowns,HttpStatus.OK);
 	}
-	
-	
 
 	// Vehicle API
 	@Transactional
 	// All Vehicle -> Add Vehicle : Vehicle API -
 	@ApiOperation(value = "Saves a given entity. Use the returned instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@PostMapping(path = "/vehicle-details", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> addVehicleDetails(@ModelAttribute VehicleDetailRequestDTO requestBody) {
+	public ResponseEntity<Object> addVehicleDetails(@Valid @RequestBody VehicleDetailRequestDTO requestBody) {
 		LOG.info("addVehicleDetails request received@@   {}", requestBody);
-		// TODO - Logic to save Vehicle details and file into database
-		AddressRequestDTO addressDTO = requestBody.getAddress();
-
-		Set<MultipartFile> files = requestBody.getFiles();
-
-		if (ObjectUtils.isEmpty(requestBody.getVehicleName())) {
-			return new ResponseEntity<Object>(new ErrorResponseDTO("vehicleName is mandatory"), HttpStatus.BAD_REQUEST);
-		}
-		if (Objects.isNull(requestBody.getPrice())) {
-			return new ResponseEntity<Object>(new ErrorResponseDTO("price is mandatory"), HttpStatus.BAD_REQUEST);
-		}
-		if (Objects.isNull(requestBody.getVehicleTypeId())) {
-			return new ResponseEntity<Object>(new ErrorResponseDTO("vehicleTypeId is mandatory"),
-					HttpStatus.BAD_REQUEST);
-		}
-		if (Objects.isNull(requestBody.getVehicleBodyTypeId())) {
-			return new ResponseEntity<Object>(new ErrorResponseDTO("vehicleBodyTypeId is mandatory"),
-					HttpStatus.BAD_REQUEST);
-		}
-		if (Objects.isNull(addressDTO)) {
-			return new ResponseEntity<Object>(new ErrorResponseDTO("address is mandatory"), HttpStatus.BAD_REQUEST);
-		}
-
-		// Address Validation
-		if (Objects.isNull(addressDTO.getCityId())) {
-			return new ResponseEntity<Object>(new ErrorResponseDTO("cityId is mandatory"), HttpStatus.BAD_REQUEST);
-		}
-
-		if (Objects.isNull(addressDTO.getStateId())) {
-			return new ResponseEntity<Object>(new ErrorResponseDTO("stateId is mandatory"), HttpStatus.BAD_REQUEST);
-		}
-
-		if (Objects.isNull(addressDTO.getZipcode())) {
-			return new ResponseEntity<Object>(new ErrorResponseDTO("zipcode is mandatory"), HttpStatus.BAD_REQUEST);
-		}
-		if (Objects.isNull(addressDTO.getZoneId())) {
-			return new ResponseEntity<Object>(new ErrorResponseDTO("zoneId is mandatory"), HttpStatus.BAD_REQUEST);
-		}
-
-		if (CollectionUtils.isEmpty(files)) {
-			return new ResponseEntity<Object>(new ErrorResponseDTO("files is mandatory"), HttpStatus.BAD_REQUEST);
-		}
-
+		
 		VehicleDetail vehicleDetail = new VehicleDetail();
-		vehicleDetail.setKeyFeatures(requestBody.getKeyFeatures());
 		vehicleDetail.setPrice(requestBody.getPrice());
 		vehicleDetail.setStatus(requestBody.getStatus());
 		vehicleDetail.setVehicleName(requestBody.getVehicleName());
@@ -1019,89 +965,17 @@ public class VehicleSetupController {
 					HttpStatus.BAD_REQUEST);
 		}
 
-		Optional<VehicleBodyType> vehicleBodyTypeData = vehicleBodyTypeRepository
-				.findById(requestBody.getVehicleBodyTypeId());
+		Optional<VehicleBodyType> vehicleBodyTypeData = vehicleBodyTypeRepository.findById(requestBody.getVehicleBodyTypeId());
+				
 		if (!vehicleBodyTypeData.isPresent()) {
 			return new ResponseEntity<Object>(
 					new ErrorResponseDTO("Did not find VehicleBodyType by id=" + requestBody.getVehicleBodyTypeId()),
 					HttpStatus.BAD_REQUEST);
 		}
-
-		// Address
-		Address address = new Address();
-
-		Optional<City> cityData = cityRepository.findById(addressDTO.getCityId());
-		if (!cityData.isPresent()) {
-			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find City by id=" + addressDTO.getCityId()),
-					HttpStatus.BAD_REQUEST);
-		}
-
-		Zipcode zipcode = zipcodeRepository.findByCode(addressDTO.getZipcode());
-
-		if (Objects.isNull(zipcode)) {
-			return new ResponseEntity<Object>(
-					new ErrorResponseDTO("Did not find Zipcode by id=" + addressDTO.getZipcode()),
-					HttpStatus.BAD_REQUEST);
-		}
-
-		Optional<ZoneDetail> zoneData = zoneDetailRepository.findById(addressDTO.getZoneId());
-
-		if (!zoneData.isPresent()) {
-			return new ResponseEntity<Object>(
-					new ErrorResponseDTO("Did not find ZoneDetail by id=" + addressDTO.getZoneId()),
-					HttpStatus.BAD_REQUEST);
-		}
-
-		Optional<State> stateData = stateRepository.findById(addressDTO.getStateId());
-
-		if (!stateData.isPresent()) {
-			return new ResponseEntity<Object>(
-					new ErrorResponseDTO("Did not find State by id=" + addressDTO.getStateId()),
-					HttpStatus.BAD_REQUEST);
-		}
-		
-		Optional<Company> companyData = companyRepository.findById(requestBody.getCompanyId());
-		
-		if (!companyData.isPresent()) {
-			return new ResponseEntity<Object>(
-					new ErrorResponseDTO("Did not find Company by id=" + addressDTO.getStateId()),
-					HttpStatus.BAD_REQUEST);
-		}
-		
-		address.setCity(cityData.get());
-		address.setState(stateData.get());
-		address.setZipcode(zipcode);
-		address.setZone(zoneData.get());
-		LOG.info("Saving  @@@@  address {}", address);
-		Address savedAddress = addressRepository.save(address);
-		LOG.info("Saved   address id {}", savedAddress.getId());
-
-		// IMAGES
-		List<Images> images = new ArrayList<>();
-
-		files.forEach(file -> {
-			Images fileEntity = new Images();
-			fileEntity.setName(StringUtils.cleanPath(file.getOriginalFilename()));
-			fileEntity.setContentType(file.getContentType());
-			try {
-				fileEntity.setData(file.getBytes());
-			} catch (IOException e) {
-				LOG.error("@@@@@ Exception during reading file bytes data", e);
-			}
-			fileEntity.setSize(file.getSize());
-			images.add(fileEntity);
-		});
-
 		vehicleDetail.setVehicleType(vehicleTypeData.get());
 		vehicleDetail.setVehicleBodyType(vehicleBodyTypeData.get());
-		vehicleDetail.setCompany(companyData.get());
-		
-		vehicleDetail.setAddress(savedAddress);
-
 		// Save Vehicle details
 		VehicleDetail savedVehicleDetail = vehicleDetailRepository.save(vehicleDetail);
-		images.stream().forEach(image -> image.setVehicleDetail(savedVehicleDetail));
-		imagesRepository.saveAll(images);
 		return new ResponseEntity<Object>(savedVehicleDetail.getId(), HttpStatus.OK);
 	}
 
@@ -1166,5 +1040,7 @@ public class VehicleSetupController {
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
 
-	// TODO - Update Vehicle Detail
+	
+	
+	
 }

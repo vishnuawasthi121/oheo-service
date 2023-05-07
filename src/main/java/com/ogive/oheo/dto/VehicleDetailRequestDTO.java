@@ -1,11 +1,9 @@
 package com.ogive.oheo.dto;
 
-import java.util.Set;
-
-import org.springframework.web.multipart.MultipartFile;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 import com.ogive.oheo.constants.StatusCode;
-import com.ogive.oheo.persistence.entities.AddressRequestDTO;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,22 +17,21 @@ import lombok.ToString;
 
 public class VehicleDetailRequestDTO {
 
+	@NotEmpty
 	private String vehicleName;
 
-	private String keyFeatures;
-
+	@NotNull
 	private Double price;
 
 	private StatusCode status;
 
+	@NotNull
 	private Long vehicleTypeId;
 
+	@NotNull
 	private Long vehicleBodyTypeId;
 
-	private Long companyId;
 
-	private AddressRequestDTO address;
 
-	private Set<MultipartFile> files;
 
 }

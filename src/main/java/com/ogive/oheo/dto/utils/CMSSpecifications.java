@@ -10,6 +10,7 @@ import org.springframework.util.ObjectUtils;
 
 import com.ogive.oheo.dto.FilterCriteria;
 import com.ogive.oheo.persistence.entities.BuyRequest;
+import com.ogive.oheo.persistence.entities.ChargingProduct;
 import com.ogive.oheo.persistence.entities.Frame;
 import com.ogive.oheo.persistence.entities.Images;
 import com.ogive.oheo.persistence.entities.Position;
@@ -190,4 +191,43 @@ public class CMSSpecifications {
 			}
 		};
 	}
+	
+	// Charging Products 
+	public static Specification<ChargingProduct> filterChargingProductByName(FilterCriteria filter) {
+		return new Specification<ChargingProduct>() {
+			@Override
+			public Predicate toPredicate(Root<ChargingProduct> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+				if (ObjectUtils.isEmpty(filter.getFilterByName())) {
+					return criteriaBuilder.conjunction();
+				}
+				return criteriaBuilder.like(criteriaBuilder.upper(root.get("name")),
+						"%" + filter.getFilterByName().toUpperCase() + "%");
+				// return criteriaBuilder.like(root.get("name"), "%" + filter.getFilterByName()
+				// + "%");
+			}
+		};
+	}
+
+	public static Specification<ChargingProduct> filterChargingProductByStatus(FilterCriteria filter) {
+		return new Specification<ChargingProduct>() {
+			@Override
+			public Predicate toPredicate(Root<ChargingProduct> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+				if (ObjectUtils.isEmpty(filter.getStatus())) {
+					return criteriaBuilder.conjunction();
+				}
+				return criteriaBuilder.equal(root.get("status"), filter.getStatus());
+			}
+		};
+	}
+	
+	public static Specification<ChargingProduct> filterLiveChargingProduct() {
+		return new Specification<ChargingProduct>() {
+			@Override
+			public Predicate toPredicate(Root<ChargingProduct> root, CriteriaQuery<?> query,
+					CriteriaBuilder criteriaBuilder) {
+				return criteriaBuilder.like(criteriaBuilder.upper(root.get("isLive")), "Y");
+			}
+		};
+	}
+
 }

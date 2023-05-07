@@ -2,7 +2,7 @@ package com.ogive.oheo.constants;
 
 public enum ImageType {
 
-	Slider("slider"), Brochure("brochure"),Other("other");
+	Slider("slider"), Brochure("brochure"),Product("product"),Other("other");
 
 	private String value;
 
