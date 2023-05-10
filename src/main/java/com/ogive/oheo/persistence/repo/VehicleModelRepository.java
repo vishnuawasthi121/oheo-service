@@ -10,5 +10,7 @@ import com.ogive.oheo.persistence.entities.VehicleModel;
 public interface VehicleModelRepository extends CrudRepository<VehicleModel, Long>, JpaSpecificationExecutor<VehicleModel> {
 
 	List<Object[]> dropDown();
+	
+	List<Object[]> dropDownByCompanyId(Long companyId);
 
 }

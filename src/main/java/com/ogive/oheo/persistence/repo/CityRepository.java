@@ -16,4 +16,6 @@ public interface CityRepository extends PagingAndSortingRepository<City, Long> {
 	Page<City> findByNameContaining(String name, Pageable pageable);
 
 	List<Object[]> dropDown();
+	List<Object[]> dropDownByStateId(Long stateId);
+	
 }

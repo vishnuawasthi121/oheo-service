@@ -57,7 +57,6 @@ import com.ogive.oheo.dto.ErrorResponseDTO;
 import com.ogive.oheo.dto.FilterCriteria;
 import com.ogive.oheo.dto.PurchaseTypeRequestDTO;
 import com.ogive.oheo.dto.PurchaseTypeResponseDTO;
-import com.ogive.oheo.dto.TermAndConditionsRequestDTO;
 import com.ogive.oheo.dto.VehicleBodyTypeRequestDTO;
 import com.ogive.oheo.dto.VehicleBodyTypeResponseDTO;
 import com.ogive.oheo.dto.VehicleDetailRequestDTO;
@@ -73,7 +72,6 @@ import com.ogive.oheo.dto.VehicleTypeResponseDTO;
 import com.ogive.oheo.dto.utils.CommonsUtil;
 import com.ogive.oheo.persistence.entities.Company;
 import com.ogive.oheo.persistence.entities.PurchaseType;
-import com.ogive.oheo.persistence.entities.TermAndConditions;
 import com.ogive.oheo.persistence.entities.VehicleBodyType;
 import com.ogive.oheo.persistence.entities.VehicleDetail;
 import com.ogive.oheo.persistence.entities.VehicleFuelType;
@@ -383,6 +381,22 @@ public class VehicleSetupController {
 	public ResponseEntity<Object> vehicleModelDropdown() {
 		LOG.info("vehicleModelDropdown request received@@");
 		List<Object[]> listData = vehicleModelRepository.dropDown();
+		List<Map<Object,Object>> dropDowns = new ArrayList<>();
+		listData.forEach(data -> {
+			Map<Object,Object> map = new HashMap<>();
+			map.put(data[0], data[1]);
+			dropDowns.add(map);
+		});
+		return new ResponseEntity<Object>(dropDowns,HttpStatus.OK);
+	}
+	
+	
+	@ApiOperation(value = "Retrieves VehicleModel dropdown list by company id", notes = "Retrieves VehicleModel dropdown list", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/{companyId}/vehicle-models/dropdown", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> vehicleModelDropdownByCompanyId(@PathVariable Long companyId) {
+		LOG.info("vehicleModelDropdownByCompanyId request received@@");
+		
+		List<Object[]> listData = vehicleModelRepository.dropDownByCompanyId(companyId);
 		List<Map<Object,Object>> dropDowns = new ArrayList<>();
 		listData.forEach(data -> {
 			Map<Object,Object> map = new HashMap<>();

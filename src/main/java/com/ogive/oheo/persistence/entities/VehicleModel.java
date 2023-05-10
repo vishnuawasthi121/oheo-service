@@ -14,6 +14,7 @@ import javax.persistence.Table;
 
 import com.ogive.oheo.constants.StatusCode;
 @NamedQuery(name="VehicleModel.dropDown", query="SELECT id , modelName FROM VehicleModel")
+@NamedQuery(name="VehicleModel.dropDownByCompanyId", query="SELECT id , modelName FROM VehicleModel WHERE company.id = : companyId")
 @Table(name = "VEHICLE_MODEL")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_VEHICLE_MODEL", sequenceName = "SEQ_VEHICLE_MODEL")
 @Entity

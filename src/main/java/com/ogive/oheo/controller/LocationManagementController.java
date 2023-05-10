@@ -586,6 +586,24 @@ public class LocationManagementController {
 		});
 		return new ResponseEntity<Object>(dropDowns,HttpStatus.OK);
 	}
+	
+	
+	@ApiOperation(value = "Retrieves cities along with city name in key value pair fatched by stateId", notes = "Retrieves cities list along with city name", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/{stateId}/cities/dropdown", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> citiesDropdownByStateId(@PathVariable Long stateId) {
+		LOG.info("citiesDropdownByStateId request received@@");
+		List<Object[]> citiesData = cityRepository.dropDownByStateId(stateId);
+		
+		List<Map<Object,Object>> dropDowns = new ArrayList<>();
+		citiesData.forEach(data -> {
+			Map<Object,Object> map = new HashMap<>();
+			map.put(data[0], data[1]);
+			dropDowns.add(map);
+		});
+		return new ResponseEntity<Object>(dropDowns,HttpStatus.OK);
+	}
+	
+	
 
 	// Zipcode
 	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)

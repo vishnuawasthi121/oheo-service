@@ -743,8 +743,10 @@ public class CMSControllerNew {
 	@Transactional
 	@ApiOperation(value = "Returns all instances of the type", notes = "Returns all instances of the type", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/buy-requests", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<Object> getAllBuyRequest(@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "10") int size, @RequestParam(required = false) String filterByName,
+	public ResponseEntity<Object> getAllBuyRequest(
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size, 
+			@RequestParam(required = false) String filterByName,
 			@RequestParam(required = false, defaultValue = "ASC") Direction sortDirection,
 			@RequestParam(required = false, defaultValue = "id") String[] orderBy,
 			@RequestParam(required = false) String email) {
@@ -779,6 +781,7 @@ public class CMSControllerNew {
 				dto.setCompanyId(entity.getCompany().getId());
 				dto.setCompanyName(entity.getCompany().getCompanyName());
 				// TODO - Dealer Mapping
+				dto.setDealerName("Dealer functionality will be coming soon..");
 
 				dto.add(linkTo(methodOn(CMSControllerNew.class).getBuyRequest(entity.getId())).withSelfRel());
 				buyRequestDTOList.add(dto);

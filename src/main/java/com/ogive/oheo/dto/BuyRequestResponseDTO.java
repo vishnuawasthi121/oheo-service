@@ -27,6 +27,8 @@ public class BuyRequestResponseDTO extends RepresentationModel<BuyRequestRespons
 
 	// TODO - Dealer Mapping
 	// private UserInfo userInfo;
+	
+	private String dealerName;
 
 	private String initial;
 	private String name;
