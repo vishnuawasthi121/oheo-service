@@ -26,6 +26,6 @@ public class StateResponseDTO extends RepresentationModel<StateResponseDTO> {
 
 	private Long zoneId;
 
-	private StatusCode satus;
+	private StatusCode status;
 
 }
