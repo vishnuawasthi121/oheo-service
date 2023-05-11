@@ -29,27 +29,27 @@ public class VehicleMaintenanceRecordRequestDTO {
 
 	private StatusCode status;
 
-	@NotNull
+	//@NotNull
 	private Long companyId;
 
-	@NotNull
+	///@NotNull
 	private Long vehicleModelId;
 
-	@NotNull
+	//@NotNull
 	private Long vehicleFuelTypeId;
-	@NotNull
+	//@NotNull
 	private Long cityId;
 
 	@NotNull
 	private Long vehicleTypeId;
 
-	@JsonFormat(pattern="yyyy-MM-dd")
-	@NotNull
-	private String registrationDate;
+	//@JsonFormat(pattern="yyyy-MM-dd")
+	//@NotNull
+//	private String registrationDate;
 
-	@JsonFormat(pattern="yyyy-MM-dd")
+	//@JsonFormat(pattern="yyyy-MM-dd")
 	// maintenance record
-	private String maintenanceExpirationDate;
+	//private String maintenanceExpirationDate;
 
 	private Integer age;
 
@@ -75,5 +75,8 @@ public class VehicleMaintenanceRecordRequestDTO {
 	private String naturalCalamity;
 
 	private MultipartFile image;
+	
+	private String rtoCode;
+	
 
 }

@@ -97,5 +97,7 @@ public class VehicleMaintenanceRecord {
 	@ManyToOne
 	@JoinColumn(name = "IMAGE_ID")
 	private Images image;
+	
+	private String rtoCode;
 
 }

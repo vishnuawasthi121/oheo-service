@@ -200,6 +200,7 @@ public class CMSControllerNew {
 		// VehicleDetail
 		Long vehicleDetailId = productRequestDTO.getVehicleDetailId();
 		Optional<VehicleDetail> vehicleDetailData = vehicleDetailRepository.findById(vehicleDetailId);
+		
 		if (!vehicleDetailData.isPresent()) {
 			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a Entity with id=" + vehicleDetailId),
 					HttpStatus.BAD_REQUEST);
@@ -536,9 +537,9 @@ public class CMSControllerNew {
 		VehicleMaintenanceRecord entity = new VehicleMaintenanceRecord();
 		BeanUtils.copyProperties(requestBody, entity);
 
-		entity.setMaintenanceExpirationDate(
-				CommonsUtil.convertStringToDate(requestBody.getMaintenanceExpirationDate(), "yyyy-MM-dd"));
-		entity.setRegistrationDate(CommonsUtil.convertStringToDate(requestBody.getRegistrationDate(), "yyyy-MM-dd"));
+		//entity.setMaintenanceExpirationDate(
+				//CommonsUtil.convertStringToDate(requestBody.getMaintenanceExpirationDate(), "yyyy-MM-dd"));
+		//entity.setRegistrationDate(CommonsUtil.convertStringToDate(requestBody.getRegistrationDate(), "yyyy-MM-dd"));
 
 		// VehicleFuelType
 		Long vehicleFuelTypeId = requestBody.getVehicleFuelTypeId();
@@ -646,8 +647,8 @@ public class CMSControllerNew {
 			dto.setModelName(vehicleModel.getModelName());
 			Images image = record.getImage();
 
-			dto.setMaintenanceExpirationDate(record.getMaintenanceExpirationDate());
-			dto.setRegistrationDate(record.getRegistrationDate());
+			//dto.setMaintenanceExpirationDate(record.getMaintenanceExpirationDate());
+			//dto.setRegistrationDate(record.getRegistrationDate());
 
 			dto.add(linkTo(methodOn(FileProcessingController.class).readFile(image.getId())).withRel("Image"));
 			allDTO.add(dto);
@@ -1028,7 +1029,7 @@ public class CMSControllerNew {
 	
 	@Transactional
 	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	@DeleteMapping(path = "/charging-products", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@DeleteMapping(path = "/charging-products/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> deleteChargingProducts(@PathVariable Long id) {
 		LOG.info("deleteChargingProducts request received@@   {}", id);
 		chargingProductRepository.deleteById(id);

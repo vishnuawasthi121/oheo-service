@@ -2,6 +2,8 @@ package com.ogive.oheo.dto;
 
 import org.springframework.hateoas.RepresentationModel;
 
+import com.ogive.oheo.constants.StatusCode;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,7 +23,9 @@ public class StateResponseDTO extends RepresentationModel<StateResponseDTO> {
 	private String countryCode;
 
 	private String zoneName;
-	
+
 	private Long zoneId;
+
+	private StatusCode satus;
 
 }

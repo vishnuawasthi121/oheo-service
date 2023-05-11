@@ -43,12 +43,14 @@ public class VehicleMaintenanceRecordResponseDTO extends RepresentationModel<Veh
 	private Long cityId;
 	private String cityName;
 
-	@JsonFormat(pattern="yyyy-MM-dd")
-	private Date registrationDate;
+	/*
+	 * @JsonFormat(pattern="yyyy-MM-dd") private Date registrationDate;
+	 */
 
 	// maintenance record
-	@JsonFormat(pattern="yyyy-MM-dd")
-	private Date maintenanceExpirationDate;
+	/*
+	 * @JsonFormat(pattern="yyyy-MM-dd") private Date maintenanceExpirationDate;
+	 */
 
 	private Integer age;
 
@@ -73,5 +75,7 @@ public class VehicleMaintenanceRecordResponseDTO extends RepresentationModel<Veh
 	private String blacklistDetail;
 
 	private String naturalCalamity;
+	
+	private String rtoCode;
 
 }
