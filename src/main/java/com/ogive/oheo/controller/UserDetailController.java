@@ -172,16 +172,17 @@ public class UserDetailController {
 	
 	@ApiOperation(value = "Retrive all the child account of an root", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/{rootId}/sub-users", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<Object> getSubUsers(@PathVariable Long id,
+	public ResponseEntity<Object> getSubUsers(
+			@PathVariable Long rootId,
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size, 
 			@RequestParam(required = false) String filterByName,
 			@RequestParam(required = false, defaultValue = "ASC") Direction sortDirection,
 			@RequestParam(required = false, defaultValue = "id") String[] orderBy,
 			@RequestParam(required = false) StatusCode status) {
-		LOG.info("getSubUsers request received@@   {}", id);
+		LOG.info("getSubUsers request received@@   {}", rootId);
 		FilterCriteria filterCriteria = new FilterCriteria(page, size, filterByName, sortDirection, orderBy, status);
-		filterCriteria.setId(id);
+		filterCriteria.setId(rootId);
 		LOG.info("filterCriteria    {} ", filterCriteria);
 		Direction sort = sortDirection == null ? Direction.ASC : sortDirection;
 		Pageable paging = PageRequest.of(page, size, Sort.by(sort, orderBy));
@@ -194,8 +195,8 @@ public class UserDetailController {
 				UserDetailResponseDTO dto = new UserDetailResponseDTO();
 				BeanUtils.copyProperties(entity, dto);
 				dto.setRole(entity.getRole().getRole());
-				Long rootId = entity.getRoot() == null ? null : entity.getRoot().getId();
-				dto.setRootId(rootId);
+				Long rootEntityId = entity.getRoot() == null ? null : entity.getRoot().getId();
+				dto.setRootId(rootEntityId);
 				dto.add(linkTo(methodOn(UserDetailController.class).getUserDetail(entity.getId())).withSelfRel());
 				dtoList.add(dto);
 			});
