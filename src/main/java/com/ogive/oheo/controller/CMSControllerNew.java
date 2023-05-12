@@ -5,6 +5,8 @@ import static com.ogive.oheo.dto.utils.CMSSpecifications.filterBuyRequestByName;
 import static com.ogive.oheo.dto.utils.CMSSpecifications.filterLiveProduct;
 import static com.ogive.oheo.dto.utils.CMSSpecifications.filterProductByName;
 import static com.ogive.oheo.dto.utils.CMSSpecifications.filterProductByStatus;
+import static com.ogive.oheo.dto.utils.GeographicLocationSpecifications.filterCompanyByCompanyName;
+import static com.ogive.oheo.dto.utils.GeographicLocationSpecifications.filterCompanyByStatus;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -55,6 +57,7 @@ import com.ogive.oheo.dto.BuyRequestDTO;
 import com.ogive.oheo.dto.BuyRequestResponseDTO;
 import com.ogive.oheo.dto.ChargingProductRequestDTO;
 import com.ogive.oheo.dto.ChargingProductResponseDTO;
+import com.ogive.oheo.dto.CompanyResponseDTO;
 import com.ogive.oheo.dto.ErrorResponseDTO;
 import com.ogive.oheo.dto.FilterCriteria;
 import com.ogive.oheo.dto.ImagesResponseDTO;
@@ -529,8 +532,8 @@ public class CMSControllerNew {
 
 	// Manage Vehicle Maintenance record
 	@Transactional
-	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	@PostMapping(path = "/vehicle-maintenance-record", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ApiOperation(value = "Vehicle maintenace record - CMS Admin", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = "/vehicle-maintenance-records", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> addVehicleMaintenanceRecord(
 			@ModelAttribute VehicleMaintenanceRecordRequestDTO requestBody) {
 		LOG.info("addVehicleMaintenanceRecord request received@@   {}", requestBody);
@@ -609,7 +612,208 @@ public class CMSControllerNew {
 	}
 
 	@Transactional
-	@ApiOperation(value = "Returns all instances of the type", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@ApiOperation(value = "Vehicle maintenace record - CMS Admin", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PutMapping(path = "/vehicle-maintenance-records/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> updateVehicleMaintenanceRecord(@PathVariable Long id,@ModelAttribute VehicleMaintenanceRecordRequestDTO requestBody) {
+		LOG.info("updateVehicleMaintenanceRecord  received@@   {}", requestBody);
+
+		Optional<VehicleMaintenanceRecord> entityData = vehicleMaintenanceRecordRepository.findById(id);
+
+		if (entityData.isPresent()) {
+			VehicleMaintenanceRecord entity = entityData.get();
+			BeanUtils.copyProperties(requestBody, entity);
+
+			// VehicleFuelType
+			Long vehicleFuelTypeId = requestBody.getVehicleFuelTypeId();
+
+			Optional<VehicleFuelType> vehicleFuelTypeData = vehicleFuelTypeRepository.findById(vehicleFuelTypeId);
+			if (!vehicleFuelTypeData.isPresent()) {
+				return new ResponseEntity<Object>(
+						new ErrorResponseDTO("Did not find a Entity with id=" + vehicleFuelTypeId),
+						HttpStatus.BAD_REQUEST);
+			}
+
+			// VehicleModel
+			Long vehicleModelId = requestBody.getVehicleModelId();
+			Optional<VehicleModel> vehicleModelData = vehicleModelRepository.findById(vehicleModelId);
+			if (!vehicleModelData.isPresent()) {
+				return new ResponseEntity<Object>(
+						new ErrorResponseDTO("Did not find a Entity with id=" + vehicleFuelTypeId),
+						HttpStatus.BAD_REQUEST);
+			}
+
+			// VehicleType
+			Long vehicleTypeId = requestBody.getVehicleTypeId();
+			Optional<VehicleType> vehicleTypeData = vehicleTypeRepository.findById(vehicleTypeId);
+
+			if (!vehicleTypeData.isPresent()) {
+				return new ResponseEntity<Object>(
+						new ErrorResponseDTO("Did not find a Entity with id=" + vehicleTypeId), HttpStatus.BAD_REQUEST);
+			}
+			// State
+			Long stateId = requestBody.getStateId();
+			Optional<State> stateData = stateRepository.findById(stateId);
+			if (!stateData.isPresent()) {
+				return new ResponseEntity<Object>(
+						new ErrorResponseDTO("Did not find a Entity with id=" + vehicleTypeId), HttpStatus.BAD_REQUEST);
+			}
+
+			// City
+			Long cityId = requestBody.getCityId();
+			Optional<City> cityData = cityRepository.findById(cityId);
+			if (!cityData.isPresent()) {
+				return new ResponseEntity<Object>(
+						new ErrorResponseDTO("Did not find a Entity with id=" + vehicleTypeId), HttpStatus.BAD_REQUEST);
+			}
+			// Company
+			Long companyId = requestBody.getCompanyId();
+			Optional<Company> companyData = companyRepository.findById(companyId);
+
+			if (!companyData.isPresent()) {
+				return new ResponseEntity<Object>(
+						new ErrorResponseDTO("Did not find a Entity with id=" + vehicleTypeId), HttpStatus.BAD_REQUEST);
+			}
+			entity.setVehicleFuelType(vehicleFuelTypeData.get());
+			entity.setVehicleModel(vehicleModelData.get());
+			entity.setVehicleType(vehicleTypeData.get());
+			entity.setCity(cityData.get());
+			entity.setState(stateData.get());
+			entity.setCompany(companyData.get());
+
+			// Save Image
+			MultipartFile image = requestBody.getImage();
+			if (null != image) {
+				Images fileEntity = entity.getImage() == null ? new Images() : entity.getImage();
+				multiPartToFileEntity(image, fileEntity, ImageType.Other);
+				imagesRepository.save(fileEntity);
+			}
+			VehicleMaintenanceRecord savedEntity = vehicleMaintenanceRecordRepository.save(entity);
+			return new ResponseEntity<Object>(savedEntity.getId(), HttpStatus.OK);
+		}
+
+		return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a Entity with id=" + id),
+				HttpStatus.BAD_REQUEST);
+	}
+
+	//Single Record
+	@Transactional
+	@ApiOperation(value = "Vehicle maintenace record - CMS Admin", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/vehicle-maintenance-records/{id}")
+	public ResponseEntity<Object> getMaintenaceRecordById(@PathVariable Long id) throws IOException {
+		LOG.info("getMaintenaceRecordById request received@@ ");
+		Optional<VehicleMaintenanceRecord> entityData = vehicleMaintenanceRecordRepository.findById(id);
+
+		if (entityData.isPresent()) {
+			VehicleMaintenanceRecord record = entityData.get();
+			VehicleMaintenanceRecordResponseDTO dto = new VehicleMaintenanceRecordResponseDTO();
+			BeanUtils.copyProperties(record, dto);
+			City city = record.getCity();
+			dto.setCityId(city.getId());
+			dto.setCityName(city.getName());
+
+			Company company = record.getCompany();
+			dto.setCompanyId(company.getId());
+			dto.setCompanyName(company.getCompanyName());
+
+			State state = record.getState();
+			dto.setStateId(state.getId());
+			dto.setStateCode(state.getStateCode());
+			dto.setStateName(state.getStateName());
+
+			VehicleFuelType vehicleFuelType = record.getVehicleFuelType();
+			dto.setVehicleFuelTypeId(vehicleFuelType.getId());
+			dto.setVehicleFuelTypeName(vehicleFuelType.getName());
+
+			VehicleType vehicleType = record.getVehicleType();
+			dto.setVehicleTypeId(vehicleType.getId());
+			dto.setVehicleTypeName(vehicleType.getName());
+
+			VehicleModel vehicleModel = record.getVehicleModel();
+			dto.setModelId(vehicleModel.getId());
+			dto.setModelName(vehicleModel.getModelName());
+			Images image = record.getImage();
+			dto.add(linkTo(methodOn(FileProcessingController.class).readFile(image.getId())).withRel("Image"));
+			return new ResponseEntity<Object>(dto, HttpStatus.OK);
+		}
+		return new ResponseEntity<Object>(HttpStatus.OK);
+	}
+	
+	@Transactional
+	@ApiOperation(value = "Vehicle maintenace record - CMS Admin", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/vehicle-maintenance-records")
+	public ResponseEntity<Object> getAllMaintenaceRecord(
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size, 
+			@RequestParam(required = false) String filterByName,
+			@RequestParam(required = false, defaultValue = "ASC") Direction sortDirection,
+			@RequestParam(required = false, defaultValue = "id") String[] orderBy,
+			@RequestParam(required = false) StatusCode status) throws IOException {
+		LOG.info("getAllMaintenaceRecord request received@@ ");
+		FilterCriteria filterCriteria = new FilterCriteria(page, size, filterByName, sortDirection, orderBy, status);
+		LOG.info("filterCriteria    {} ", filterCriteria);
+		Direction sort = sortDirection == null ? Direction.ASC : sortDirection;
+		Pageable paging = PageRequest.of(page, size, Sort.by(sort, orderBy));
+		Map<String, Object> response = new HashMap<>();
+		List<VehicleMaintenanceRecordResponseDTO> allDTO = new ArrayList<>();
+		Page<VehicleMaintenanceRecord> pages = vehicleMaintenanceRecordRepository.findAll(filterMaintenanceRecordByName(filterCriteria).and(filterMaintenanceRecordByStatus(filterCriteria)),paging);
+
+		if (pages.hasContent()) {
+			pages.getContent().forEach(record -> {
+				VehicleMaintenanceRecordResponseDTO dto = new VehicleMaintenanceRecordResponseDTO();
+				BeanUtils.copyProperties(record, dto);
+				City city = record.getCity();
+				dto.setCityId(city.getId());
+				dto.setCityName(city.getName());
+
+				Company company = record.getCompany();
+				dto.setCompanyId(company.getId());
+				dto.setCompanyName(company.getCompanyName());
+
+				State state = record.getState();
+				dto.setStateId(state.getId());
+				dto.setStateCode(state.getStateCode());
+				dto.setStateName(state.getStateName());
+
+				VehicleFuelType vehicleFuelType = record.getVehicleFuelType();
+				dto.setVehicleFuelTypeId(vehicleFuelType.getId());
+				dto.setVehicleFuelTypeName(vehicleFuelType.getName());
+
+				VehicleType vehicleType = record.getVehicleType();
+				dto.setVehicleTypeId(vehicleType.getId());
+				dto.setVehicleTypeName(vehicleType.getName());
+
+				VehicleModel vehicleModel = record.getVehicleModel();
+				dto.setModelId(vehicleModel.getId());
+				dto.setModelName(vehicleModel.getModelName());
+				Images image = record.getImage();
+
+				// dto.setMaintenanceExpirationDate(record.getMaintenanceExpirationDate());
+				// dto.setRegistrationDate(record.getRegistrationDate());
+
+				dto.add(linkTo(methodOn(FileProcessingController.class).readFile(image.getId())).withRel("Image"));
+				allDTO.add(dto);
+			});
+		}
+		response.put("records", allDTO);
+		response.put("currentPage", pages.getNumber());
+		response.put("totalElements", pages.getTotalElements());
+		response.put("totalPages", pages.getTotalPages());
+		LOG.info("Total records count {}", allDTO.size());
+		return new ResponseEntity<Object>(response, HttpStatus.OK);
+	}
+	
+	
+	@Transactional
+	@ApiOperation(value = "Vehicle maintenace record - CMS Admin", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@DeleteMapping(path = "/vehicle-maintenance-records/{id}")
+	public ResponseEntity<Object> deleteMaintenaceRecordById(@PathVariable Long id) throws IOException {
+		LOG.info("deleteMaintenaceRecordById request received@@ ID {} ", id);
+		vehicleMaintenanceRecordRepository.deleteById(id);
+		return new ResponseEntity<Object>(HttpStatus.OK);
+	}
+
+	@Transactional
+	@ApiOperation(value = "Vehicle maintenace record - Customer", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/vehicle-maintenance-record/{email}")
 	public ResponseEntity<Object> getMaintenaceRecord(@PathVariable String email) throws IOException {
 		LOG.info("getMaintenaceRecord request received@@ ");
@@ -646,13 +850,8 @@ public class CMSControllerNew {
 			dto.setModelId(vehicleModel.getId());
 			dto.setModelName(vehicleModel.getModelName());
 			Images image = record.getImage();
-
-			//dto.setMaintenanceExpirationDate(record.getMaintenanceExpirationDate());
-			//dto.setRegistrationDate(record.getRegistrationDate());
-
 			dto.add(linkTo(methodOn(FileProcessingController.class).readFile(image.getId())).withRel("Image"));
 			allDTO.add(dto);
-
 		});
 
 		return new ResponseEntity<Object>(allDTO, HttpStatus.OK);

@@ -994,6 +994,43 @@ public class VehicleSetupController {
 	}
 
 	@Transactional
+	// All Vehicle -> Add Vehicle : Vehicle API -
+	@ApiOperation(value = "Saves a given entity. Use the returned instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PutMapping(path = "/vehicle-details/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> updateVehicleDetails(@PathVariable Long id,@Valid @RequestBody VehicleDetailRequestDTO requestBody) {
+		LOG.info("updateVehicleDetails request received@@   {}", requestBody);
+		Optional<VehicleDetail> vehicleData = vehicleDetailRepository.findById(id);
+
+		if (vehicleData.isPresent()) {
+			VehicleDetail entity = vehicleData.get();
+			BeanUtils.copyProperties(requestBody, entity);
+			Optional<VehicleType> vehicleTypeData = vehicleTypeRepository.findById(requestBody.getVehicleTypeId());
+
+			if (!vehicleTypeData.isPresent()) {
+				return new ResponseEntity<Object>(
+						new ErrorResponseDTO("Did not find VehicleType by id=" + requestBody.getVehicleTypeId()),
+						HttpStatus.BAD_REQUEST);
+			}
+			
+			Optional<VehicleBodyType> vehicleBodyTypeData = vehicleBodyTypeRepository.findById(requestBody.getVehicleBodyTypeId());
+			
+			if (!vehicleBodyTypeData.isPresent()) {
+				return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find VehicleBodyType by id=" + requestBody.getVehicleBodyTypeId()),HttpStatus.BAD_REQUEST);
+			}
+			entity.setVehicleType(vehicleTypeData.get());
+			entity.setVehicleBodyType(vehicleBodyTypeData.get());
+			// Save Vehicle details
+			VehicleDetail saveed = vehicleDetailRepository.save(entity);
+			return new ResponseEntity<Object>(saveed.getId(),HttpStatus.OK);
+		}
+
+		return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find VehicleDetail by id=" + id),
+				HttpStatus.BAD_REQUEST);
+
+	}
+	
+	
+	@Transactional
 	@ApiOperation(value = "Retrieves an entity by its id", notes = "Return Id of the record if saved correctly otherwise null", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/vehicle-details/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Object> getVehicleDetails(@PathVariable Long id) {

@@ -29,15 +29,15 @@ public class VehicleMaintenanceRecordRequestDTO {
 
 	private StatusCode status;
 
-	//@NotNull
+	@NotNull
 	private Long companyId;
 
-	///@NotNull
+	@NotNull
 	private Long vehicleModelId;
 
-	//@NotNull
+	@NotNull
 	private Long vehicleFuelTypeId;
-	//@NotNull
+	@NotNull
 	private Long cityId;
 
 	@NotNull
@@ -54,6 +54,7 @@ public class VehicleMaintenanceRecordRequestDTO {
 	private Integer age;
 
 	// Registration Details
+	@NotNull
 	private Long stateId;
 
 	private String registrationAuthority;

@@ -15,6 +15,7 @@ import com.ogive.oheo.persistence.entities.Frame;
 import com.ogive.oheo.persistence.entities.Images;
 import com.ogive.oheo.persistence.entities.Position;
 import com.ogive.oheo.persistence.entities.Product;
+import com.ogive.oheo.persistence.entities.VehicleMaintenanceRecord;
 import com.ogive.oheo.persistence.entities.Widget;
 
 public class CMSSpecifications {
@@ -226,6 +227,36 @@ public class CMSSpecifications {
 			public Predicate toPredicate(Root<ChargingProduct> root, CriteriaQuery<?> query,
 					CriteriaBuilder criteriaBuilder) {
 				return criteriaBuilder.like(criteriaBuilder.upper(root.get("isLive")), "Y");
+			}
+		};
+	}
+
+	
+	// VehicleMaintenanceRecord record spec
+	
+	public static Specification<VehicleMaintenanceRecord> filterMaintenanceRecordByStatus(FilterCriteria filter) {
+		return new Specification<VehicleMaintenanceRecord>() {
+			@Override
+			public Predicate toPredicate(Root<VehicleMaintenanceRecord> root, CriteriaQuery<?> query,CriteriaBuilder criteriaBuilder) {
+				if (ObjectUtils.isEmpty(filter.getStatus())) {
+					return criteriaBuilder.conjunction();
+				}
+				return criteriaBuilder.equal(root.get("status"), filter.getStatus());
+			}
+		};
+	}
+
+	public static Specification<VehicleMaintenanceRecord> filterMaintenanceRecordByName(FilterCriteria filter) {
+		return new Specification<VehicleMaintenanceRecord>() {
+			@Override
+			public Predicate toPredicate(Root<VehicleMaintenanceRecord> root, CriteriaQuery<?> query,CriteriaBuilder criteriaBuilder) {
+				if (ObjectUtils.isEmpty(filter.getFilterByName())) {
+					return criteriaBuilder.conjunction();
+				}
+				
+				return criteriaBuilder.like(criteriaBuilder.upper(root.get("name")),"%" + filter.getFilterByName().toUpperCase() + "%");
+				// return criteriaBuilder.like(root.get("name"), "%" + filter.getFilterByName()
+				// + "%");
 			}
 		};
 	}

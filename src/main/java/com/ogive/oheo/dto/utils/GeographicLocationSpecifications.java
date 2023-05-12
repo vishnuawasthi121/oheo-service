@@ -1,5 +1,7 @@
 package com.ogive.oheo.dto.utils;
 
+import java.util.Objects;
+
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
@@ -13,6 +15,7 @@ import com.ogive.oheo.dto.FilterCriteria;
 import com.ogive.oheo.persistence.entities.City;
 import com.ogive.oheo.persistence.entities.Company;
 import com.ogive.oheo.persistence.entities.PurchaseType;
+import com.ogive.oheo.persistence.entities.UserDetail;
 import com.ogive.oheo.persistence.entities.VehicleBodyType;
 import com.ogive.oheo.persistence.entities.VehicleDetail;
 import com.ogive.oheo.persistence.entities.VehicleFuelType;
@@ -267,5 +270,41 @@ public class GeographicLocationSpecifications {
 		};
 
 	}
+	
+	//User filter by name and status
+	public static Specification<UserDetail> filterUserDetailByName(FilterCriteria filter) {
+		return new Specification<UserDetail>() {
+			@Override
+			public Predicate toPredicate(Root<UserDetail> root, CriteriaQuery<?> query,
+					CriteriaBuilder criteriaBuilder) {
 
+				if (ObjectUtils.isEmpty(filter.getFilterByName())) {
+					return criteriaBuilder.conjunction();
+				}
+				return criteriaBuilder.like(criteriaBuilder.upper(root.get("name")),
+						"%" + filter.getFilterByName().toUpperCase() + "%");
+			}
+		};
+	}
+
+	public static Specification<UserDetail> filterUserDetailByStatus(FilterCriteria filter) {
+		return (root, query, builder) -> {
+			if (ObjectUtils.isEmpty(filter.getStatus())) {
+				return builder.conjunction();
+			}
+			return builder.equal(root.get("status"), filter.getStatus());
+		};
+	}
+
+	public static Specification<UserDetail> findAllUserDetailByRootId(FilterCriteria filter) {
+		return (root, query, criteriaBuilder) -> {
+			if (Objects.isNull(filter.getId())) {
+				return criteriaBuilder.conjunction();
+			}
+			Join<UserDetail, UserDetail> user = root.join("root");
+		//	return builder.like(zipcodeCity.get("name"), "%" + filter.getFilterByCityName() + "%");
+			return criteriaBuilder.equal(user.get("id"), filter.getId() );
+		};
+
+	}
 }

@@ -1,10 +1,14 @@
 package com.ogive.oheo.dto;
 
-import java.util.Arrays;
-
 import org.springframework.data.domain.Sort.Direction;
 
 import com.ogive.oheo.constants.StatusCode;
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
 
 public class FilterCriteria {
 
@@ -26,6 +30,7 @@ public class FilterCriteria {
 
 	private StatusCode status;
 	private String email;
+	private Long id;
 
 	public FilterCriteria() {
 		super();
@@ -51,86 +56,6 @@ public class FilterCriteria {
 		this.filterByCityName = filterByCityName;
 		this.sortDirection = sortDirection;
 		this.status = status;
-	}
-
-	public String getFilterByCityName() {
-		return filterByCityName;
-	}
-
-	public void setFilterByCityName(String filterByCityName) {
-		this.filterByCityName = filterByCityName;
-	}
-
-	public int getPage() {
-		return page;
-	}
-
-	public void setPage(int page) {
-		this.page = page;
-	}
-
-	public int getSize() {
-		return size;
-	}
-
-	public void setSize(int size) {
-		this.size = size;
-	}
-
-	public String getFilterByName() {
-		return filterByName;
-	}
-
-	public void setFilterByName(String filterByName) {
-		this.filterByName = filterByName;
-	}
-
-	public String getFilterByStatus() {
-		return filterByStatus;
-	}
-
-	public void setFilterByStatus(String filterByStatus) {
-		this.filterByStatus = filterByStatus;
-	}
-
-	public Direction getSortDirection() {
-		return sortDirection;
-	}
-
-	public void setSortDirection(Direction sortDirection) {
-		this.sortDirection = sortDirection;
-	}
-
-	public String[] getOrderBy() {
-		return orderBy;
-	}
-
-	public void setOrderBy(String[] orderBy) {
-		this.orderBy = orderBy;
-	}
-
-	public StatusCode getStatus() {
-		return status;
-	}
-
-	public void setStatus(StatusCode status) {
-		this.status = status;
-	}
-
-	public String getFilterByCode() {
-		return filterByCode;
-	}
-
-	public void setFilterByCode(String filterByCode) {
-		this.filterByCode = filterByCode;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
 	}
 
 	
