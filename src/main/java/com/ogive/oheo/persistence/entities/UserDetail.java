@@ -70,7 +70,7 @@ public class UserDetail {
 
 	private Date updated;
 
-	@ManyToOne(cascade = { CascadeType.ALL })
+	@ManyToOne(cascade = { CascadeType.REMOVE })
 	@JoinColumn(name = "role_id")
 	private UserRole role;
 

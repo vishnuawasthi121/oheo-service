@@ -1,12 +1,15 @@
 package com.ogive.oheo.controller;
 
-import static com.ogive.oheo.dto.utils.CMSSpecifications.*;
+import static com.ogive.oheo.dto.utils.CMSSpecifications.filterBuyRequestByEmail;
 import static com.ogive.oheo.dto.utils.CMSSpecifications.filterBuyRequestByName;
+import static com.ogive.oheo.dto.utils.CMSSpecifications.filterChargingProductByName;
+import static com.ogive.oheo.dto.utils.CMSSpecifications.filterChargingProductByStatus;
+import static com.ogive.oheo.dto.utils.CMSSpecifications.filterLiveChargingProduct;
 import static com.ogive.oheo.dto.utils.CMSSpecifications.filterLiveProduct;
+import static com.ogive.oheo.dto.utils.CMSSpecifications.filterMaintenanceRecordByName;
+import static com.ogive.oheo.dto.utils.CMSSpecifications.filterMaintenanceRecordByStatus;
 import static com.ogive.oheo.dto.utils.CMSSpecifications.filterProductByName;
 import static com.ogive.oheo.dto.utils.CMSSpecifications.filterProductByStatus;
-import static com.ogive.oheo.dto.utils.GeographicLocationSpecifications.filterCompanyByCompanyName;
-import static com.ogive.oheo.dto.utils.GeographicLocationSpecifications.filterCompanyByStatus;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -57,7 +60,6 @@ import com.ogive.oheo.dto.BuyRequestDTO;
 import com.ogive.oheo.dto.BuyRequestResponseDTO;
 import com.ogive.oheo.dto.ChargingProductRequestDTO;
 import com.ogive.oheo.dto.ChargingProductResponseDTO;
-import com.ogive.oheo.dto.CompanyResponseDTO;
 import com.ogive.oheo.dto.ErrorResponseDTO;
 import com.ogive.oheo.dto.FilterCriteria;
 import com.ogive.oheo.dto.ImagesResponseDTO;
@@ -75,7 +77,6 @@ import com.ogive.oheo.dto.VehicleMaintenanceRecordRequestDTO;
 import com.ogive.oheo.dto.VehicleMaintenanceRecordResponseDTO;
 import com.ogive.oheo.dto.VehicleModelResponseDTO;
 import com.ogive.oheo.dto.VehicleTypeResponseDTO;
-import com.ogive.oheo.dto.utils.CommonsUtil;
 import com.ogive.oheo.exception.ValidationException;
 import com.ogive.oheo.persistence.entities.BuyRequest;
 import com.ogive.oheo.persistence.entities.ChargingProduct;
@@ -107,7 +108,6 @@ import com.ogive.oheo.persistence.repo.ProductSpecificationRepository;
 import com.ogive.oheo.persistence.repo.SliderRepository;
 import com.ogive.oheo.persistence.repo.StateRepository;
 import com.ogive.oheo.persistence.repo.TermAndConditionsRepository;
-import com.ogive.oheo.persistence.repo.UserRepository;
 import com.ogive.oheo.persistence.repo.VehicleBodyTypeRepository;
 import com.ogive.oheo.persistence.repo.VehicleDetailRepository;
 import com.ogive.oheo.persistence.repo.VehicleFuelTypeRepository;
@@ -171,9 +171,6 @@ public class CMSControllerNew {
 
 	@Autowired
 	private StateRepository stateRepository;
-
-	@Autowired
-	private UserRepository userRepository;
 
 	@Autowired
 	private BuyRequestRepository buyRequestRepository;
