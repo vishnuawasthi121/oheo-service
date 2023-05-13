@@ -8,6 +8,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
 
+import org.apache.commons.text.CharacterPredicates;
+import org.apache.commons.text.RandomStringGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -55,4 +57,20 @@ public class CommonsUtil {
 		return date;
 
 	}
+
+	public static String generatePassword() {
+
+		// Generates a 12 code point string, using only the letters a-z
+		RandomStringGenerator generator = new RandomStringGenerator.Builder()  
+                .withinRange('0', 'z')  
+               // .filteredBy(CharacterPredicates.DIGITS)  
+                .build();  
+		return generator.generate(8);
+	}
+
+	/*
+	 * public static void main(String... args) {
+	 * 
+	 * System.out.println(generatePassword()); }
+	 */
 }
