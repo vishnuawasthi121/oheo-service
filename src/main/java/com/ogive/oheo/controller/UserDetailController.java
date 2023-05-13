@@ -97,7 +97,9 @@ public class UserDetailController {
 		LOG.info("addUser request received@@   {}", userDetailRequestDTO);
 		UserDetail entity = new UserDetail();
 		BeanUtils.copyProperties(userDetailRequestDTO, entity);
-
+		
+		entity.setEmail(userDetailRequestDTO.getEmail().toUpperCase());
+		
 		entity.setCreated(new Date());
 		entity.setUpdated(new Date());
 		String createdByUser = userDetailRequestDTO.getCreatedByUser();
@@ -198,7 +200,7 @@ public class UserDetailController {
 			return new ResponseEntity<Object>(
 					new ErrorResponseDTO("Did not find a Zipcode with id=" + userDetailRequestDTO.getZipcodeId()),HttpStatus.BAD_REQUEST);
 		}
-		
+		entity.setEmail(userDetailRequestDTO.getEmail().toUpperCase());
 		entity.setZone(zoneData.get());
 		entity.setState(stateData.get());
 		entity.setCity(cityData.get());

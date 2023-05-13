@@ -8,4 +8,5 @@ import com.ogive.oheo.persistence.entities.ViewUserDetails;
 public interface ViewUserDetailRepository
 		extends CrudRepository<ViewUserDetails, Long>, JpaSpecificationExecutor<ViewUserDetails> {
 
+	ViewUserDetails findByEmail(String email);
 }
