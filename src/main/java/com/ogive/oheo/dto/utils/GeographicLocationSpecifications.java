@@ -22,6 +22,7 @@ import com.ogive.oheo.persistence.entities.VehicleFuelType;
 import com.ogive.oheo.persistence.entities.VehicleModel;
 import com.ogive.oheo.persistence.entities.VehicleTransmission;
 import com.ogive.oheo.persistence.entities.VehicleType;
+import com.ogive.oheo.persistence.entities.ViewUserDetails;
 import com.ogive.oheo.persistence.entities.Zipcode;
 import com.ogive.oheo.persistence.entities.ZoneDetail;
 
@@ -272,10 +273,10 @@ public class GeographicLocationSpecifications {
 	}
 	
 	//User filter by name and status
-	public static Specification<UserDetail> filterUserDetailByName(FilterCriteria filter) {
-		return new Specification<UserDetail>() {
+	public static Specification<ViewUserDetails> filterUserDetailByName(FilterCriteria filter) {
+		return new Specification<ViewUserDetails>() {
 			@Override
-			public Predicate toPredicate(Root<UserDetail> root, CriteriaQuery<?> query,
+			public Predicate toPredicate(Root<ViewUserDetails> root, CriteriaQuery<?> query,
 					CriteriaBuilder criteriaBuilder) {
 
 				if (ObjectUtils.isEmpty(filter.getFilterByName())) {
@@ -287,7 +288,7 @@ public class GeographicLocationSpecifications {
 		};
 	}
 
-	public static Specification<UserDetail> filterUserDetailByStatus(FilterCriteria filter) {
+	public static Specification<ViewUserDetails> filterUserDetailByStatus(FilterCriteria filter) {
 		return (root, query, builder) -> {
 			if (ObjectUtils.isEmpty(filter.getStatus())) {
 				return builder.conjunction();
@@ -296,14 +297,14 @@ public class GeographicLocationSpecifications {
 		};
 	}
 
-	public static Specification<UserDetail> findAllUserDetailByRootId(FilterCriteria filter) {
+	public static Specification<ViewUserDetails> findAllUserDetailByRootId(FilterCriteria filter) {
 		return (root, query, criteriaBuilder) -> {
 			if (Objects.isNull(filter.getId())) {
 				return criteriaBuilder.conjunction();
 			}
-			Join<UserDetail, UserDetail> user = root.join("root");
+			
 		//	return builder.like(zipcodeCity.get("name"), "%" + filter.getFilterByCityName() + "%");
-			return criteriaBuilder.equal(user.get("id"), filter.getId() );
+			return criteriaBuilder.equal(root.get("rootId"), filter.getId() );
 		};
 
 	}

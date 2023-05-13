@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.validation.Valid;
@@ -43,10 +44,20 @@ import com.ogive.oheo.dto.UserDetailRequestDTO;
 import com.ogive.oheo.dto.UserDetailResponseDTO;
 import com.ogive.oheo.dto.UserRoleRequestDTO;
 import com.ogive.oheo.dto.utils.GeographicLocationSpecifications;
+import com.ogive.oheo.persistence.entities.City;
+import com.ogive.oheo.persistence.entities.State;
 import com.ogive.oheo.persistence.entities.UserDetail;
 import com.ogive.oheo.persistence.entities.UserRole;
+import com.ogive.oheo.persistence.entities.ViewUserDetails;
+import com.ogive.oheo.persistence.entities.Zipcode;
+import com.ogive.oheo.persistence.entities.ZoneDetail;
+import com.ogive.oheo.persistence.repo.CityRepository;
+import com.ogive.oheo.persistence.repo.StateRepository;
 import com.ogive.oheo.persistence.repo.UserDetailRepository;
 import com.ogive.oheo.persistence.repo.UserRoleRepository;
+import com.ogive.oheo.persistence.repo.ViewUserDetailRepository;
+import com.ogive.oheo.persistence.repo.ZipcodeRepository;
+import com.ogive.oheo.persistence.repo.ZoneDetailRepository;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -63,6 +74,22 @@ public class UserDetailController {
 	
 	@Autowired
 	private UserRoleRepository userRoleRepository;
+	
+	@Autowired
+	private ZoneDetailRepository zoneDetailRepository;
+	
+	@Autowired
+	private StateRepository  stateRepository;
+	
+	@Autowired
+	private CityRepository cityRepository;
+	
+	@Autowired
+	private ZipcodeRepository zipcodeRepository;
+	
+	@Autowired
+	private ViewUserDetailRepository viewUserDetailRepository;
+	
 
 	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@PostMapping(path = "/", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -74,8 +101,12 @@ public class UserDetailController {
 		entity.setCreated(new Date());
 		entity.setUpdated(new Date());
 		String createdByUser = userDetailRequestDTO.getCreatedByUser();
-		// Created By
+		//Created By
 		UserDetail createdByUserEntity = userDetailRepository.findByEmail(createdByUser);
+		if (Objects.isNull(createdByUserEntity)) {
+			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a UserDetail with email=" + createdByUser),HttpStatus.BAD_REQUEST);
+		}
+		
 		Optional<UserRole> roleData = userRoleRepository.findById(userDetailRequestDTO.getRoleId());
 
 		if (!roleData.isPresent()) {
@@ -83,6 +114,37 @@ public class UserDetailController {
 					new ErrorResponseDTO("Did not find a UserRole with id=" + userDetailRequestDTO.getRoleId()),
 					HttpStatus.BAD_REQUEST);
 		}
+		
+		Optional<ZoneDetail> zoneData = zoneDetailRepository.findById(userDetailRequestDTO.getZoneId());
+		if(!zoneData.isPresent()) {
+			return new ResponseEntity<Object>(
+					new ErrorResponseDTO("Did not find a ZoneDetail with id=" + userDetailRequestDTO.getZoneId()),
+					HttpStatus.BAD_REQUEST);
+		}
+		
+		Optional<State> stateData = stateRepository.findById(userDetailRequestDTO.getStateId());
+		if(!stateData.isPresent()) {
+			return new ResponseEntity<Object>(
+					new ErrorResponseDTO("Did not find a State with id=" + userDetailRequestDTO.getStateId()),HttpStatus.BAD_REQUEST);
+		}
+		
+		Optional<City> cityData = cityRepository.findById(userDetailRequestDTO.getCityId());
+		if(!cityData.isPresent()) {
+			return new ResponseEntity<Object>(
+					new ErrorResponseDTO("Did not find a City with id=" + userDetailRequestDTO.getCityId()),HttpStatus.BAD_REQUEST);
+		}
+		
+		Optional<Zipcode> zipcodeData = zipcodeRepository.findById(userDetailRequestDTO.getZipcodeId());
+		if(!zipcodeData.isPresent()) {
+			return new ResponseEntity<Object>(
+					new ErrorResponseDTO("Did not find a Zipcode with id=" + userDetailRequestDTO.getZipcodeId()),HttpStatus.BAD_REQUEST);
+		}
+		
+		entity.setZone(zoneData.get());
+		entity.setState(stateData.get());
+		entity.setCity(cityData.get());
+		entity.setZipcode(zipcodeData.get());
+		
 		entity.setRoot(createdByUserEntity);
 		entity.setValidated(false);
 		entity.setRole(roleData.get());
@@ -93,8 +155,8 @@ public class UserDetailController {
 	
 	@ApiOperation(value = "Update a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> updateUser(@PathVariable Long id,@Valid @RequestBody UpdateUserRequestDTO updateRequest) {
-		LOG.info("updateUser request received@@   {}", updateRequest);
+	public ResponseEntity<Object> updateUser(@PathVariable Long id,@Valid @RequestBody UpdateUserRequestDTO userDetailRequestDTO) {
+		LOG.info("updateUser request received@@   {}", userDetailRequestDTO);
 		Optional<UserDetail> userData = userDetailRepository.findById(id);
 
 		if (!userData.isPresent()) {
@@ -102,15 +164,46 @@ public class UserDetailController {
 					HttpStatus.BAD_REQUEST);
 		}
 		UserDetail entity = userData.get();
-		BeanUtils.copyProperties(updateRequest, entity);
+		BeanUtils.copyProperties(userDetailRequestDTO, entity);
 		entity.setUpdated(new Date());
-		Optional<UserRole> roleData = userRoleRepository.findById(updateRequest.getRoleId());
+		Optional<UserRole> roleData = userRoleRepository.findById(userDetailRequestDTO.getRoleId());
 
 		if (!roleData.isPresent()) {
 			return new ResponseEntity<Object>(
-					new ErrorResponseDTO("Did not find a UserRole with id=" + updateRequest.getRoleId()),
+					new ErrorResponseDTO("Did not find a UserRole with id=" + userDetailRequestDTO.getRoleId()),
 					HttpStatus.BAD_REQUEST);
 		}
+		
+		Optional<ZoneDetail> zoneData = zoneDetailRepository.findById(userDetailRequestDTO.getZoneId());
+		if(!zoneData.isPresent()) {
+			return new ResponseEntity<Object>(
+					new ErrorResponseDTO("Did not find a ZoneDetail with id=" + userDetailRequestDTO.getZoneId()),
+					HttpStatus.BAD_REQUEST);
+		}
+		
+		Optional<State> stateData = stateRepository.findById(userDetailRequestDTO.getStateId());
+		if(!stateData.isPresent()) {
+			return new ResponseEntity<Object>(
+					new ErrorResponseDTO("Did not find a State with id=" + userDetailRequestDTO.getStateId()),HttpStatus.BAD_REQUEST);
+		}
+		
+		Optional<City> cityData = cityRepository.findById(userDetailRequestDTO.getCityId());
+		if(!cityData.isPresent()) {
+			return new ResponseEntity<Object>(
+					new ErrorResponseDTO("Did not find a City with id=" + userDetailRequestDTO.getCityId()),HttpStatus.BAD_REQUEST);
+		}
+		
+		Optional<Zipcode> zipcodeData = zipcodeRepository.findById(userDetailRequestDTO.getZipcodeId());
+		if(!zipcodeData.isPresent()) {
+			return new ResponseEntity<Object>(
+					new ErrorResponseDTO("Did not find a Zipcode with id=" + userDetailRequestDTO.getZipcodeId()),HttpStatus.BAD_REQUEST);
+		}
+		
+		entity.setZone(zoneData.get());
+		entity.setState(stateData.get());
+		entity.setCity(cityData.get());
+		entity.setZipcode(zipcodeData.get());
+		
 		UserDetail savedEntity = userDetailRepository.save(entity);
 		LOG.info("Saved @@   {}", savedEntity);
 		return new ResponseEntity<Object>(savedEntity.getId(), HttpStatus.OK);
@@ -120,14 +213,11 @@ public class UserDetailController {
 	@GetMapping(path = "/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Object> getUserDetail(@PathVariable Long id) {
 		LOG.info("getUserDetail request received@@   {}", id);
-		Optional<UserDetail> fetchedData = userDetailRepository.findById(id);
+		Optional<ViewUserDetails> fetchedData = viewUserDetailRepository.findById(id);
 		if (fetchedData.isPresent()) {
-			UserDetail entity = fetchedData.get();
+			ViewUserDetails entity = fetchedData.get();
 			UserDetailResponseDTO dto = new UserDetailResponseDTO();
 			BeanUtils.copyProperties(entity, dto);
-			dto.setRole(entity.getRole().getRole());
-			Long rootId=entity.getRoot() == null ? null : entity.getRoot().getId(); 
-			dto.setRootId(rootId);
 			dto.add(linkTo(methodOn(UserDetailController.class).getUserDetail(entity.getId())).withSelfRel());
 			return new ResponseEntity<Object>(dto, HttpStatus.OK);
 		}
@@ -150,15 +240,12 @@ public class UserDetailController {
 		Pageable paging = PageRequest.of(page, size, Sort.by(sort, orderBy));
 		Map<String, Object> response = new HashMap<>();
 		List<UserDetailResponseDTO> dtoList = new ArrayList<>();
-		Page<UserDetail> pages = userDetailRepository.findAll(GeographicLocationSpecifications.filterUserDetailByName(filterCriteria).and(GeographicLocationSpecifications.filterUserDetailByStatus(filterCriteria)), paging);
+		Page<ViewUserDetails> pages = viewUserDetailRepository.findAll(GeographicLocationSpecifications.filterUserDetailByName(filterCriteria).and(GeographicLocationSpecifications.filterUserDetailByStatus(filterCriteria)), paging);
 		
 		if (pages.hasContent()) {
 			pages.getContent().forEach(entity -> {
 				UserDetailResponseDTO dto = new UserDetailResponseDTO();
 				BeanUtils.copyProperties(entity, dto);
-				dto.setRole(entity.getRole().getRole());
-				Long rootId = entity.getRoot() == null ? null : entity.getRoot().getId();
-				dto.setRootId(rootId);
 				dto.add(linkTo(methodOn(UserDetailController.class).getUserDetail(entity.getId())).withSelfRel());
 				dtoList.add(dto);
 			});
@@ -187,16 +274,14 @@ public class UserDetailController {
 		Direction sort = sortDirection == null ? Direction.ASC : sortDirection;
 		Pageable paging = PageRequest.of(page, size, Sort.by(sort, orderBy));
 		Map<String, Object> response = new HashMap<>();
-		Page<UserDetail> pages = userDetailRepository.findAll(GeographicLocationSpecifications.findAllUserDetailByRootId(filterCriteria), paging);
+		
+		Page<ViewUserDetails> pages = viewUserDetailRepository.findAll(GeographicLocationSpecifications.findAllUserDetailByRootId(filterCriteria), paging);
 		
 		List<UserDetailResponseDTO> dtoList = new ArrayList<>();
 		if (pages.hasContent()) {
 			pages.getContent().forEach(entity -> {
 				UserDetailResponseDTO dto = new UserDetailResponseDTO();
 				BeanUtils.copyProperties(entity, dto);
-				dto.setRole(entity.getRole().getRole());
-				Long rootEntityId = entity.getRoot() == null ? null : entity.getRoot().getId();
-				dto.setRootId(rootEntityId);
 				dto.add(linkTo(methodOn(UserDetailController.class).getUserDetail(entity.getId())).withSelfRel());
 				dtoList.add(dto);
 			});

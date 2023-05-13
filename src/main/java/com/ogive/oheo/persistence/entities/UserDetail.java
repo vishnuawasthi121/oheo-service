@@ -32,7 +32,7 @@ import lombok.ToString;
 @ToString
 @NoArgsConstructor
 
-@NamedQuery(name="UserDetail.findAllSubUsersByRootId", query="SELECT u FROM UserDetail u WHERE u.root.id = : rootId")
+@NamedQuery(name = "UserDetail.findAllSubUsersByRootId", query = "SELECT u FROM UserDetail u WHERE u.root.id = : rootId")
 
 @Table(name = "USER_DETAIL")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_USER_DETAIL", sequenceName = "SEQ_USER_DETAIL")
@@ -59,7 +59,7 @@ public class UserDetail {
 
 	private String contact;
 
-	@ManyToOne(cascade = { CascadeType.ALL })
+	@ManyToOne
 	@JoinColumn(name = "root_id")
 	private UserDetail root;
 
@@ -70,8 +70,25 @@ public class UserDetail {
 
 	private Date updated;
 
-	@ManyToOne(cascade = { CascadeType.REMOVE })
+	@ManyToOne
 	@JoinColumn(name = "role_id")
 	private UserRole role;
+
+	// Region details
+	@ManyToOne
+	@JoinColumn(name = "zone_id")
+	private ZoneDetail zone;
+
+	@ManyToOne
+	@JoinColumn(name = "state_id")
+	private State state;
+
+	@ManyToOne
+	@JoinColumn(name = "city_id")
+	private City city;
+
+	@ManyToOne
+	@JoinColumn(name = "zipcode_id")
+	private Zipcode zipcode;
 
 }

@@ -24,4 +24,15 @@ public class UpdateUserRequestDTO {
 	@Email
 	private String email;
 
+	@NotNull
+	private Long zoneId;
+
+	@NotNull
+	private Long stateId;
+
+	@NotNull
+	private Long cityId;
+
+	@NotNull
+	private Long zipcodeId;
 }
