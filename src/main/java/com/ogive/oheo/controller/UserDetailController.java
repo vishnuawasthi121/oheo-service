@@ -27,6 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -36,6 +37,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ogive.oheo.constants.StatusCode;
+import com.ogive.oheo.dto.EmailDetails;
+import com.ogive.oheo.dto.EmailRequest;
 import com.ogive.oheo.dto.ErrorResponseDTO;
 import com.ogive.oheo.dto.FilterCriteria;
 import com.ogive.oheo.dto.UpdateUserRequestDTO;
@@ -58,6 +61,7 @@ import com.ogive.oheo.persistence.repo.UserRoleRepository;
 import com.ogive.oheo.persistence.repo.ViewUserDetailRepository;
 import com.ogive.oheo.persistence.repo.ZipcodeRepository;
 import com.ogive.oheo.persistence.repo.ZoneDetailRepository;
+import com.ogive.oheo.services.EmailServiceImpl;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -71,25 +75,27 @@ public class UserDetailController {
 
 	@Autowired
 	private UserDetailRepository userDetailRepository;
-	
+
 	@Autowired
 	private UserRoleRepository userRoleRepository;
-	
+
 	@Autowired
 	private ZoneDetailRepository zoneDetailRepository;
-	
+
 	@Autowired
-	private StateRepository  stateRepository;
-	
+	private StateRepository stateRepository;
+
 	@Autowired
 	private CityRepository cityRepository;
-	
+
 	@Autowired
 	private ZipcodeRepository zipcodeRepository;
-	
+
 	@Autowired
 	private ViewUserDetailRepository viewUserDetailRepository;
-	
+
+	@Autowired
+	private EmailServiceImpl emailServiceImpl;
 
 	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@PostMapping(path = "/", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -97,18 +103,20 @@ public class UserDetailController {
 		LOG.info("addUser request received@@   {}", userDetailRequestDTO);
 		UserDetail entity = new UserDetail();
 		BeanUtils.copyProperties(userDetailRequestDTO, entity);
-		
+
 		entity.setEmail(userDetailRequestDTO.getEmail().toUpperCase());
-		
+
 		entity.setCreated(new Date());
 		entity.setUpdated(new Date());
 		String createdByUser = userDetailRequestDTO.getCreatedByUser();
-		//Created By
+		// Created By
 		UserDetail createdByUserEntity = userDetailRepository.findByEmail(createdByUser);
 		if (Objects.isNull(createdByUserEntity)) {
-			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a UserDetail with email=" + createdByUser),HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<Object>(
+					new ErrorResponseDTO("Did not find a UserDetail with email=" + createdByUser),
+					HttpStatus.BAD_REQUEST);
 		}
-		
+
 		Optional<UserRole> roleData = userRoleRepository.findById(userDetailRequestDTO.getRoleId());
 
 		if (!roleData.isPresent()) {
@@ -116,37 +124,40 @@ public class UserDetailController {
 					new ErrorResponseDTO("Did not find a UserRole with id=" + userDetailRequestDTO.getRoleId()),
 					HttpStatus.BAD_REQUEST);
 		}
-		
+
 		Optional<ZoneDetail> zoneData = zoneDetailRepository.findById(userDetailRequestDTO.getZoneId());
-		if(!zoneData.isPresent()) {
+		if (!zoneData.isPresent()) {
 			return new ResponseEntity<Object>(
 					new ErrorResponseDTO("Did not find a ZoneDetail with id=" + userDetailRequestDTO.getZoneId()),
 					HttpStatus.BAD_REQUEST);
 		}
-		
+
 		Optional<State> stateData = stateRepository.findById(userDetailRequestDTO.getStateId());
-		if(!stateData.isPresent()) {
+		if (!stateData.isPresent()) {
 			return new ResponseEntity<Object>(
-					new ErrorResponseDTO("Did not find a State with id=" + userDetailRequestDTO.getStateId()),HttpStatus.BAD_REQUEST);
+					new ErrorResponseDTO("Did not find a State with id=" + userDetailRequestDTO.getStateId()),
+					HttpStatus.BAD_REQUEST);
 		}
-		
+
 		Optional<City> cityData = cityRepository.findById(userDetailRequestDTO.getCityId());
-		if(!cityData.isPresent()) {
+		if (!cityData.isPresent()) {
 			return new ResponseEntity<Object>(
-					new ErrorResponseDTO("Did not find a City with id=" + userDetailRequestDTO.getCityId()),HttpStatus.BAD_REQUEST);
+					new ErrorResponseDTO("Did not find a City with id=" + userDetailRequestDTO.getCityId()),
+					HttpStatus.BAD_REQUEST);
 		}
-		
+
 		Optional<Zipcode> zipcodeData = zipcodeRepository.findById(userDetailRequestDTO.getZipcodeId());
-		if(!zipcodeData.isPresent()) {
+		if (!zipcodeData.isPresent()) {
 			return new ResponseEntity<Object>(
-					new ErrorResponseDTO("Did not find a Zipcode with id=" + userDetailRequestDTO.getZipcodeId()),HttpStatus.BAD_REQUEST);
+					new ErrorResponseDTO("Did not find a Zipcode with id=" + userDetailRequestDTO.getZipcodeId()),
+					HttpStatus.BAD_REQUEST);
 		}
-		
+
 		entity.setZone(zoneData.get());
 		entity.setState(stateData.get());
 		entity.setCity(cityData.get());
 		entity.setZipcode(zipcodeData.get());
-		
+
 		entity.setRoot(createdByUserEntity);
 		entity.setValidated(false);
 		entity.setRole(roleData.get());
@@ -154,10 +165,11 @@ public class UserDetailController {
 		LOG.info("Saved @@   {}", savedEntity);
 		return new ResponseEntity<Object>(savedEntity.getId(), HttpStatus.OK);
 	}
-	
+
 	@ApiOperation(value = "Update a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> updateUser(@PathVariable Long id,@Valid @RequestBody UpdateUserRequestDTO userDetailRequestDTO) {
+	public ResponseEntity<Object> updateUser(@PathVariable Long id,
+			@Valid @RequestBody UpdateUserRequestDTO userDetailRequestDTO) {
 		LOG.info("updateUser request received@@   {}", userDetailRequestDTO);
 		Optional<UserDetail> userData = userDetailRepository.findById(id);
 
@@ -175,43 +187,46 @@ public class UserDetailController {
 					new ErrorResponseDTO("Did not find a UserRole with id=" + userDetailRequestDTO.getRoleId()),
 					HttpStatus.BAD_REQUEST);
 		}
-		
+
 		Optional<ZoneDetail> zoneData = zoneDetailRepository.findById(userDetailRequestDTO.getZoneId());
-		if(!zoneData.isPresent()) {
+		if (!zoneData.isPresent()) {
 			return new ResponseEntity<Object>(
 					new ErrorResponseDTO("Did not find a ZoneDetail with id=" + userDetailRequestDTO.getZoneId()),
 					HttpStatus.BAD_REQUEST);
 		}
-		
+
 		Optional<State> stateData = stateRepository.findById(userDetailRequestDTO.getStateId());
-		if(!stateData.isPresent()) {
+		if (!stateData.isPresent()) {
 			return new ResponseEntity<Object>(
-					new ErrorResponseDTO("Did not find a State with id=" + userDetailRequestDTO.getStateId()),HttpStatus.BAD_REQUEST);
+					new ErrorResponseDTO("Did not find a State with id=" + userDetailRequestDTO.getStateId()),
+					HttpStatus.BAD_REQUEST);
 		}
-		
+
 		Optional<City> cityData = cityRepository.findById(userDetailRequestDTO.getCityId());
-		if(!cityData.isPresent()) {
+		if (!cityData.isPresent()) {
 			return new ResponseEntity<Object>(
-					new ErrorResponseDTO("Did not find a City with id=" + userDetailRequestDTO.getCityId()),HttpStatus.BAD_REQUEST);
+					new ErrorResponseDTO("Did not find a City with id=" + userDetailRequestDTO.getCityId()),
+					HttpStatus.BAD_REQUEST);
 		}
-		
+
 		Optional<Zipcode> zipcodeData = zipcodeRepository.findById(userDetailRequestDTO.getZipcodeId());
-		if(!zipcodeData.isPresent()) {
+		if (!zipcodeData.isPresent()) {
 			return new ResponseEntity<Object>(
-					new ErrorResponseDTO("Did not find a Zipcode with id=" + userDetailRequestDTO.getZipcodeId()),HttpStatus.BAD_REQUEST);
+					new ErrorResponseDTO("Did not find a Zipcode with id=" + userDetailRequestDTO.getZipcodeId()),
+					HttpStatus.BAD_REQUEST);
 		}
 		entity.setEmail(userDetailRequestDTO.getEmail().toUpperCase());
 		entity.setZone(zoneData.get());
 		entity.setState(stateData.get());
 		entity.setCity(cityData.get());
 		entity.setZipcode(zipcodeData.get());
-		
+
 		UserDetail savedEntity = userDetailRepository.save(entity);
 		LOG.info("Saved @@   {}", savedEntity);
 		return new ResponseEntity<Object>(savedEntity.getId(), HttpStatus.OK);
 	}
-	
-	@ApiOperation(value = "Retrieves an entity by its id",  produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+
+	@ApiOperation(value = "Retrieves an entity by its id", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Object> getUserDetail(@PathVariable Long id) {
 		LOG.info("getUserDetail request received@@   {}", id);
@@ -225,13 +240,11 @@ public class UserDetailController {
 		}
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
-	
-	@ApiOperation(value = "Retrieves all entity along with search and filter",  produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+
+	@ApiOperation(value = "Retrieves all entity along with search and filter", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<Object> getAllUsers(
-			@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "10") int size, 
-			@RequestParam(required = false) String filterByName,
+	public ResponseEntity<Object> getAllUsers(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size, @RequestParam(required = false) String filterByName,
 			@RequestParam(required = false, defaultValue = "ASC") Direction sortDirection,
 			@RequestParam(required = false, defaultValue = "id") String[] orderBy,
 			@RequestParam(required = false) StatusCode status) {
@@ -242,8 +255,10 @@ public class UserDetailController {
 		Pageable paging = PageRequest.of(page, size, Sort.by(sort, orderBy));
 		Map<String, Object> response = new HashMap<>();
 		List<UserDetailResponseDTO> dtoList = new ArrayList<>();
-		Page<ViewUserDetails> pages = viewUserDetailRepository.findAll(GeographicLocationSpecifications.filterUserDetailByName(filterCriteria).and(GeographicLocationSpecifications.filterUserDetailByStatus(filterCriteria)), paging);
-		
+		Page<ViewUserDetails> pages = viewUserDetailRepository
+				.findAll(GeographicLocationSpecifications.filterUserDetailByName(filterCriteria)
+						.and(GeographicLocationSpecifications.filterUserDetailByStatus(filterCriteria)), paging);
+
 		if (pages.hasContent()) {
 			pages.getContent().forEach(entity -> {
 				UserDetailResponseDTO dto = new UserDetailResponseDTO();
@@ -258,14 +273,11 @@ public class UserDetailController {
 		response.put("totalPages", pages.getTotalPages());
 		return new ResponseEntity<Object>(response, HttpStatus.OK);
 	}
-	
+
 	@ApiOperation(value = "Retrive all the child account of an root", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/{rootId}/sub-users", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<Object> getSubUsers(
-			@PathVariable Long rootId,
-			@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "10") int size, 
-			@RequestParam(required = false) String filterByName,
+	public ResponseEntity<Object> getSubUsers(@PathVariable Long rootId, @RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size, @RequestParam(required = false) String filterByName,
 			@RequestParam(required = false, defaultValue = "ASC") Direction sortDirection,
 			@RequestParam(required = false, defaultValue = "id") String[] orderBy,
 			@RequestParam(required = false) StatusCode status) {
@@ -276,9 +288,10 @@ public class UserDetailController {
 		Direction sort = sortDirection == null ? Direction.ASC : sortDirection;
 		Pageable paging = PageRequest.of(page, size, Sort.by(sort, orderBy));
 		Map<String, Object> response = new HashMap<>();
-		
-		Page<ViewUserDetails> pages = viewUserDetailRepository.findAll(GeographicLocationSpecifications.findAllUserDetailByRootId(filterCriteria), paging);
-		
+
+		Page<ViewUserDetails> pages = viewUserDetailRepository
+				.findAll(GeographicLocationSpecifications.findAllUserDetailByRootId(filterCriteria), paging);
+
 		List<UserDetailResponseDTO> dtoList = new ArrayList<>();
 		if (pages.hasContent()) {
 			pages.getContent().forEach(entity -> {
@@ -294,7 +307,7 @@ public class UserDetailController {
 		response.put("totalPages", pages.getTotalPages());
 		return new ResponseEntity<Object>(response, HttpStatus.OK);
 	}
-	
+
 	@ApiOperation(value = "Deletes the entity with the given id", notes = "If the entity is not found in the persistence store it is silently ignored.", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@DeleteMapping(path = "/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Object> deleteUser(@PathVariable Long id) {
@@ -302,9 +315,8 @@ public class UserDetailController {
 		userDetailRepository.deleteById(id);
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
-	
 
-	//Roles API 
+	// Roles API
 	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@PostMapping(path = "/roles", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> addUserRole(@Valid @RequestBody UserRoleRequestDTO roleRequest) {
@@ -315,7 +327,7 @@ public class UserDetailController {
 		LOG.info("Saved @@   {}", savedEntity);
 		return new ResponseEntity<Object>(savedEntity.getId(), HttpStatus.OK);
 	}
-	
+
 	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@PutMapping(path = "/roles/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> updateUserRole(@PathVariable Long id,
@@ -333,5 +345,15 @@ public class UserDetailController {
 
 		return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find UserRole with id=" + id),
 				HttpStatus.BAD_REQUEST);
+	}
+
+	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = "/email-sender", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> emailTest(@ModelAttribute EmailDetails details) {
+		LOG.info("emailTest request received@@");
+		// emailServiceImpl.sendEmail();
+		emailServiceImpl.sendMailWithAttachment(details);
+		// emailServiceImpl.sendEmailWithTemplate(details);
+		return new ResponseEntity<Object>("Email sent successfully", HttpStatus.OK);
 	}
 }

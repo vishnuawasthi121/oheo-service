@@ -13,4 +13,7 @@ public interface EmailService {
     String sendMailWithAttachment(EmailDetails details);	
     
     public void sendEmail();
+    
+    public void sendEmailWithTemplate(EmailDetails details);
+    
 }
