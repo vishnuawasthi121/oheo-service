@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -46,6 +47,7 @@ import com.ogive.oheo.dto.UpdateUserRequestDTO;
 import com.ogive.oheo.dto.UserDetailRequestDTO;
 import com.ogive.oheo.dto.UserDetailResponseDTO;
 import com.ogive.oheo.dto.UserRoleRequestDTO;
+import com.ogive.oheo.dto.utils.CommonsUtil;
 import com.ogive.oheo.dto.utils.GeographicLocationSpecifications;
 import com.ogive.oheo.persistence.entities.City;
 import com.ogive.oheo.persistence.entities.State;
@@ -96,6 +98,12 @@ public class UserDetailController {
 
 	@Autowired
 	private EmailServiceImpl emailServiceImpl;
+
+	@Value("${app.email.enabled}")
+	private boolean isEmailEnabled;
+
+	@Value("${oheo.user.registration.email.subject}")
+	private String registrationEmailsubject;
 
 	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@PostMapping(path = "/", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -152,6 +160,8 @@ public class UserDetailController {
 					new ErrorResponseDTO("Did not find a Zipcode with id=" + userDetailRequestDTO.getZipcodeId()),
 					HttpStatus.BAD_REQUEST);
 		}
+		// Set auto generated password to entity
+		entity.setPassword(CommonsUtil.generatePassword());
 
 		entity.setZone(zoneData.get());
 		entity.setState(stateData.get());
@@ -162,8 +172,23 @@ public class UserDetailController {
 		entity.setValidated(false);
 		entity.setRole(roleData.get());
 		UserDetail savedEntity = userDetailRepository.save(entity);
-		LOG.info("Saved @@   {}", savedEntity);
-		return new ResponseEntity<Object>(savedEntity.getId(), HttpStatus.OK);
+
+		Map<String, Object> map = new HashMap<>();
+		map.put("email", savedEntity.getEmail());
+		map.put("password", savedEntity.getPassword());
+		map.put("id", savedEntity.getId());
+
+		// Prepare and send email
+		if (isEmailEnabled) {
+			EmailDetails emailDetails = new EmailDetails();
+			emailDetails.setSubject(registrationEmailsubject);
+			emailDetails.setName(savedEntity.getName());
+			emailDetails.setRecipient(savedEntity.getEmail());
+			emailDetails.setUsername(savedEntity.getEmail());
+			emailDetails.setUserPasswordToSend(savedEntity.getPassword());
+			emailServiceImpl.sendEmailWithTemplate(emailDetails);
+		}
+		return new ResponseEntity<Object>(map, HttpStatus.OK);
 	}
 
 	@ApiOperation(value = "Update a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -222,6 +247,7 @@ public class UserDetailController {
 		entity.setZipcode(zipcodeData.get());
 
 		UserDetail savedEntity = userDetailRepository.save(entity);
+
 		LOG.info("Saved @@   {}", savedEntity);
 		return new ResponseEntity<Object>(savedEntity.getId(), HttpStatus.OK);
 	}
