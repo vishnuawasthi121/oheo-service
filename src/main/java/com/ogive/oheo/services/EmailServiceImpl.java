@@ -127,10 +127,9 @@ public class EmailServiceImpl implements EmailService {
 
 	@Override
 	public void sendEmailWithTemplate(EmailDetails details) {
-
-		MimeMessage message = emailSender.createMimeMessage();
-		MimeMessageHelper helper;
 		try {
+			MimeMessage message = emailSender.createMimeMessage();
+			MimeMessageHelper helper;
 			helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
 					StandardCharsets.UTF_8.name());
 
@@ -146,9 +145,9 @@ public class EmailServiceImpl implements EmailService {
 			Context context = new Context();
 			// Add required field you need in template
 			Map<String, Object> model = new HashMap<String, Object>();
-			model.put("username",details.getUsername());
 			model.put("name", details.getName());
-			model.put("password", "GQAR123@");
+			model.put("username", details.getUsername());
+			model.put("password", details.getUserPasswordToSend());
 
 			context.setVariables(model);
 			String html = templateEngine.process("user-registration", context);

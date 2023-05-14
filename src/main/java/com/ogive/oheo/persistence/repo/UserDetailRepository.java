@@ -11,4 +11,5 @@ public interface UserDetailRepository extends CrudRepository<UserDetail, Long>, 
 
 	UserDetail findByEmail(String email);
 	List<UserDetail> findAllSubUsersByRootId(Long rootId);
+	UserDetail findByEmailAndPassword(String username,String password);
 }
