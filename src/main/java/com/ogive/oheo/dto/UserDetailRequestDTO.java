@@ -25,8 +25,8 @@ public class UserDetailRequestDTO {
 	@Email
 	private String email;
 
-	@NotEmpty
-	private String password;
+	//@NotEmpty
+	//private String password;
 
 	@NotEmpty
 	private String contact;
