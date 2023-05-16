@@ -43,17 +43,13 @@ public class LoginController {
 	@ApiOperation(value = "Login api - Admin", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@PostMapping(path = "/authenticate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> doLogin(@Valid @RequestBody LoginRequestDTO loginRequest) {
-		ViewUserDetails userDetailsEntity = viewUserDetailRepository.findByEmail(loginRequest.getEmail());
+		ViewUserDetails userDetailsEntity = viewUserDetailRepository.findByEmail(loginRequest.getEmail().toUpperCase());
 		// Validate Password
 		if (null != userDetailsEntity && userDetailsEntity.getPassword().equals(loginRequest.getPassword())) {
-
-			if (Objects.nonNull(userDetailsEntity)) {
 				UserDetailResponseDTO dto = new UserDetailResponseDTO();
 				BeanUtils.copyProperties(userDetailsEntity, dto);
-				dto.add(linkTo(methodOn(UserDetailController.class).getUserDetail(userDetailsEntity.getId()))
-						.withSelfRel());
+				dto.add(linkTo(methodOn(UserDetailController.class).getUserDetail(userDetailsEntity.getId())).withSelfRel());
 				return new ResponseEntity<Object>(dto, HttpStatus.OK);
-			}
 		}
 		return new ResponseEntity<Object>(new ErrorResponseDTO("Invalid username or password"), HttpStatus.BAD_REQUEST);
 	}

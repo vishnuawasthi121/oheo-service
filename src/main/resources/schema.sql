@@ -1,4 +1,4 @@
-
+/*
 DROP VIEW IF EXISTS view_user_details;
 CREATE VIEW view_user_details (id, name, contact, email, is_validated, password, status,root_id, zonename, statename, cityname, code, rolename,roleId) AS  SELECT u.id,
     u.name,
@@ -20,3 +20,4 @@ CREATE VIEW view_user_details (id, name, contact, email, is_validated, password,
      JOIN city city ON u.city_id = city.id
      JOIN zipcode zipcode ON u.zipcode_id = zipcode.id
      JOIN user_role role ON u.role_id = role.id;
+*/

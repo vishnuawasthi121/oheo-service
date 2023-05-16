@@ -31,6 +31,8 @@ public class FilterCriteria {
 	private StatusCode status;
 	private String email;
 	private Long id;
+	
+	private String lastName;
 
 	public FilterCriteria() {
 		super();

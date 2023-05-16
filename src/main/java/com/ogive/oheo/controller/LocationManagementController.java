@@ -262,7 +262,8 @@ public class LocationManagementController {
 
 	@ApiOperation(value = "Returns all instances of the type for a country", notes = "Returns all instances of the type for a country", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/states/", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<Object> getAllState(@RequestParam(defaultValue = "0") int page,
+	public ResponseEntity<Object> getAllState(
+			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size, @RequestParam(required = false) String filterByName,
 			@RequestParam(required = false, defaultValue = "ASC") String sortDirection,
 			@RequestParam(required = false, defaultValue = "stateName") String[] orderBy) {
