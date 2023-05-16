@@ -160,6 +160,40 @@ public class EmailServiceImpl implements EmailService {
 			e.printStackTrace();
 		}
 	}
+	
+	public void sendEmail(Map<String, Object> model) {
+		try {
+			MimeMessage message = emailSender.createMimeMessage();
+			MimeMessageHelper helper;
+			helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,StandardCharsets.UTF_8.name());
+
+			MultipartFile attachment =(MultipartFile) model.get("attachment");
+		  //  String username=	(String) model.get("username");
+		  //  String password=	(String) model.get("password");
+		    String recipient=	(String) model.get("recipient");
+		    String subject=	(String) model.get("subject");
+		    String templateKey=	(String) model.get("templateKey");
+			
+			if (null != attachment) {
+				MultipartFile multipartFile = new MockMultipartFile(attachment.getOriginalFilename(),attachment.getBytes());
+				File fileToSend = new File(attachment.getOriginalFilename());
+				multipartFile.transferTo(fileToSend);
+				FileSystemResource file = new FileSystemResource(fileToSend);
+				helper.addAttachment(file.getFilename(), file);
+			}
+			Context context = new Context();
+			context.setVariables(model);
+			String html = templateEngine.process(templateKey, context);
+			helper.setTo(recipient);
+			helper.setText(html, true);
+			helper.setSubject(subject);
+			helper.setFrom(sender);
+			
+			emailSender.send(message);
+		} catch (MessagingException | IOException e) {
+			e.printStackTrace();
+		}
+	}
 
 	public Properties emailConfigGmail() {
 		Properties props = new Properties();
@@ -214,4 +248,8 @@ public class EmailServiceImpl implements EmailService {
 			e.printStackTrace();
 		}
 	}
+	
+	
+	
+	
 }

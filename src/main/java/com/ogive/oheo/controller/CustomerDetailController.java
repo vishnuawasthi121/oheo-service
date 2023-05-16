@@ -37,11 +37,11 @@ import com.ogive.oheo.dto.CustomerRequestDTO;
 import com.ogive.oheo.dto.CustomerResponseDTO;
 import com.ogive.oheo.dto.ErrorResponseDTO;
 import com.ogive.oheo.dto.FilterCriteria;
-import com.ogive.oheo.dto.LoginRequestDTO;
 import com.ogive.oheo.dto.UpdateCustomerRequestDTO;
 import com.ogive.oheo.dto.utils.CustomerSpecification;
 import com.ogive.oheo.persistence.entities.CustomerDetail;
 import com.ogive.oheo.persistence.repo.CustomerDetailRepository;
+import com.ogive.oheo.persistence.repo.OTPRepository;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -55,24 +55,9 @@ public class CustomerDetailController {
 
 	@Autowired
 	private CustomerDetailRepository customerDetailRepository;
-
-	@ApiOperation(value = "Login api - Admin", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	@PostMapping(path = "/customer-authenticate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> doLogin(@Valid @RequestBody LoginRequestDTO loginRequest) {
-		List<String> emailToFetch  = new ArrayList<>();
-		emailToFetch.add(loginRequest.getEmail().toUpperCase());
-		LOG.info("Email  {}",emailToFetch);
-		
-		CustomerDetail customeDetail = customerDetailRepository.findByEmailIgnoreCaseIn(emailToFetch);
-		// Validate Password
-		if (null != customeDetail && customeDetail.getPassword().equals(loginRequest.getPassword())) {
-			CustomerResponseDTO dto = new CustomerResponseDTO();
-			BeanUtils.copyProperties(customeDetail, dto);
-			dto.add(linkTo(methodOn(CustomerDetailController.class).getCustomer(customeDetail.getId())).withSelfRel());
-			return new ResponseEntity<Object>(dto,HttpStatus.OK);
-		}
-		return new ResponseEntity<Object>(new ErrorResponseDTO("Invalid username or password"), HttpStatus.BAD_REQUEST);
-	}
+	
+	@Autowired
+	private OTPRepository otpRepository;
 
 	@ApiOperation(value = "Customer registraiton API", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@PostMapping(path = "/customers", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -81,7 +66,6 @@ public class CustomerDetailController {
 		BeanUtils.copyProperties(request, customeDetail);
 		customeDetail.setEmail(request.getEmail().toUpperCase());
 		//TODO - Logic to handle EMAIL OTP
-		
 		
 		try {
 			customerDetailRepository.save(customeDetail);
@@ -172,4 +156,6 @@ public class CustomerDetailController {
 		customerDetailRepository.deleteById(id);
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
+	
+	
 }

@@ -7,6 +7,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
+import java.util.Random;
 
 import org.apache.commons.text.CharacterPredicates;
 import org.apache.commons.text.RandomStringGenerator;
@@ -68,9 +69,14 @@ public class CommonsUtil {
 		return generator.generate(8);
 	}
 
-	/*
-	 * public static void main(String... args) {
-	 * 
-	 * System.out.println(generatePassword()); }
-	 */
+	
+	  public static void main(String... args) {
+	  
+	//  System.out.println(generatePassword());
+		  
+		  Random random = new java.util.Random();
+			String id = String.format("%04d", random.nextInt(10000));
+			System.out.println(id);
+	  }
+	 
 }
