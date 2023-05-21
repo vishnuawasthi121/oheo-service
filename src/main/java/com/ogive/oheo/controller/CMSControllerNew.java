@@ -1,13 +1,5 @@
 package com.ogive.oheo.controller;
 
-import static com.ogive.oheo.dto.utils.CMSSpecifications.filterBuyRequestByEmail;
-import static com.ogive.oheo.dto.utils.CMSSpecifications.filterBuyRequestByName;
-import static com.ogive.oheo.dto.utils.CMSSpecifications.filterChargingProductByName;
-import static com.ogive.oheo.dto.utils.CMSSpecifications.filterChargingProductByStatus;
-import static com.ogive.oheo.dto.utils.CMSSpecifications.filterLiveChargingProduct;
-import static com.ogive.oheo.dto.utils.CMSSpecifications.filterLiveProduct;
-import static com.ogive.oheo.dto.utils.CMSSpecifications.filterMaintenanceRecordByName;
-import static com.ogive.oheo.dto.utils.CMSSpecifications.filterMaintenanceRecordByStatus;
 import static com.ogive.oheo.dto.utils.CMSSpecifications.*;
 import static com.ogive.oheo.dto.utils.CMSSpecifications.filterProductByStatus;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
