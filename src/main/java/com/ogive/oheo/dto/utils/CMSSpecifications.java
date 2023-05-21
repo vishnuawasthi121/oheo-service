@@ -126,6 +126,22 @@ public class CMSSpecifications {
 		};
 	}
 	
+	
+	public static Specification<BuyRequest> filterBuyRequestByUserId(FilterCriteria filter) {
+		return new Specification<BuyRequest>() {
+			@Override
+			public Predicate toPredicate(Root<BuyRequest> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+				if (ObjectUtils.isEmpty(filter.getUserId())) {
+					return criteriaBuilder.conjunction();
+				}
+				
+				Join<BuyRequest, UserDetail> userDetail = root.join("userDetail");
+				return criteriaBuilder.equal(userDetail.get("id"), filter.getUserId());
+			}
+		};
+	}
+	
+	
 	// Charging Products 
 	public static Specification<ChargingProduct> filterChargingProductByName(FilterCriteria filter) {
 		return new Specification<ChargingProduct>() {

@@ -959,8 +959,9 @@ public class CMSControllerNew {
 
 	@Transactional
 	@ApiOperation(value = "Returns all instances of the type", notes = "Returns all instances of the type", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	@GetMapping(path = "/buy-requests", produces = { MediaType.APPLICATION_JSON_VALUE })
+	@GetMapping(path = "/{userId}/buy-requests", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Object> getAllBuyRequest(
+			@PathVariable Long userId,
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size, 
 			@RequestParam(required = false) String filterByName,
@@ -971,7 +972,8 @@ public class CMSControllerNew {
 
 		FilterCriteria filterCriteria = new FilterCriteria(page, size, filterByName, sortDirection, orderBy, null);
 		filterCriteria.setEmail(email);
-
+		filterCriteria.setUserId(userId);
+		
 		LOG.info("filterCriteria    {} ", filterCriteria);
 		Direction sort = sortDirection == null ? Direction.ASC : sortDirection;
 		Pageable paging = PageRequest.of(page, size, Sort.by(sort, orderBy));
@@ -979,7 +981,7 @@ public class CMSControllerNew {
 		List<BuyRequestResponseDTO> buyRequestDTOList = new ArrayList<>();
 
 		Page<BuyRequest> pages = buyRequestRepository
-				.findAll(filterBuyRequestByName(filterCriteria).and(filterBuyRequestByEmail(filterCriteria)), paging);
+				.findAll(filterBuyRequestByName(filterCriteria).and(filterBuyRequestByEmail(filterCriteria)).and(filterBuyRequestByUserId(filterCriteria)), paging);
 
 		if (pages.hasContent()) {
 			pages.getContent().forEach(entity -> {

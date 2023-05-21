@@ -1,12 +1,13 @@
 /*
 DROP VIEW IF EXISTS view_user_details;
-CREATE VIEW view_user_details (id, name, contact, email, is_validated, password, status,root_id, zonename, statename, cityname, code, rolename,roleId) AS  SELECT u.id,
+CREATE VIEW view_user_details (id, name, contact, email, is_validated, password, status,gst_number,root_id, zonename, statename, cityname, code, rolename,roleId) AS  SELECT u.id,
     u.name,
     u.contact,
     u.email,
     u.is_validated,
     u.password,
     u.status,
+    u.gst_number AS gst_number ,
     u.root_id AS root_id,
     z.name AS zonename,
     s.state_name AS statename,
