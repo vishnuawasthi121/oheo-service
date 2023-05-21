@@ -32,4 +32,5 @@ public class UserDetailResponseDTO extends RepresentationModel<UserDetailRespons
 	private RoleTypes rolename;
 	private Long roleId;
 	private Long rootId;
+	private String gstNumber;
 }

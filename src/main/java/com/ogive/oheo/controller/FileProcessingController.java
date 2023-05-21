@@ -12,8 +12,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.validation.Valid;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -32,7 +30,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -44,10 +41,8 @@ import com.ogive.oheo.constants.StatusCode;
 import com.ogive.oheo.dto.ErrorResponseDTO;
 import com.ogive.oheo.dto.FilterCriteria;
 import com.ogive.oheo.dto.ImagesResponseDTO;
-import com.ogive.oheo.dto.WidgetRequestDTO;
 import com.ogive.oheo.exception.ValidationException;
 import com.ogive.oheo.persistence.entities.Images;
-import com.ogive.oheo.persistence.entities.Widget;
 import com.ogive.oheo.persistence.repo.ImagesRepository;
 
 import io.swagger.annotations.Api;

@@ -8,6 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -24,6 +25,8 @@ import lombok.ToString;
 @ToString
 @NoArgsConstructor
 
+
+@NamedQuery(name="Images.deleteByChargingProductId", query="delete from Images where chargingProduct.id  =:productId")
 @Table(name = "IMAGES")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_IMAGES", sequenceName = "SEQ_IMAGES")
 @Entity

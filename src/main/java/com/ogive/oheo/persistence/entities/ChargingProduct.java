@@ -7,6 +7,9 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -22,6 +25,7 @@ import lombok.ToString;
 @Getter
 @ToString
 @NoArgsConstructor
+@NamedQuery(name="ChargingProduct.findProductByUserIdAndId", query="FROM ChargingProduct WHERE userDetail.id  = :userId AND id = :id")
 
 @Table(name = "CHARGING_PRODUCT")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_CHARGING_PRODUCT", sequenceName = "SEQ_CHARGING_PRODUCT")
@@ -90,4 +94,7 @@ public class ChargingProduct {
 	@OneToMany(mappedBy = "chargingProduct")
 	private Set<Images> images;
 
+	@ManyToOne
+	@JoinColumn(name = "USER_DETAIL_ID")
+	private UserDetail userDetail;
 }

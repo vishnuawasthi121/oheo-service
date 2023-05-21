@@ -7,4 +7,5 @@ import com.ogive.oheo.persistence.entities.ChargingProduct;
 
 public interface ChargingProductRepository  extends CrudRepository<ChargingProduct, Long>, JpaSpecificationExecutor<ChargingProduct>{
 
+	ChargingProduct findProductByUserIdAndId(Long userId,Long id);
 }

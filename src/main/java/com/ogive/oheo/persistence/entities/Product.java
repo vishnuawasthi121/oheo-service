@@ -24,6 +24,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 @NamedQuery(name="Product.dropDownLive", query="SELECT id ,name FROM Product WHERE isLive = :isLive")
+@NamedQuery(name="Product.findProductByUserIdAndId", query="FROM Product WHERE userDetail.id  = :userId AND id = :id")
 
 @Setter
 @Getter
@@ -81,5 +82,9 @@ public class Product {
 	@ManyToOne
 	@JoinColumn(name = "VEHICLE_TRANSMISSION_ID")
 	private VehicleTransmission vehicleTransmission;
+	
+	@ManyToOne
+	@JoinColumn(name = "USER_DETAIL_ID")
+	private UserDetail userDetail;
 
 }

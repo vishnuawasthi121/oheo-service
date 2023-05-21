@@ -51,4 +51,8 @@ public class ViewUserDetails {
 	
 	@Column(name="root_id")
 	private Long rootId;
+	
+	private String gstNumber;
+	
+	
 }

@@ -2,7 +2,8 @@ package com.ogive.oheo.constants;
 
 public enum RoleTypes {
 
-	Admin("admin"), Distributor("distributor"), Dealer("dealer"), Subdealer("subdealer"), Customer("customer");
+	Admin("admin"), Distributor("distributor"), Dealer("dealer"), Subdealer("subdealer"), Provider("provider"),
+	Customer("customer");
 
 	private String value;
 

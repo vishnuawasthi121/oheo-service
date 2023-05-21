@@ -270,7 +270,8 @@ public class UserDetailController {
 	@ApiOperation(value = "Retrieves all entity along with search and filter", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Object> getAllUsers(@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "10") int size, @RequestParam(required = false) String filterByName,
+			@RequestParam(defaultValue = "10") int size, 
+			@RequestParam(required = false) String filterByName,
 			@RequestParam(required = false, defaultValue = "ASC") Direction sortDirection,
 			@RequestParam(required = false, defaultValue = "id") String[] orderBy,
 			@RequestParam(required = false) StatusCode status) {

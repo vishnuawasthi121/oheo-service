@@ -8,7 +8,7 @@ import static com.ogive.oheo.dto.utils.CMSSpecifications.filterLiveChargingProdu
 import static com.ogive.oheo.dto.utils.CMSSpecifications.filterLiveProduct;
 import static com.ogive.oheo.dto.utils.CMSSpecifications.filterMaintenanceRecordByName;
 import static com.ogive.oheo.dto.utils.CMSSpecifications.filterMaintenanceRecordByStatus;
-import static com.ogive.oheo.dto.utils.CMSSpecifications.filterProductByName;
+import static com.ogive.oheo.dto.utils.CMSSpecifications.*;
 import static com.ogive.oheo.dto.utils.CMSSpecifications.filterProductByStatus;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -90,6 +90,7 @@ import com.ogive.oheo.persistence.entities.ProductSpecification;
 import com.ogive.oheo.persistence.entities.Slider;
 import com.ogive.oheo.persistence.entities.State;
 import com.ogive.oheo.persistence.entities.TermAndConditions;
+import com.ogive.oheo.persistence.entities.UserDetail;
 import com.ogive.oheo.persistence.entities.VehicleDetail;
 import com.ogive.oheo.persistence.entities.VehicleFuelType;
 import com.ogive.oheo.persistence.entities.VehicleMaintenanceRecord;
@@ -108,6 +109,7 @@ import com.ogive.oheo.persistence.repo.ProductSpecificationRepository;
 import com.ogive.oheo.persistence.repo.SliderRepository;
 import com.ogive.oheo.persistence.repo.StateRepository;
 import com.ogive.oheo.persistence.repo.TermAndConditionsRepository;
+import com.ogive.oheo.persistence.repo.UserDetailRepository;
 import com.ogive.oheo.persistence.repo.VehicleBodyTypeRepository;
 import com.ogive.oheo.persistence.repo.VehicleDetailRepository;
 import com.ogive.oheo.persistence.repo.VehicleFuelTypeRepository;
@@ -183,12 +185,15 @@ public class CMSControllerNew {
 
 	@Autowired
 	private ChargingProductRepository chargingProductRepository;
+	
+	@Autowired
+	private UserDetailRepository userDetailRepository;
 
 	// Product API
 	@Transactional
 	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	@PostMapping(path = "/products", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> addProduct(@ModelAttribute ProductRequestDTO productRequestDTO) {
+	@PostMapping(path = "/{userId}/products", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> addProduct(@PathVariable Long userId,@ModelAttribute ProductRequestDTO productRequestDTO) {
 		LOG.info("addProduct request received@@   {}", productRequestDTO);
 		// Product Entity
 		Product entity = new Product();
@@ -197,6 +202,13 @@ public class CMSControllerNew {
 		SpecificationDTO SpecificationDTO = productRequestDTO.getSpecification();
 		ProductSpecification specificationEntity = new ProductSpecification();
 		BeanUtils.copyProperties(SpecificationDTO, specificationEntity);
+		
+		
+		Optional<UserDetail> userDetailData = userDetailRepository.findById(userId);
+		if (!userDetailData.isPresent()) {
+			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a UserDetail with id=" + userId),HttpStatus.BAD_REQUEST);
+		}
+		entity.setUserDetail(userDetailData.get());
 		// VehicleDetail
 		Long vehicleDetailId = productRequestDTO.getVehicleDetailId();
 		Optional<VehicleDetail> vehicleDetailData = vehicleDetailRepository.findById(vehicleDetailId);
@@ -282,12 +294,13 @@ public class CMSControllerNew {
 
 	@Transactional
 	@ApiOperation(value = "Retrieves an entity by its id", notes = "Return Id of the record if saved correctly otherwise null", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	@GetMapping(path = "/products/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<Object> getProduct(@PathVariable Long id) {
+	@GetMapping(path = "/{userId}/products/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> getProduct(
+			@PathVariable Long userId,
+			@PathVariable Long id) {
 		LOG.info("getProduct request received@@   {}", id);
-		Optional<Product> entityData = productRepository.findById(id);
-		if (entityData.isPresent()) {
-			Product entity = entityData.get();
+		Product entity = productRepository.findProductByUserIdAndId(userId, id);
+		if (Objects.nonNull(entity)) {
 			ProductResponseDTO dto = new ProductResponseDTO();
 			populateProductEntityToDTO(entity, dto);
 			return new ResponseEntity<Object>(dto, HttpStatus.OK);
@@ -297,8 +310,10 @@ public class CMSControllerNew {
 
 	@Transactional
 	@ApiOperation(value = "Returns all instances of the type", notes = "Returns all instances of the type", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	@GetMapping(path = "/products", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<Object> getAllProducts(@RequestParam(defaultValue = "0") int page,
+	@GetMapping(path = "/{userId}/products", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> getAllProducts(
+			@PathVariable Long userId,
+			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size, 
 			@RequestParam(required = false) String filterByName,
 			@RequestParam(required = false, defaultValue = "ASC") Direction sortDirection,
@@ -306,12 +321,13 @@ public class CMSControllerNew {
 			@RequestParam(required = false) StatusCode status) {
 		LOG.info("getAllProducts request received");
 		FilterCriteria criteria = new FilterCriteria(page, size, filterByName, sortDirection, orderBy, status);
+		criteria.setUserId(userId);
 		Direction sort = sortDirection == null ? Direction.ASC : sortDirection;
 		Pageable paging = PageRequest.of(page, size, Sort.by(sort, orderBy));
 		Map<String, Object> response = new HashMap<>();
 		List<ProductResponseDTO> allDTO = new ArrayList<>();
-		Page<Product> pages = productRepository
-				.findAll(filterProductByName(criteria).and(filterProductByStatus(criteria)), paging);
+		Page<Product> pages = productRepository.findAll(onlyFetchLoggedInUserProduct(criteria).and(filterProductByName(criteria).and(filterProductByStatus(criteria))), paging);
+		
 		if (pages.hasContent()) {
 			pages.getContent().forEach(entity -> {
 				ProductResponseDTO dto = new ProductResponseDTO();
@@ -330,8 +346,10 @@ public class CMSControllerNew {
 	@Transactional
 	@ApiOperation(value = "Returns all instances of the type if they are live. Live product are one will be visible to shop", notes = "Returns all instances of the type", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/products-live", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<Object> getLiveProduct(@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "10") int size, @RequestParam(required = false) String filterByName,
+	public ResponseEntity<Object> getLiveProduct(
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size, 
+			@RequestParam(required = false) String filterByName,
 			@RequestParam(required = false, defaultValue = "ASC") Direction sortDirection,
 			@RequestParam(required = false, defaultValue = "id") String[] orderBy,
 			@RequestParam(required = false) StatusCode status) {
@@ -341,8 +359,7 @@ public class CMSControllerNew {
 		Pageable paging = PageRequest.of(page, size, Sort.by(sort, orderBy));
 		Map<String, Object> response = new HashMap<>();
 		List<ProductResponseDTO> allDTO = new ArrayList<>();
-		Page<Product> pages = productRepository.findAll(
-				filterProductByName(criteria).and(filterProductByStatus(criteria).and(filterLiveProduct())), paging);
+		Page<Product> pages = productRepository.findAll(filterProductByName(criteria).and(filterProductByStatus(criteria).and(filterLiveProduct())), paging);
 
 		if (pages.hasContent()) {
 			pages.getContent().forEach(entity -> {
@@ -387,7 +404,6 @@ public class CMSControllerNew {
 					new ErrorResponseDTO("Did not find a Entity with id=" + sliderRequest.getProductId()),
 					HttpStatus.BAD_REQUEST);
 		}
-
 		entity.setData(sliderRequest.getSlider().getBytes());
 		entity.setContentType(sliderRequest.getSlider().getContentType());
 		entity.setName(StringUtils.cleanPath(sliderRequest.getSlider().getOriginalFilename()));
@@ -415,7 +431,7 @@ public class CMSControllerNew {
 			// TODO - Add logic to pull slider image
 			try {
 				dto.add(linkTo(methodOn(CMSControllerNew.class).getSliderById(slider.getId())).withSelfRel());
-				dto.add(linkTo(methodOn(CMSControllerNew.class).getProduct(product.getId())).withRel("Product"));
+				dto.add(linkTo(methodOn(CMSControllerNew.class).getProduct(product.getUserDetail().getId(),product.getId())).withRel("Product"));
 				allDTO.add(dto);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -511,7 +527,7 @@ public class CMSControllerNew {
 			Set<String> featureSet = features.stream().map(feature -> feature.getName()).collect(Collectors.toSet());
 			dto.setFeatures(featureSet);
 		}
-		dto.add(linkTo(methodOn(CMSControllerNew.class).getProduct(entity.getId())).withSelfRel());
+		dto.add(linkTo(methodOn(CMSControllerNew.class).getProduct(entity.getUserDetail().getId(),entity.getId())).withSelfRel());
 	}
 
 	public void multiPartToFileEntity(MultipartFile file, Images fileEntity, ImageType imageType) {
@@ -536,11 +552,6 @@ public class CMSControllerNew {
 		LOG.info("addVehicleMaintenanceRecord request received@@   {}", requestBody);
 		VehicleMaintenanceRecord entity = new VehicleMaintenanceRecord();
 		BeanUtils.copyProperties(requestBody, entity);
-
-		//entity.setMaintenanceExpirationDate(
-				//CommonsUtil.convertStringToDate(requestBody.getMaintenanceExpirationDate(), "yyyy-MM-dd"));
-		//entity.setRegistrationDate(CommonsUtil.convertStringToDate(requestBody.getRegistrationDate(), "yyyy-MM-dd"));
-
 		// VehicleFuelType
 		Long vehicleFuelTypeId = requestBody.getVehicleFuelTypeId();
 
@@ -729,7 +740,10 @@ public class CMSControllerNew {
 			dto.setModelId(vehicleModel.getId());
 			dto.setModelName(vehicleModel.getModelName());
 			Images image = record.getImage();
-			dto.add(linkTo(methodOn(FileProcessingController.class).readFile(image.getId())).withRel("Image"));
+			if(Objects.nonNull(image)) {
+				dto.add(linkTo(methodOn(FileProcessingController.class).readFile(image.getId())).withRel("Image"));
+			}
+			
 			return new ResponseEntity<Object>(dto, HttpStatus.OK);
 		}
 		return new ResponseEntity<Object>(HttpStatus.OK);
@@ -756,6 +770,7 @@ public class CMSControllerNew {
 
 		if (pages.hasContent()) {
 			pages.getContent().forEach(record -> {
+				
 				VehicleMaintenanceRecordResponseDTO dto = new VehicleMaintenanceRecordResponseDTO();
 				BeanUtils.copyProperties(record, dto);
 				City city = record.getCity();
@@ -784,10 +799,9 @@ public class CMSControllerNew {
 				dto.setModelName(vehicleModel.getModelName());
 				Images image = record.getImage();
 
-				// dto.setMaintenanceExpirationDate(record.getMaintenanceExpirationDate());
-				// dto.setRegistrationDate(record.getRegistrationDate());
-
-				dto.add(linkTo(methodOn(FileProcessingController.class).readFile(image.getId())).withRel("Image"));
+				if(Objects.nonNull(image)) {
+					dto.add(linkTo(methodOn(FileProcessingController.class).readFile(image.getId())).withRel("Image"));
+				}
 				allDTO.add(dto);
 			});
 		}
@@ -847,7 +861,10 @@ public class CMSControllerNew {
 			dto.setModelId(vehicleModel.getId());
 			dto.setModelName(vehicleModel.getModelName());
 			Images image = record.getImage();
-			dto.add(linkTo(methodOn(FileProcessingController.class).readFile(image.getId())).withRel("Image"));
+			if(Objects.nonNull(image)) {
+				dto.add(linkTo(methodOn(FileProcessingController.class).readFile(image.getId())).withRel("Image"));
+			}
+			
 			allDTO.add(dto);
 		});
 
@@ -864,15 +881,21 @@ public class CMSControllerNew {
 		BuyRequest entity = new BuyRequest();
 		BeanUtils.copyProperties(buyRequest, entity);
 
-		// TODO - Dealer Mapping
-		buyRequest.getDealerId();
 		// userRepository.findById(buyRequest.getDealerId());
+		// Dealer/Distributor 
+		Optional<UserDetail> userDetailData = userDetailRepository.findById(buyRequest.getDealerId());
+		if(!userDetailData.isPresent()) {
+			return new ResponseEntity<Object>(
+					new ErrorResponseDTO("Did not find a UserDetail with id=" + buyRequest.getDealerId()),HttpStatus.BAD_REQUEST);
+		}
+		
+		entity.setUserDetail(userDetailData.get());
 
 		// City
 		Optional<City> cityData = cityRepository.findById(buyRequest.getCityId());
 		if (!cityData.isPresent()) {
 			return new ResponseEntity<Object>(
-					new ErrorResponseDTO("Did not find a Entity with id=" + buyRequest.getCityId()),
+					new ErrorResponseDTO("Did not find a City with id=" + buyRequest.getCityId()),
 					HttpStatus.BAD_REQUEST);
 		}
 
@@ -880,7 +903,7 @@ public class CMSControllerNew {
 		Optional<Company> companyData = companyRepository.findById(buyRequest.getCompanyId());
 		if (!companyData.isPresent()) {
 			return new ResponseEntity<Object>(
-					new ErrorResponseDTO("Did not find a Entity with id=" + buyRequest.getCompanyId()),
+					new ErrorResponseDTO("Did not find a Company with id=" + buyRequest.getCompanyId()),
 					HttpStatus.BAD_REQUEST);
 		}
 
@@ -888,14 +911,14 @@ public class CMSControllerNew {
 		Optional<State> stateData = stateRepository.findById(buyRequest.getStateId());
 		if (!stateData.isPresent()) {
 			return new ResponseEntity<Object>(
-					new ErrorResponseDTO("Did not find a Entity with id=" + buyRequest.getStateId()),
+					new ErrorResponseDTO("Did not find a State with id=" + buyRequest.getStateId()),
 					HttpStatus.BAD_REQUEST);
 		}
 		// Vehicle Model
 		Optional<VehicleModel> modelData = vehicleModelRepository.findById(buyRequest.getModelId());
 		if (!modelData.isPresent()) {
 			return new ResponseEntity<Object>(
-					new ErrorResponseDTO("Did not find a Entity with id=" + buyRequest.getModelId()),
+					new ErrorResponseDTO("Did not find a VehicleModel with id=" + buyRequest.getModelId()),
 					HttpStatus.BAD_REQUEST);
 		}
 
@@ -930,7 +953,12 @@ public class CMSControllerNew {
 			// Company
 			dto.setCompanyId(entity.getCompany().getId());
 			dto.setCompanyName(entity.getCompany().getCompanyName());
-			// TODO - Dealer Mapping
+			// Dealer Mapping
+			if (Objects.nonNull(entity.getUserDetail())) {
+				dto.setDealerName(entity.getUserDetail().getName());
+				dto.setDealerId(entity.getUserDetail().getId());
+			}
+
 			dto.add(linkTo(methodOn(CMSControllerNew.class).getBuyRequest(entity.getId())).withSelfRel());
 			return new ResponseEntity<Object>(dto, HttpStatus.OK);
 		}
@@ -977,8 +1005,12 @@ public class CMSControllerNew {
 				// Company
 				dto.setCompanyId(entity.getCompany().getId());
 				dto.setCompanyName(entity.getCompany().getCompanyName());
-				// TODO - Dealer Mapping
-				dto.setDealerName("Dealer functionality will be coming soon..");
+				//Dealer Mapping
+				
+				if(Objects.nonNull(entity.getUserDetail())) {
+					dto.setDealerName(entity.getUserDetail().getName());
+					dto.setDealerId(entity.getUserDetail().getId());
+				}
 
 				dto.add(linkTo(methodOn(CMSControllerNew.class).getBuyRequest(entity.getId())).withSelfRel());
 				buyRequestDTOList.add(dto);
@@ -1059,12 +1091,20 @@ public class CMSControllerNew {
 	// Charging product api
 	@Transactional
 	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	@PostMapping(path = "/charging-products", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = "/{userId}/charging-products", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> addChargingProducts(
+			@PathVariable Long userId,
 			@ModelAttribute ChargingProductRequestDTO chargingProductRequestDTO) {
 		LOG.info("addChargingProducts request received@@   {}", chargingProductRequestDTO);
 		// ChargingProduct Entity
 		ChargingProduct entity = new ChargingProduct();
+		
+		Optional<UserDetail> userDetailData = userDetailRepository.findById(userId);
+		if (!userDetailData.isPresent()) {
+			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a UserDetail with id=" + userId),HttpStatus.BAD_REQUEST);
+		}
+		entity.setUserDetail(userDetailData.get());
+		)
 		BeanUtils.copyProperties(chargingProductRequestDTO, entity);
 		// ProductSpecification
 		// Save Image
@@ -1084,17 +1124,27 @@ public class CMSControllerNew {
 	
 	@Transactional
 	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	@PutMapping(path = "/charging-products/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> updateChargingProducts(@PathVariable Long id,
+	@PutMapping(path = "/{userId}/charging-products/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> updateChargingProducts(
+			@PathVariable Long userId,
+			@PathVariable Long id,
 			@Valid @ModelAttribute ChargingProductRequestDTO chargingProductRequestDTO) {
 		LOG.info("updateChargingProducts request received@@   {}", chargingProductRequestDTO);
 		// ChargingProduct Entity
+		
+		Optional<UserDetail> userDetailData = userDetailRepository.findById(userId);
+		if (!userDetailData.isPresent()) {
+			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a UserDetail with id=" + userId),HttpStatus.BAD_REQUEST);
+		}
+		
 		Optional<ChargingProduct> chargingProductData = chargingProductRepository.findById(id);
 		
 		if (chargingProductData.isPresent()) {
 			ChargingProduct entity = chargingProductData.get();
 			BeanUtils.copyProperties(chargingProductRequestDTO, entity);
 			MultipartFile imagesFile = chargingProductRequestDTO.getImage();
+			entity.setUserDetail(userDetailData.get());
+			
 			ChargingProduct savedEntity = chargingProductRepository.save(entity);
 
 			if (null != imagesFile) {
@@ -1118,15 +1168,17 @@ public class CMSControllerNew {
 
 	@Transactional
 	@ApiOperation(value = "Retrieves an entity by its id", notes = "Return Id of the record if saved correctly otherwise null", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	@GetMapping(path = "/charging-products/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<Object> getChargingProducts(@PathVariable Long id) {
+	@GetMapping(path = "/{userId}/charging-products/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> getChargingProducts(
+			@PathVariable Long userId,
+			@PathVariable Long id) {
 		LOG.info("getChargingProducts request received@@   {}", id);
-		Optional<ChargingProduct> entityData = chargingProductRepository.findById(id);
-		if (entityData.isPresent()) {
-			ChargingProduct entity = entityData.get();
+	ChargingProduct entity = chargingProductRepository.findProductByUserIdAndId(userId, id);
+		if (Objects.nonNull(entity)) {
 			ChargingProductResponseDTO dto = new ChargingProductResponseDTO();
 			BeanUtils.copyProperties(entity, dto);
-			dto.add(linkTo(methodOn(CMSControllerNew.class).getChargingProducts(entity.getId())).withSelfRel());
+			dto.add(linkTo(methodOn(CMSControllerNew.class).getChargingProducts(entity.getUserDetail().getId(),entity.getId())).withSelfRel());
+			
 			Set<Images> images = entity.getImages();
 			if (null != images) {
 				images.forEach(image -> {
@@ -1141,8 +1193,10 @@ public class CMSControllerNew {
 	
 	@Transactional
 	@ApiOperation(value = "Returns all instances of the type", notes = "Returns all instances of the type", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	@GetMapping(path = "/charging-products", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<Object> getAllChargingProducts(@RequestParam(defaultValue = "0") int page,
+	@GetMapping(path = "/{userId}/charging-products", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> getAllChargingProducts(
+			@PathVariable Long userId,
+			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size, 
 			@RequestParam(required = false) String filterByName,
 			@RequestParam(required = false, defaultValue = "ASC") Direction sortDirection,
@@ -1150,18 +1204,20 @@ public class CMSControllerNew {
 			@RequestParam(required = false) StatusCode status) {
 		LOG.info("getAllChargingProducts request received");
 		FilterCriteria criteria = new FilterCriteria(page, size, filterByName, sortDirection, orderBy, status);
+		criteria.setUserId(userId);
+		
 		Direction sort = sortDirection == null ? Direction.ASC : sortDirection;
 		Pageable paging = PageRequest.of(page, size, Sort.by(sort, orderBy));
 		Map<String, Object> response = new HashMap<>();
 		List<ChargingProductResponseDTO> allDTO = new ArrayList<>();
 		Page<ChargingProduct> pages = chargingProductRepository
-				.findAll(filterChargingProductByName(criteria).and(filterChargingProductByStatus(criteria)), paging);
+				.findAll(filterChargingProductByName(criteria).and(filterChargingProductByStatus(criteria)).and(onlyFetchLoggedInUserChargingProduct(criteria)), paging);
 
 		if (pages.hasContent()) {
 			pages.getContent().forEach(entity -> {
 				ChargingProductResponseDTO dto = new ChargingProductResponseDTO();
 				BeanUtils.copyProperties(entity, dto);
-				dto.add(linkTo(methodOn(CMSControllerNew.class).getChargingProducts(entity.getId())).withSelfRel());
+				dto.add(linkTo(methodOn(CMSControllerNew.class).getChargingProducts(userId,entity.getId())).withSelfRel());
 				Set<Images> images = entity.getImages();
 				if (null != images) {
 					images.forEach(image -> {
@@ -1203,7 +1259,7 @@ public class CMSControllerNew {
 			pages.getContent().forEach(entity -> {
 				ChargingProductResponseDTO dto = new ChargingProductResponseDTO();
 				BeanUtils.copyProperties(entity, dto);
-				dto.add(linkTo(methodOn(CMSControllerNew.class).getChargingProducts(entity.getId())).withSelfRel());
+				dto.add(linkTo(methodOn(CMSControllerNew.class).getChargingProducts(entity.getUserDetail().getId(),entity.getId())).withSelfRel());
 				Set<Images> images = entity.getImages();
 				if (null != images) {
 					images.forEach(image -> {
@@ -1224,10 +1280,11 @@ public class CMSControllerNew {
 	}
 	
 	@Transactional
-	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	@DeleteMapping(path = "/charging-products/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ApiOperation(value = "", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@DeleteMapping(path = "/charging-products/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> deleteChargingProducts(@PathVariable Long id) {
 		LOG.info("deleteChargingProducts request received@@   {}", id);
+		imagesRepository.deleteByChargingProductId(id);
 		chargingProductRepository.deleteById(id);
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}

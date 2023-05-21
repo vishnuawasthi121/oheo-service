@@ -10,4 +10,7 @@ import com.ogive.oheo.persistence.entities.Product;
 public interface ProductRepository  extends CrudRepository<Product, Long>, JpaSpecificationExecutor<Product>{
 
 	List<Object[]>	dropDownLive(String isLive);
+	
+	Product findProductByUserIdAndId(Long userId, Long id);
+	
 }

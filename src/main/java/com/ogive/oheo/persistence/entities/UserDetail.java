@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Enumerated;
@@ -48,7 +47,7 @@ public class UserDetail {
 	@Column(unique = true, nullable = false)
 	private String email;
 
-	@Column(nullable = false)
+	@Column(nullable = false, length = 8)
 	private String password;
 
 	@Enumerated
@@ -65,6 +64,8 @@ public class UserDetail {
 
 	@OneToMany(mappedBy = "root")
 	private Set<UserDetail> childs = new HashSet<UserDetail>();
+	
+	private String gstNumber;
 
 	private Date created;
 

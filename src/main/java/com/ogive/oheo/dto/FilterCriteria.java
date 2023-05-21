@@ -33,6 +33,8 @@ public class FilterCriteria {
 	private Long id;
 	
 	private String lastName;
+	
+	private Long userId;
 
 	public FilterCriteria() {
 		super();

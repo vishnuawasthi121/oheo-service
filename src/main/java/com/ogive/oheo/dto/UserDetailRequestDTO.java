@@ -51,5 +51,8 @@ public class UserDetailRequestDTO {
 
 	@NotNull
 	private Long zipcodeId;
+	
+	@NotEmpty
+	private String gstNumber;
 
 }

@@ -1,4 +1,4 @@
-package com.ogive.oheo.persistence.entities;
+package com.ogive.oheo.dto;
 
 public class AddressRequestDTO {
 

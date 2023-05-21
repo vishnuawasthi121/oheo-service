@@ -44,11 +44,9 @@ public class BuyRequest {
 	@JoinColumn(name = "CITY_ID")
 	private City city;
 
-	/*
-	 * @ManyToOne
-	 * 
-	 * @JoinColumn(name = "USER_INFO_ID") private UserInfo userInfo;
-	 */
+	@ManyToOne
+	@JoinColumn(name = "USER_DETAIL_ID")
+	private UserDetail userDetail;
 
 	private String initial;
 	private String name;
@@ -57,7 +55,7 @@ public class BuyRequest {
 
 	private String mailingStateName;
 	private String mailingCityName;
-	
+
 	private String zipcode;
 	private String contactNumber;
 	private String email;
