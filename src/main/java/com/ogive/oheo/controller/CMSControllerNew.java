@@ -1104,7 +1104,7 @@ public class CMSControllerNew {
 			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a UserDetail with id=" + userId),HttpStatus.BAD_REQUEST);
 		}
 		entity.setUserDetail(userDetailData.get());
-		)
+		
 		BeanUtils.copyProperties(chargingProductRequestDTO, entity);
 		// ProductSpecification
 		// Save Image
@@ -1173,7 +1173,7 @@ public class CMSControllerNew {
 			@PathVariable Long userId,
 			@PathVariable Long id) {
 		LOG.info("getChargingProducts request received@@   {}", id);
-	ChargingProduct entity = chargingProductRepository.findProductByUserIdAndId(userId, id);
+		ChargingProduct entity = chargingProductRepository.findProductByUserIdAndId(userId, id);
 		if (Objects.nonNull(entity)) {
 			ChargingProductResponseDTO dto = new ChargingProductResponseDTO();
 			BeanUtils.copyProperties(entity, dto);
