@@ -23,8 +23,6 @@ import lombok.ToString;
 
 public class ProductRequestDTO {
 
-	// private List<UploadImageRequestDTO> images;
-	// private List<MultipartFile> images;
 	private List<MultipartFile> images;
 
 	private ImageType imageType;
@@ -63,5 +61,7 @@ public class ProductRequestDTO {
 	private List<String> features;
 
 	private MultipartFile brochure;
+
+	private String availableForLease;
 
 }

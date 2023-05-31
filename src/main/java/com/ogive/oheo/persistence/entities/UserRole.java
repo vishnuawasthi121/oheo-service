@@ -6,6 +6,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -21,6 +22,8 @@ import lombok.ToString;
 @Getter
 @ToString
 @NoArgsConstructor
+
+@NamedQuery(name="UserRole.dropDown", query="SELECT id ,role FROM UserRole")
 
 @Table(name = "USER_ROLE")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_USER_ROLE", sequenceName = "SEQ_USER_ROLE")

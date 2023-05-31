@@ -47,6 +47,7 @@ import com.ogive.oheo.dto.UpdateUserRequestDTO;
 import com.ogive.oheo.dto.UserDetailRequestDTO;
 import com.ogive.oheo.dto.UserDetailResponseDTO;
 import com.ogive.oheo.dto.UserRoleRequestDTO;
+import com.ogive.oheo.dto.UserRoleResponseDTO;
 import com.ogive.oheo.dto.utils.CommonsUtil;
 import com.ogive.oheo.dto.utils.GeographicLocationSpecifications;
 import com.ogive.oheo.persistence.entities.City;
@@ -355,10 +356,9 @@ public class UserDetailController {
 		return new ResponseEntity<Object>(savedEntity.getId(), HttpStatus.OK);
 	}
 
-	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@ApiOperation(value = "Update a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@PutMapping(path = "/roles/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> updateUserRole(@PathVariable Long id,
-			@Valid @RequestBody UserRoleRequestDTO roleRequest) {
+	public ResponseEntity<Object> updateUserRole(@PathVariable Long id,@Valid @RequestBody UserRoleRequestDTO roleRequest) {
 		LOG.info("updateUserRole request received@@ ID, BODY  {}  {}", id, roleRequest);
 		Optional<UserRole> roleData = userRoleRepository.findById(id);
 		if (roleData.isPresent()) {
@@ -369,18 +369,35 @@ public class UserDetailController {
 			LOG.info("Saved @@   {}", savedEntity);
 			return new ResponseEntity<Object>(savedEntity.getId(), HttpStatus.OK);
 		}
-
-		return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find UserRole with id=" + id),
-				HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find UserRole with id=" + id),HttpStatus.BAD_REQUEST);
 	}
-
-	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	@PostMapping(path = "/email-sender", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> emailTest(@ModelAttribute EmailDetails details) {
-		LOG.info("emailTest request received@@");
-		// emailServiceImpl.sendEmail();
-		emailServiceImpl.sendMailWithAttachment(details);
-		// emailServiceImpl.sendEmailWithTemplate(details);
-		return new ResponseEntity<Object>("Email sent successfully", HttpStatus.OK);
+	
+	@ApiOperation(value = "Retrieves an entity by its id", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/roles/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> getRole(@PathVariable Long id) {
+		LOG.info("getRole request received@@   {}", id);
+		Optional<UserRole> fetchedData = userRoleRepository.findById(id);
+		if (fetchedData.isPresent()) {
+			UserRole entity = fetchedData.get();
+			UserRoleResponseDTO dto = new UserRoleResponseDTO();
+			BeanUtils.copyProperties(entity, dto);
+			dto.add(linkTo(methodOn(UserDetailController.class).getRole(entity.getId())).withSelfRel());
+			return new ResponseEntity<Object>(dto, HttpStatus.OK);
+		}
+		return new ResponseEntity<Object>(HttpStatus.OK);
+	}
+	
+	@ApiOperation(value = "Retrieves role list along with id &  name", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/roles/dropdown", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> userRoleDropdown() {
+		LOG.info("userRoleDropdown request received@@");
+		List<Object[]> roleData = userRoleRepository.dropDown();
+		List<Map<Object, Object>> dropDowns = new ArrayList<>();
+		roleData.forEach(data -> {
+			Map<Object, Object> map = new HashMap<>();
+			map.put(data[0], data[1]);
+			dropDowns.add(map);
+		});
+		return new ResponseEntity<Object>(dropDowns, HttpStatus.OK);
 	}
 }

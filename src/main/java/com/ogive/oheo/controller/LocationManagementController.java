@@ -674,8 +674,10 @@ public class LocationManagementController {
 
 	@ApiOperation(value = "Returns all instances of the type", notes = "Returns all instances of the type", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/zipcodes/", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<Object> getAllZipcodes(@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "10") int size, @RequestParam(required = false) String filterByCode,
+	public ResponseEntity<Object> getAllZipcodes(
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size, 
+			@RequestParam(required = false) String filterByCode,
 			@RequestParam(required = false) String filterByCityName,
 			@RequestParam(required = false, defaultValue = "ASC") Direction sortDirection,
 			@RequestParam(required = false, defaultValue = "id") String[] orderBy,

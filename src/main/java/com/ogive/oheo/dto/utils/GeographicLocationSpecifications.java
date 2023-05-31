@@ -256,7 +256,7 @@ public class GeographicLocationSpecifications {
 			if (ObjectUtils.isEmpty(filter.getFilterByCode())) {
 				return criteriaBuilder.conjunction();
 			}
-			return criteriaBuilder.like(criteriaBuilder.upper(root.get("code")), "%" + filter.getFilterByCode().toUpperCase() + "%");
+			return criteriaBuilder.equal(root.get("code"), filter.getFilterByCode());
 		};
 	}
 

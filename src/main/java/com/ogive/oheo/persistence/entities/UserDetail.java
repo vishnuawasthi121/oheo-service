@@ -59,7 +59,7 @@ public class UserDetail {
 	private String contact;
 
 	@ManyToOne
-	@JoinColumn(name = "root_id")
+	@JoinColumn(name = "root_id", nullable = true)
 	private UserDetail root;
 
 	@OneToMany(mappedBy = "root")
@@ -72,24 +72,24 @@ public class UserDetail {
 	private Date updated;
 
 	@ManyToOne
-	@JoinColumn(name = "role_id")
+	@JoinColumn(name = "role_id", nullable = true)
 	private UserRole role;
 
 	// Region details
 	@ManyToOne
-	@JoinColumn(name = "zone_id")
+	@JoinColumn(name = "zone_id", nullable = true)
 	private ZoneDetail zone;
 
 	@ManyToOne
-	@JoinColumn(name = "state_id")
+	@JoinColumn(name = "state_id", nullable = true)
 	private State state;
 
 	@ManyToOne
-	@JoinColumn(name = "city_id")
+	@JoinColumn(name = "city_id", nullable = true)
 	private City city;
 
 	@ManyToOne
-	@JoinColumn(name = "zipcode_id")
+	@JoinColumn(name = "zipcode_id", nullable = true)
 	private Zipcode zipcode;
 
 }

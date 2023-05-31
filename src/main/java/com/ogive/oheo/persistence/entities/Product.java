@@ -86,5 +86,7 @@ public class Product {
 	@ManyToOne
 	@JoinColumn(name = "USER_DETAIL_ID")
 	private UserDetail userDetail;
+	
+	private String availableForLease;
 
 }
