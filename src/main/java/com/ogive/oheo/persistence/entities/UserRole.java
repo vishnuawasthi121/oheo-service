@@ -2,6 +2,7 @@ package com.ogive.oheo.persistence.entities;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -23,7 +24,7 @@ import lombok.ToString;
 @ToString
 @NoArgsConstructor
 
-@NamedQuery(name="UserRole.dropDown", query="SELECT id ,role FROM UserRole")
+@NamedQuery(name = "UserRole.dropDown", query = "SELECT id ,role FROM UserRole")
 
 @Table(name = "USER_ROLE")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_USER_ROLE", sequenceName = "SEQ_USER_ROLE")
@@ -35,7 +36,7 @@ public class UserRole {
 	@Column(name = "ID")
 	private Long id;
 
-	@Enumerated
+	@Enumerated(EnumType.STRING)
 	private RoleTypes role;
 
 	@Enumerated

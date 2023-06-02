@@ -2,6 +2,7 @@ package com.ogive.oheo.persistence.entities;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 
@@ -43,7 +44,8 @@ public class ViewUserDetails {
 	@Column(name = "code")
 	private String zipcode;
 	
-	@Enumerated
+	@Column(name="role_name")
+	@Enumerated(EnumType.STRING)
 	private RoleTypes rolename;
 	
 	@Column(name="roleid")

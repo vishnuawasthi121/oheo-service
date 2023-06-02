@@ -2,6 +2,7 @@ package com.ogive.oheo.dto;
 
 import org.springframework.data.domain.Sort.Direction;
 
+import com.ogive.oheo.constants.RoleTypes;
 import com.ogive.oheo.constants.StatusCode;
 
 import lombok.Getter;
@@ -35,6 +36,8 @@ public class FilterCriteria {
 	private String lastName;
 	
 	private Long userId;
+	
+	private RoleTypes roleTypes;
 
 	public FilterCriteria() {
 		super();

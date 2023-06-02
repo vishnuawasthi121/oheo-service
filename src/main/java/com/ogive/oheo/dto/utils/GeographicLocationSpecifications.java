@@ -296,6 +296,17 @@ public class GeographicLocationSpecifications {
 			return builder.equal(root.get("status"), filter.getStatus());
 		};
 	}
+	
+	public static Specification<ViewUserDetails> filterUserDetailByRoleTypes(FilterCriteria filter) {
+		return (root, query, builder) -> {
+			
+			if (ObjectUtils.isEmpty(filter.getRoleTypes())) {
+				return builder.conjunction();
+			}
+			return builder.equal(root.get("rolename"), filter.getRoleTypes());
+		};
+	}
+	
 
 	public static Specification<ViewUserDetails> findAllUserDetailByRootId(FilterCriteria filter) {
 		return (root, query, criteriaBuilder) -> {

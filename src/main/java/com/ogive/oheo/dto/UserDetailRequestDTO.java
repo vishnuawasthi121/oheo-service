@@ -50,7 +50,7 @@ public class UserDetailRequestDTO {
 	private Long cityId;
 
 	@NotNull
-	private Long zipcodeId;
+	private Long zipcode;
 	
 	@NotEmpty
 	private String gstNumber;

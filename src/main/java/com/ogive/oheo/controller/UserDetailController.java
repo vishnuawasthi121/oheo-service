@@ -28,7 +28,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -37,9 +36,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ogive.oheo.constants.RoleTypes;
 import com.ogive.oheo.constants.StatusCode;
 import com.ogive.oheo.dto.EmailDetails;
-import com.ogive.oheo.dto.EmailRequest;
 import com.ogive.oheo.dto.ErrorResponseDTO;
 import com.ogive.oheo.dto.FilterCriteria;
 import com.ogive.oheo.dto.UpdateUserRequestDTO;
@@ -112,9 +111,17 @@ public class UserDetailController {
 		LOG.info("addUser request received@@   {}", userDetailRequestDTO);
 		UserDetail entity = new UserDetail();
 		BeanUtils.copyProperties(userDetailRequestDTO, entity);
-
 		entity.setEmail(userDetailRequestDTO.getEmail().toUpperCase());
 
+		//Email id validation if already exist in database.
+		UserDetail entityByNewUserEmail= userDetailRepository.findByEmail(userDetailRequestDTO.getEmail().toUpperCase());
+		
+		if (Objects.nonNull(entityByNewUserEmail)) {
+			return new ResponseEntity<Object>(
+					new ErrorResponseDTO("Email already exist=" + userDetailRequestDTO.getEmail()),
+					HttpStatus.BAD_REQUEST);
+		}
+		
 		entity.setCreated(new Date());
 		entity.setUpdated(new Date());
 		String createdByUser = userDetailRequestDTO.getCreatedByUser();
@@ -155,10 +162,11 @@ public class UserDetailController {
 					HttpStatus.BAD_REQUEST);
 		}
 
-		Optional<Zipcode> zipcodeData = zipcodeRepository.findById(userDetailRequestDTO.getZipcodeId());
-		if (!zipcodeData.isPresent()) {
+		Zipcode zipcode = zipcodeRepository.findByCode(userDetailRequestDTO.getZipcode());
+		
+		if (Objects.isNull(zipcode)) {
 			return new ResponseEntity<Object>(
-					new ErrorResponseDTO("Did not find a Zipcode with id=" + userDetailRequestDTO.getZipcodeId()),
+					new ErrorResponseDTO("Did not find a Zipcode by code =" + userDetailRequestDTO.getZipcode()),
 					HttpStatus.BAD_REQUEST);
 		}
 		// Set auto generated password to entity
@@ -167,7 +175,7 @@ public class UserDetailController {
 		entity.setZone(zoneData.get());
 		entity.setState(stateData.get());
 		entity.setCity(cityData.get());
-		entity.setZipcode(zipcodeData.get());
+		entity.setZipcode(zipcode);
 
 		entity.setRoot(createdByUserEntity);
 		entity.setValidated(false);
@@ -203,9 +211,19 @@ public class UserDetailController {
 			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find UserDetail with id=" + id),
 					HttpStatus.BAD_REQUEST);
 		}
+		
+		// Email id validation if already exist in database.
+		UserDetail entityByNewUserEmail = userDetailRepository.findByEmail(userDetailRequestDTO.getEmail().toUpperCase());
+		if (Objects.nonNull(entityByNewUserEmail)) {
+			return new ResponseEntity<Object>(
+					new ErrorResponseDTO("Email already exist=" + userDetailRequestDTO.getEmail()),
+					HttpStatus.BAD_REQUEST);
+		}
+		
 		UserDetail entity = userData.get();
 		BeanUtils.copyProperties(userDetailRequestDTO, entity);
 		entity.setUpdated(new Date());
+		
 		Optional<UserRole> roleData = userRoleRepository.findById(userDetailRequestDTO.getRoleId());
 
 		if (!roleData.isPresent()) {
@@ -235,17 +253,18 @@ public class UserDetailController {
 					HttpStatus.BAD_REQUEST);
 		}
 
-		Optional<Zipcode> zipcodeData = zipcodeRepository.findById(userDetailRequestDTO.getZipcodeId());
-		if (!zipcodeData.isPresent()) {
+		Zipcode zipcode = zipcodeRepository.findByCode(userDetailRequestDTO.getZipcode());
+		
+		if (Objects.isNull(zipcode)) {
 			return new ResponseEntity<Object>(
-					new ErrorResponseDTO("Did not find a Zipcode with id=" + userDetailRequestDTO.getZipcodeId()),
+					new ErrorResponseDTO("Did not find a Zipcode by zipcode=" + userDetailRequestDTO.getZipcode()),
 					HttpStatus.BAD_REQUEST);
 		}
 		entity.setEmail(userDetailRequestDTO.getEmail().toUpperCase());
 		entity.setZone(zoneData.get());
 		entity.setState(stateData.get());
 		entity.setCity(cityData.get());
-		entity.setZipcode(zipcodeData.get());
+		entity.setZipcode(zipcode);
 
 		UserDetail savedEntity = userDetailRepository.save(entity);
 
@@ -275,9 +294,13 @@ public class UserDetailController {
 			@RequestParam(required = false) String filterByName,
 			@RequestParam(required = false, defaultValue = "ASC") Direction sortDirection,
 			@RequestParam(required = false, defaultValue = "id") String[] orderBy,
-			@RequestParam(required = false) StatusCode status) {
+			@RequestParam(required = false) StatusCode status,
+			@RequestParam(required = false) RoleTypes roleTypes) {
 		LOG.info("getAllUsers request received@@");
+		
 		FilterCriteria filterCriteria = new FilterCriteria(page, size, filterByName, sortDirection, orderBy, status);
+		filterCriteria.setRoleTypes(roleTypes);
+		
 		LOG.info("filterCriteria    {} ", filterCriteria);
 		Direction sort = sortDirection == null ? Direction.ASC : sortDirection;
 		Pageable paging = PageRequest.of(page, size, Sort.by(sort, orderBy));
@@ -285,7 +308,8 @@ public class UserDetailController {
 		List<UserDetailResponseDTO> dtoList = new ArrayList<>();
 		Page<ViewUserDetails> pages = viewUserDetailRepository
 				.findAll(GeographicLocationSpecifications.filterUserDetailByName(filterCriteria)
-						.and(GeographicLocationSpecifications.filterUserDetailByStatus(filterCriteria)), paging);
+						.and(GeographicLocationSpecifications.filterUserDetailByStatus(filterCriteria)
+								.and(GeographicLocationSpecifications.filterUserDetailByRoleTypes(filterCriteria))), paging);
 
 		if (pages.hasContent()) {
 			pages.getContent().forEach(entity -> {

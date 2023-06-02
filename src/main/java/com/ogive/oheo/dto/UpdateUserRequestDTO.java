@@ -34,7 +34,7 @@ public class UpdateUserRequestDTO {
 	private Long cityId;
 
 	@NotNull
-	private Long zipcodeId;
+	private Long zipcode;
 	
 	@NotEmpty
 	private String gstNumber;
