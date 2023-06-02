@@ -268,6 +268,7 @@ public class CMSControllerNew {
 		if (null != productRequestDTO.getBrochure()) {
 			Images brochure = new Images();
 			multiPartToFileEntity(productRequestDTO.getBrochure(), brochure, productRequestDTO.getImageType());
+			brochure.setProduct(productEntity);
 			imagesRepository.save(brochure);
 		}
 		// Save features
@@ -280,6 +281,14 @@ public class CMSControllerNew {
 				featuresList.add(features);
 			});
 			featuresRepository.saveAll(featuresList);
+		}
+		
+		//  Save Video file 
+		if (null != productRequestDTO.getVideo()) {
+			Images video = new Images();
+			multiPartToFileEntity(productRequestDTO.getVideo(), video, ImageType.Video);
+			video.setProduct(productEntity);
+			imagesRepository.save(video);
 		}
 		return new ResponseEntity<Object>(productEntity.getId(), HttpStatus.OK);
 	}
@@ -508,7 +517,12 @@ public class CMSControllerNew {
 			images.forEach(img -> {
 				ImagesResponseDTO imgDTO = new ImagesResponseDTO();
 				BeanUtils.copyProperties(img, imgDTO);
-				imgDTO.add(linkTo(methodOn(FileProcessingController.class).readFile(img.getId())).withSelfRel());
+				ImageType imageType = img.getImageType();
+				if( null == imageType) {
+					imgDTO.add(linkTo(methodOn(FileProcessingController.class).readFile(img.getId())).withSelfRel());
+				}else {
+					imgDTO.add(linkTo(methodOn(FileProcessingController.class).readFile(img.getId())).withRel(imageType.name()));
+				}
 				imagesDTOList.add(imgDTO);
 			});
 			dto.setImages(imagesDTOList);

@@ -61,6 +61,8 @@ public class ProductRequestDTO {
 	private List<String> features;
 
 	private MultipartFile brochure;
+	
+	private MultipartFile video;
 
 	private String availableForLease;
 
