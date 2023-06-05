@@ -20,9 +20,11 @@ public class UpdateUserRequestDTO {
 	@NotNull
 	private Long roleId;
 	
-	@NotEmpty
-	@Email
-	private String email;
+	/*
+	 * @NotEmpty
+	 * 
+	 * @Email private String email;
+	 */
 
 	@NotNull
 	private Long zoneId;
