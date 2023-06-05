@@ -202,23 +202,24 @@ public class UserDetailController {
 
 	@ApiOperation(value = "Update a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> updateUser(@PathVariable Long id,
-			@Valid @RequestBody UpdateUserRequestDTO userDetailRequestDTO) {
+	public ResponseEntity<Object> updateUser(@PathVariable Long id,@Valid @RequestBody UpdateUserRequestDTO userDetailRequestDTO) {
 		LOG.info("updateUser request received@@   {}", userDetailRequestDTO);
 		Optional<UserDetail> userData = userDetailRepository.findById(id);
 
 		if (!userData.isPresent()) {
-			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find UserDetail with id=" + id),
-					HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find UserDetail with id=" + id),HttpStatus.BAD_REQUEST);
 		}
 		
-		// Email id validation if already exist in database.
-		UserDetail entityByNewUserEmail = userDetailRepository.findByEmail(userDetailRequestDTO.getEmail().toUpperCase());
-		if (Objects.nonNull(entityByNewUserEmail)) {
-			return new ResponseEntity<Object>(
-					new ErrorResponseDTO("Email already exist=" + userDetailRequestDTO.getEmail()),
-					HttpStatus.BAD_REQUEST);
-		}
+		/*
+		 * // Email id validation if already exist in database. UserDetail
+		 * entityByNewUserEmail =
+		 * userDetailRepository.findByEmail(userDetailRequestDTO.getEmail().toUpperCase(
+		 * ));
+		 * 
+		 * if (Objects.nonNull(entityByNewUserEmail)) { return new
+		 * ResponseEntity<Object>( new ErrorResponseDTO("Email already exist=" +
+		 * userDetailRequestDTO.getEmail()), HttpStatus.BAD_REQUEST); }
+		 */
 		
 		UserDetail entity = userData.get();
 		BeanUtils.copyProperties(userDetailRequestDTO, entity);
@@ -260,14 +261,13 @@ public class UserDetailController {
 					new ErrorResponseDTO("Did not find a Zipcode by zipcode=" + userDetailRequestDTO.getZipcode()),
 					HttpStatus.BAD_REQUEST);
 		}
-		entity.setEmail(userDetailRequestDTO.getEmail().toUpperCase());
+		//entity.setEmail(userDetailRequestDTO.getEmail().toUpperCase());
 		entity.setZone(zoneData.get());
 		entity.setState(stateData.get());
 		entity.setCity(cityData.get());
 		entity.setZipcode(zipcode);
 
 		UserDetail savedEntity = userDetailRepository.save(entity);
-
 		LOG.info("Saved @@   {}", savedEntity);
 		return new ResponseEntity<Object>(savedEntity.getId(), HttpStatus.OK);
 	}

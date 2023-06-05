@@ -83,6 +83,28 @@ public class LoginController {
 		return new ResponseEntity<Object>(new ErrorResponseDTO("Invalid username or password"), HttpStatus.BAD_REQUEST);
 	}
 	
+	
+	
+	@ApiOperation(value = "Reset password of a user account - Customer", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = "/customer-reset-password", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> resetCustomerPassword(
+			@Valid @RequestBody ChangePasswordRequestDTO changePasswordRequest) {
+		LOG.info("resetCustomerPassword  request  -  {}", changePasswordRequest);
+		List<String> emailToFetch = new ArrayList<>();
+		
+		emailToFetch.add(changePasswordRequest.getEmail().toUpperCase());
+		CustomerDetail customeDetail = customerDetailRepository.findByEmailIgnoreCaseIn(emailToFetch);
+
+		if (null != customeDetail && customeDetail.getPassword().equals(changePasswordRequest.getPassword())) {
+
+			customeDetail.setPassword(changePasswordRequest.getNewPassword());
+			customerDetailRepository.save(customeDetail);
+			return new ResponseEntity<Object>(HttpStatus.OK);
+		}
+		return new ResponseEntity<Object>(new ErrorResponseDTO("Invalid username or password"), HttpStatus.BAD_REQUEST);
+	}
+	
+	
 	@ApiOperation(value = "Login api - Customer", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@PostMapping(path = "/customer-authenticate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> doCustomerLogin(@Valid @RequestBody LoginRequestDTO loginRequest) {
