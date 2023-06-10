@@ -48,6 +48,7 @@ import com.ogive.oheo.dto.ErrorResponseDTO;
 import com.ogive.oheo.dto.FilterCriteria;
 import com.ogive.oheo.dto.StateRequestDTO;
 import com.ogive.oheo.dto.StateResponseDTO;
+import com.ogive.oheo.dto.UpdateZipcodeRequestDTO;
 import com.ogive.oheo.dto.ZipcodeRequestDTO;
 import com.ogive.oheo.dto.ZipcodeResponseDTO;
 import com.ogive.oheo.dto.ZoneDetailRequestDTO;
@@ -619,56 +620,56 @@ public class LocationManagementController {
 		}
 		Zipcode zipcode = new Zipcode();
 		BeanUtils.copyProperties(zipcodeDTO, zipcode);
-
-		zipcode.setCode(zipcodeDTO.getZipcode());
 		zipcode.setCity(cityData.get());
 		Zipcode saved = zipcodeRepository.save(zipcode);
 		return new ResponseEntity<Object>(saved.getId(), HttpStatus.OK);
 	}
 
 	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	@PutMapping(path = "/zipcodes/{zipcode}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> updateZipcode(@PathVariable Long zipcode,
-			@Valid @RequestBody ZipcodeRequestDTO zipcodeDTO) {
-		LOG.info("updateZipcode request received@@   {}", zipcode);
+	@PutMapping(path = "/zipcodes/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> updateZipcode(@PathVariable Long id,@Valid @RequestBody UpdateZipcodeRequestDTO zipcodeDTO) {
+		LOG.info("updateZipcode request received@@   {}", id);
+		Optional<Zipcode> zipcodeData = zipcodeRepository.findById(id);
 
+		if (!zipcodeData.isPresent()) {
+			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a Zipcode with id=" + id),
+					HttpStatus.BAD_REQUEST);
+		}
 		Optional<City> cityData = cityRepository.findById(zipcodeDTO.getCityId());
-
 		if (!cityData.isPresent()) {
 			return new ResponseEntity<Object>(
 					new ErrorResponseDTO("Did not find a City with cityId=" + zipcodeDTO.getCityId()),
 					HttpStatus.BAD_REQUEST);
 		}
-
-		Zipcode zipcodeEntity = zipcodeRepository.findByCode(zipcode);
-		if (Objects.isNull(zipcodeEntity)) {
-			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a Zipcode with code=" + zipcode),HttpStatus.BAD_REQUEST);
-		}
+		
+		Zipcode zipcodeEntity = zipcodeData.get();
 		BeanUtils.copyProperties(zipcodeDTO, zipcodeEntity);
-		zipcodeEntity.setCode(zipcode);
-		zipcodeEntity.setStatus(zipcodeDTO.getStatus());
 		zipcodeEntity.setCity(cityData.get());
+
 		Zipcode saved = zipcodeRepository.save(zipcodeEntity);
 		return new ResponseEntity<Object>(saved, HttpStatus.OK);
 	}
 
 	@ApiOperation(value = "Retrieves an entity by its id", notes = "Return Id of the record if saved correctly otherwise null", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	@GetMapping(path = "/zipcodes/{zipcode}", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<Object> getZipcode(@PathVariable Long zipcode) {
-		LOG.info("getZipcode request received@@id   {}", zipcode);
-		Zipcode zipcodeEntity = zipcodeRepository.findByCode(zipcode);
-		if (Objects.nonNull(zipcodeEntity)) {
+	@GetMapping(path = "/zipcodes/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> getZipcode(@PathVariable Long id) {
+		LOG.info("getZipcode request received@@id   {}", id);
+		Optional<Zipcode> zipcodeData = zipcodeRepository.findById(id);
+
+		if (zipcodeData.isPresent()) {
+			Zipcode zipcodeEntity = zipcodeData.get();
 			ZipcodeResponseDTO dto = new ZipcodeResponseDTO();
 			BeanUtils.copyProperties(zipcodeEntity, dto);
-			dto.setCityId(zipcodeEntity.getCity().getId());
-			dto.setCityName(zipcodeEntity.getCity().getName());
-			dto.setStatus(zipcodeEntity.getStatus());
-			dto.setCode(zipcodeEntity.getCode());
-			dto.add(linkTo(methodOn(LocationManagementController.class).getZipcode(zipcode)).withSelfRel());
-			LOG.info("Found data against ID {} and returing response   {}", zipcode, zipcodeEntity);
+
+			if (Objects.nonNull(zipcodeEntity.getCity())) {
+				dto.setCityId(zipcodeEntity.getCity().getId());
+				dto.setCityName(zipcodeEntity.getCity().getName());
+			}
+			dto.add(linkTo(methodOn(LocationManagementController.class).getZipcode(zipcodeEntity.getId()))
+					.withSelfRel());
+			LOG.info("Found data against ID {} and returing response   {}", id, zipcodeEntity);
 			return new ResponseEntity<Object>(dto, HttpStatus.OK);
 		}
-		LOG.info("Did not find ZoneDetail by @@id   {}", zipcode);
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
 
@@ -702,7 +703,7 @@ public class LocationManagementController {
 				dto.setCityName(zipcode.getCity().getName());
 				dto.setStatus(zipcode.getStatus());
 				dto.setCode(zipcode.getCode());
-				dto.add(linkTo(methodOn(LocationManagementController.class).getZipcode(zipcode.getCode())).withSelfRel());
+				dto.add(linkTo(methodOn(LocationManagementController.class).getZipcode(zipcode.getId())).withSelfRel());
 				zipcodesLists.add(dto);
 			});
 		}
@@ -730,11 +731,10 @@ public class LocationManagementController {
 	}
 
 	@ApiOperation(value = "Delete an entity by its id", notes = "If the entity is not found in the persistence store it is silently ignored", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	@DeleteMapping(path = "/zipcodes/{zipcode}", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<Object> deleteZipcode(@PathVariable Long zipcode) {
-		LOG.info("deleteCity request received@@   {}", zipcode);
-		Zipcode zipcodeEntity = zipcodeRepository.findByCode(zipcode);
-		zipcodeRepository.delete(zipcodeEntity);
+	@DeleteMapping(path = "/zipcodes/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> deleteZipcode(@PathVariable Long id) {
+		LOG.info("deleteCity request received@@   {}", id);
+		zipcodeRepository.deleteById(id);
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
 

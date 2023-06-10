@@ -10,8 +10,7 @@ import lombok.Setter;
 
 @Setter
 @Getter
-
-public class ZipcodeRequestDTO {
+public class UpdateZipcodeRequestDTO {
 
 	@Digits(message="zipcode should contain 6 digits.", fraction = 0, integer = 6)
 	@NotNull(message = "code is mandatory")
