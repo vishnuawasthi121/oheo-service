@@ -2,7 +2,9 @@ package com.ogive.oheo.exception;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -33,6 +35,18 @@ public class ServiceResponseEntityExceptionHandler extends ResponseEntityExcepti
 		return handleExceptionInternal(ex, errorResponseDTO, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
 	}
 	
+	//
+	@ExceptionHandler(value = { DataIntegrityViolationException.class })
+	protected ResponseEntity<Object> handleDataIntegrityViolationException(DataIntegrityViolationException ex,WebRequest request) {
+		ErrorResponseDTO errorResponseDTO = new ErrorResponseDTO();
+		
+		if (Objects.nonNull(ex.getRootCause())) {
+			errorResponseDTO.setDescription(ex.getRootCause().getMessage());
+		} else {
+			errorResponseDTO.setDescription(ex.getMessage());
+		}
+		return handleExceptionInternal(ex, errorResponseDTO, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+	}
 	
 	@Override
 	protected ResponseEntity<Object> handleBindException(BindException ex,
