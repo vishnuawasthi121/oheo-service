@@ -1,6 +1,5 @@
 package com.ogive.oheo.dto;
 
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -40,4 +39,7 @@ public class UpdateUserRequestDTO {
 	
 	@NotEmpty
 	private String gstNumber;
+	
+	@NotNull
+	private Long vehicleTypeId;
 }

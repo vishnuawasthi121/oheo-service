@@ -15,7 +15,7 @@ import com.ogive.oheo.dto.FilterCriteria;
 import com.ogive.oheo.persistence.entities.City;
 import com.ogive.oheo.persistence.entities.Company;
 import com.ogive.oheo.persistence.entities.PurchaseType;
-import com.ogive.oheo.persistence.entities.UserDetail;
+import com.ogive.oheo.persistence.entities.UserRole;
 import com.ogive.oheo.persistence.entities.VehicleBodyType;
 import com.ogive.oheo.persistence.entities.VehicleDetail;
 import com.ogive.oheo.persistence.entities.VehicleFuelType;
@@ -307,6 +307,19 @@ public class GeographicLocationSpecifications {
 		};
 	}
 	
+	public static Specification<ViewUserDetails> filterUserDetailByVehicleTypeName(FilterCriteria filter) {
+		return (root, query, builder) -> {
+
+			if (ObjectUtils.isEmpty(filter.getVehicleTypeName())) {
+				return builder.conjunction();
+			}
+
+			return builder.like(builder.upper(root.get("vehicleTypeName")),
+					"%" + filter.getVehicleTypeName().toUpperCase() + "%");
+
+		};
+	}
+	
 
 	public static Specification<ViewUserDetails> findAllUserDetailByRootId(FilterCriteria filter) {
 		return (root, query, criteriaBuilder) -> {
@@ -316,6 +329,21 @@ public class GeographicLocationSpecifications {
 			
 		//	return builder.like(zipcodeCity.get("name"), "%" + filter.getFilterByCityName() + "%");
 			return criteriaBuilder.equal(root.get("rootId"), filter.getId() );
+		};
+
+	}
+	
+	public static Specification<UserRole> findAllUserRole(FilterCriteria filter) {
+		return (root, query, criteriaBuilder) -> {
+			
+			if (Objects.isNull(filter.getRole())) {
+				return criteriaBuilder.conjunction();
+			}
+
+			// return builder.like(zipcodeCity.get("name"), "%" +
+			// filter.getFilterByCityName() + "%");
+			
+			return criteriaBuilder.equal(root.get("role"), filter.getRole());
 		};
 
 	}

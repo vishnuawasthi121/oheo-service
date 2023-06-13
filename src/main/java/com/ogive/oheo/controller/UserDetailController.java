@@ -53,6 +53,7 @@ import com.ogive.oheo.persistence.entities.City;
 import com.ogive.oheo.persistence.entities.State;
 import com.ogive.oheo.persistence.entities.UserDetail;
 import com.ogive.oheo.persistence.entities.UserRole;
+import com.ogive.oheo.persistence.entities.VehicleType;
 import com.ogive.oheo.persistence.entities.ViewUserDetails;
 import com.ogive.oheo.persistence.entities.Zipcode;
 import com.ogive.oheo.persistence.entities.ZoneDetail;
@@ -60,6 +61,7 @@ import com.ogive.oheo.persistence.repo.CityRepository;
 import com.ogive.oheo.persistence.repo.StateRepository;
 import com.ogive.oheo.persistence.repo.UserDetailRepository;
 import com.ogive.oheo.persistence.repo.UserRoleRepository;
+import com.ogive.oheo.persistence.repo.VehicleTypeRepository;
 import com.ogive.oheo.persistence.repo.ViewUserDetailRepository;
 import com.ogive.oheo.persistence.repo.ZipcodeRepository;
 import com.ogive.oheo.persistence.repo.ZoneDetailRepository;
@@ -104,6 +106,9 @@ public class UserDetailController {
 
 	@Value("${oheo.user.registration.email.subject}")
 	private String registrationEmailsubject;
+	
+	@Autowired
+	private VehicleTypeRepository vehicleTypeRepository;
 
 	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@PostMapping(path = "/", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -169,6 +174,18 @@ public class UserDetailController {
 					new ErrorResponseDTO("Did not find a Zipcode by code =" + userDetailRequestDTO.getZipcode()),
 					HttpStatus.BAD_REQUEST);
 		}
+		
+		
+		Optional<VehicleType> vehicleTypeData = vehicleTypeRepository.findById(userDetailRequestDTO.getVehicleTypeId());
+		
+		if (!vehicleTypeData.isPresent()) {
+			return new ResponseEntity<Object>(
+					new ErrorResponseDTO(
+							"Did not find a VehicleType by id =" + userDetailRequestDTO.getVehicleTypeId()),
+					HttpStatus.BAD_REQUEST);
+		}
+		entity.setVehicleType(vehicleTypeData.get());
+		
 		// Set auto generated password to entity
 		entity.setPassword(CommonsUtil.generatePassword());
 
@@ -176,6 +193,7 @@ public class UserDetailController {
 		entity.setState(stateData.get());
 		entity.setCity(cityData.get());
 		entity.setZipcode(zipcode);
+		
 
 		entity.setRoot(createdByUserEntity);
 		entity.setValidated(false);
@@ -261,6 +279,18 @@ public class UserDetailController {
 					new ErrorResponseDTO("Did not find a Zipcode by zipcode=" + userDetailRequestDTO.getZipcode()),
 					HttpStatus.BAD_REQUEST);
 		}
+		
+		Optional<VehicleType> vehicleTypeData = vehicleTypeRepository.findById(userDetailRequestDTO.getVehicleTypeId());
+
+		if (!vehicleTypeData.isPresent()) {
+			return new ResponseEntity<Object>(
+					new ErrorResponseDTO(
+							"Did not find a VehicleType by id =" + userDetailRequestDTO.getVehicleTypeId()),
+					HttpStatus.BAD_REQUEST);
+		}
+		entity.setVehicleType(vehicleTypeData.get());
+		
+		
 		//entity.setEmail(userDetailRequestDTO.getEmail().toUpperCase());
 		entity.setZone(zoneData.get());
 		entity.setState(stateData.get());
@@ -295,11 +325,13 @@ public class UserDetailController {
 			@RequestParam(required = false, defaultValue = "ASC") Direction sortDirection,
 			@RequestParam(required = false, defaultValue = "id") String[] orderBy,
 			@RequestParam(required = false) StatusCode status,
-			@RequestParam(required = false) RoleTypes roleTypes) {
+			@RequestParam(required = false) RoleTypes roleTypes,
+			@RequestParam(required = false) String vehicleTypeName) {
 		LOG.info("getAllUsers request received@@");
 		
 		FilterCriteria filterCriteria = new FilterCriteria(page, size, filterByName, sortDirection, orderBy, status);
 		filterCriteria.setRoleTypes(roleTypes);
+		filterCriteria.setVehicleTypeName(vehicleTypeName);
 		
 		LOG.info("filterCriteria    {} ", filterCriteria);
 		Direction sort = sortDirection == null ? Direction.ASC : sortDirection;
@@ -308,8 +340,9 @@ public class UserDetailController {
 		List<UserDetailResponseDTO> dtoList = new ArrayList<>();
 		Page<ViewUserDetails> pages = viewUserDetailRepository
 				.findAll(GeographicLocationSpecifications.filterUserDetailByName(filterCriteria)
-						.and(GeographicLocationSpecifications.filterUserDetailByStatus(filterCriteria)
-								.and(GeographicLocationSpecifications.filterUserDetailByRoleTypes(filterCriteria))), paging);
+								.and(GeographicLocationSpecifications.filterUserDetailByStatus(filterCriteria)
+								.and(GeographicLocationSpecifications.filterUserDetailByRoleTypes(filterCriteria))
+								.and(GeographicLocationSpecifications.filterUserDetailByVehicleTypeName(filterCriteria))), paging);
 
 		if (pages.hasContent()) {
 			pages.getContent().forEach(entity -> {
@@ -328,7 +361,9 @@ public class UserDetailController {
 
 	@ApiOperation(value = "Retrive all the child account of an root", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/{rootId}/sub-users", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<Object> getSubUsers(@PathVariable Long rootId, @RequestParam(defaultValue = "0") int page,
+	public ResponseEntity<Object> getSubUsers(
+			@PathVariable Long rootId, 
+			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size, @RequestParam(required = false) String filterByName,
 			@RequestParam(required = false, defaultValue = "ASC") Direction sortDirection,
 			@RequestParam(required = false, defaultValue = "id") String[] orderBy,
@@ -409,6 +444,33 @@ public class UserDetailController {
 			return new ResponseEntity<Object>(dto, HttpStatus.OK);
 		}
 		return new ResponseEntity<Object>(HttpStatus.OK);
+	}
+	
+	@ApiOperation(value = "Retrieves all entities", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/roles", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> getAllRoles(
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size,
+			@RequestParam(required = false) RoleTypes role,
+			@RequestParam(required = false, defaultValue = "ASC") Direction sortDirection,
+			@RequestParam(required = false, defaultValue = "id") String[] orderBy) {
+		LOG.info("getAllRoles request received@@   {}");
+		Direction sort = sortDirection == null ? Direction.ASC : sortDirection;
+		Pageable paging = PageRequest.of(page, size, Sort.by(sort, orderBy));
+		FilterCriteria filterCriteria = new FilterCriteria(page, size, null, sortDirection, orderBy, null);
+		filterCriteria.setRole(role);
+		List<UserRoleResponseDTO> dtoList = new ArrayList<>();
+		Page<UserRole> pages = userRoleRepository.findAll(GeographicLocationSpecifications.findAllUserRole(filterCriteria), paging);
+		
+		if (pages.hasContent()) {
+			pages.getContent().forEach(entity -> {
+				UserRoleResponseDTO dto = new UserRoleResponseDTO();
+				BeanUtils.copyProperties(entity, dto);
+				dto.add(linkTo(methodOn(UserDetailController.class).getRole(entity.getId())).withSelfRel());
+				dtoList.add(dto);
+			});
+		}
+		return new ResponseEntity<Object>(dtoList,HttpStatus.OK);
 	}
 	
 	@ApiOperation(value = "Retrieves role list along with id &  name", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)

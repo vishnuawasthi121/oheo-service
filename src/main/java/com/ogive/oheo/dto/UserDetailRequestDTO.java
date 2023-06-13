@@ -25,8 +25,8 @@ public class UserDetailRequestDTO {
 	@Email
 	private String email;
 
-	//@NotEmpty
-	//private String password;
+	// @NotEmpty
+	// private String password;
 
 	@NotEmpty
 	private String contact;
@@ -50,8 +50,11 @@ public class UserDetailRequestDTO {
 	private Long cityId;
 
 	@NotNull
+	private Long vehicleTypeId;
+
+	@NotNull
 	private Long zipcode;
-	
+
 	@NotEmpty
 	private String gstNumber;
 

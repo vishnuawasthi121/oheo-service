@@ -38,6 +38,11 @@ public class FilterCriteria {
 	private Long userId;
 	
 	private RoleTypes roleTypes;
+	
+	private String vehicleTypeName;
+	
+	private RoleTypes role;
+	
 
 	public FilterCriteria() {
 		super();

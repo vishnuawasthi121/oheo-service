@@ -92,4 +92,7 @@ public class UserDetail {
 	@JoinColumn(name = "zipcode_id", nullable = true)
 	private Zipcode zipcode;
 
+	@ManyToOne
+	@JoinColumn(name = "VEHICLE_TYPE_ID", nullable = true)
+	private VehicleType vehicleType;
 }

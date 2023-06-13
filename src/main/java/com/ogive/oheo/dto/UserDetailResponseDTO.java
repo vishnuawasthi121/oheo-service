@@ -33,4 +33,7 @@ public class UserDetailResponseDTO extends RepresentationModel<UserDetailRespons
 	private Long roleId;
 	private Long rootId;
 	private String gstNumber;
+	
+	private Long vehicleTypeId;
+	private String vehicleTypeName;
 }

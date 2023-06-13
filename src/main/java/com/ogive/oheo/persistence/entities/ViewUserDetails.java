@@ -56,5 +56,11 @@ public class ViewUserDetails {
 	
 	private String gstNumber;
 	
+	@Column(name="vehicle_type_id")
+	private Long vehicleTypeId;
+	
+	@Column(name="vehicletypename")
+	private String vehicleTypeName;
+	
 	
 }
