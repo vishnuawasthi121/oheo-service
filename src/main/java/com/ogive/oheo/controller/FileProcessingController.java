@@ -92,7 +92,7 @@ public class FileProcessingController {
 	}
 	
 	@RequestMapping(path = "/", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<Object> uploadFile(@RequestPart("file") MultipartFile file) {
+	public ResponseEntity<Object> uploadFile(@RequestParam("file")  MultipartFile file) {
 		LOG.info("uploadFile request received@@");
 		Images fileEntity = new Images();
 		fileEntity.setName(StringUtils.cleanPath(file.getOriginalFilename()));
@@ -109,31 +109,32 @@ public class FileProcessingController {
 	}
 	
 	
-	@PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PutMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> updateImage(@PathVariable Long id, @RequestPart("file") MultipartFile file) {
 		LOG.info("updateImage requested record id {} ", id);
+
 		Optional<Images> entityData = imagesRepository.findById(id);
 
-		if (Objects.isNull(entityData.get())) {
-			throw new ValidationException("Unable to find file against id " + id);
+		if (!entityData.isPresent()) {
+			return new ResponseEntity<Object>(new ErrorResponseDTO("Unable to find file against id = " + id),
+					HttpStatus.BAD_REQUEST);
 		}
-		if (entityData.isPresent()) {
+
+		try {
 			Images fileEntity = entityData.get();
 			fileEntity.setName(StringUtils.cleanPath(file.getOriginalFilename()));
 			fileEntity.setContentType(file.getContentType());
-			try {
-				fileEntity.setData(file.getBytes());
-			} catch (IOException e) {
-				LOG.error("@@@@@ Exception during reading file bytes data", e);
-				throw new ValidationException(e.getMessage());
-			}
+			fileEntity.setData(file.getBytes());
 			fileEntity.setSize(file.getSize());
-			Images savedImage = imagesRepository.save(fileEntity);
-			return new ResponseEntity<Object>(savedImage.getId(), HttpStatus.OK);
+			imagesRepository.save(fileEntity);
+			return new ResponseEntity<Object>(HttpStatus.OK);
+		} catch (Exception e) {
+			LOG.error("Exception while updading file id  = {}  ...  {}", id, e);
+			return new ResponseEntity<Object>(new ErrorResponseDTO(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a file with id=" + id),
-				HttpStatus.BAD_REQUEST);
+
 	}
+	
 
 	@ApiOperation(value = "Returns all instances of the type", notes = "Returns all instances of the type", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/", produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -152,7 +153,6 @@ public class FileProcessingController {
 		List<ImagesResponseDTO> allDTO = new ArrayList<>();
 		Page<Images> pages = imagesRepository.findAll(filterImagesByName(criteria).and(filterImagesByStatus(criteria)),
 				paging);
-
 		if (pages.hasContent()) {
 			pages.getContent().forEach(entity -> {
 				ImagesResponseDTO dto = new ImagesResponseDTO();

@@ -2,6 +2,7 @@ package com.ogive.oheo.persistence.entities;
 
 import javax.persistence.Entity;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -49,7 +50,7 @@ public class Images {
 	private ImageType imageType;
 
 	@JsonIgnore
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "VEHICLE_DETAIL_ID")
 	private VehicleDetail vehicleDetail;
 
@@ -62,11 +63,11 @@ public class Images {
 	}
 
 	@JsonIgnore
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "PRODUCT_ID")
 	private Product product;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "CHARGING_PRODUCT_ID")
 	private ChargingProduct chargingProduct;
 
