@@ -7,4 +7,5 @@ import com.ogive.oheo.persistence.entities.ProductSpecification;
 
 public interface ProductSpecificationRepository extends CrudRepository<ProductSpecification, Long>, JpaSpecificationExecutor<ProductSpecification> {
 
+	void deleteByProductId(long productId);
 }

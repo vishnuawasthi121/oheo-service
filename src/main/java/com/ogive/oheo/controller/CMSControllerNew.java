@@ -263,20 +263,18 @@ public class CMSControllerNew {
 		specificationEntity.setProduct(productEntity);
 		// Save product specification
 		productSpecificationRepository.save(specificationEntity);
-
 		// Save Image
 		List<MultipartFile> imagesFile = productRequestDTO.getImages();
 		if (null != imagesFile) {
-			imagesFile.forEach(image -> {
+			imagesFile.stream().filter(image -> image != null && !image.isEmpty()).forEach(image -> {
 				Images fileEntity = new Images();
 				multiPartToFileEntity(image, fileEntity, productRequestDTO.getImageType());
 				fileEntity.setProduct(productEntity);
 				imagesRepository.save(fileEntity);
 			});
 		}
-
 		// Save brochure
-		if (null != productRequestDTO.getBrochure()) {
+		if (null !=productRequestDTO.getBrochure() && !productRequestDTO.getBrochure().isEmpty()) {
 			Images brochure = new Images();
 			multiPartToFileEntity(productRequestDTO.getBrochure(), brochure, productRequestDTO.getImageType());
 			brochure.setProduct(productEntity);
@@ -295,7 +293,7 @@ public class CMSControllerNew {
 		}
 		
 		//  Save Video file 
-		if (null != productRequestDTO.getVideo()) {
+		if (null != productRequestDTO.getVideo() && !productRequestDTO.getVideo().isEmpty()) {
 			Images video = new Images();
 			multiPartToFileEntity(productRequestDTO.getVideo(), video, ImageType.Video);
 			video.setProduct(productEntity);
@@ -484,8 +482,13 @@ public class CMSControllerNew {
 			imagesRepository.deleteByProductId(id);
 			//Delete Slider 
 			sliderRepository.deleteByProductId(id);
+			//Delete product specification 
+			productSpecificationRepository.deleteByProductId(id);
+			//Delete product features 
+			featuresRepository.deleteByProductId(id);
 			//Now delete product			
 			productRepository.delete(entityData.get());
+			
 		} else {
 			LOG.info("Did not find an Product entity to delete");
 		}
@@ -636,7 +639,7 @@ public class CMSControllerNew {
 
 		// Save Image
 		MultipartFile image = requestBody.getImage();
-		if (null != image) {
+		if (null != image   && !image.isEmpty()) {
 			Images fileEntity = new Images();
 			multiPartToFileEntity(image, fileEntity, ImageType.Other);
 			Images savedImage = imagesRepository.save(fileEntity);
@@ -648,9 +651,9 @@ public class CMSControllerNew {
 	}
 
 	@Transactional
-	@ApiOperation(value = "Vehicle maintenace record - CMS Admin", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	@PutMapping(path = "/vehicle-maintenance-records/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> updateVehicleMaintenanceRecord(@PathVariable Long id,@ModelAttribute VehicleMaintenanceRecordRequestDTO requestBody) {
+	@ApiOperation(value = "Vehicle maintenace record - CMS Admin", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PutMapping(path = "/vehicle-maintenance-records/{id}",produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> updateVehicleMaintenanceRecord(@PathVariable Long id,@Valid  @ModelAttribute VehicleMaintenanceRecordRequestDTO requestBody) {
 		LOG.info("updateVehicleMaintenanceRecord  received@@   {}", requestBody);
 
 		Optional<VehicleMaintenanceRecord> entityData = vehicleMaintenanceRecordRepository.findById(id);
@@ -718,7 +721,7 @@ public class CMSControllerNew {
 
 			// Save Image
 			MultipartFile image = requestBody.getImage();
-			if (null != image) {
+			if (null != image && !image.isEmpty()) {
 				Images fileEntity = entity.getImage() == null ? new Images() : entity.getImage();
 				multiPartToFileEntity(image, fileEntity, ImageType.Other);
 				imagesRepository.save(fileEntity);

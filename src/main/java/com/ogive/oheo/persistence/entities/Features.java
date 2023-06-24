@@ -6,6 +6,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -18,7 +19,7 @@ import lombok.ToString;
 @Getter
 @ToString
 @NoArgsConstructor
-
+@NamedQuery(name="Features.deleteByProductId", query="delete from ProductSpecification where product.id  =:productId")
 @Table(name = "FEATURES")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_FEATURES", sequenceName = "SEQ_FEATURES")
 @Entity

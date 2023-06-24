@@ -6,6 +6,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -22,6 +23,7 @@ import lombok.ToString;
 @ToString
 @NoArgsConstructor
 
+@NamedQuery(name="ProductSpecification.deleteByProductId", query="delete from ProductSpecification where product.id  =:productId")
 @Table(name = "PRODUCT_SPECIFICATION")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_PRODUCT_SPECIFICATION", sequenceName = "SEQ_PRODUCT_SPECIFICATION")
 @Entity
@@ -61,7 +63,7 @@ public class ProductSpecification {
 	// @ManyToOne
 	// @JoinColumn(name = "PRODUCT_ID")
 	@OneToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "product_id", referencedColumnName = "id")
+	@JoinColumn(name = "product_id", referencedColumnName = "id",nullable = true)
 	private Product product;
 
 }
