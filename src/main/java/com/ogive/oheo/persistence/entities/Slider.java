@@ -8,6 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -24,6 +25,7 @@ import lombok.ToString;
 @ToString
 @NoArgsConstructor
 
+@NamedQuery(name="Slider.deleteByProductId", query="delete from Slider where product.id  =:productId")
 @Table(name = "SLIDER")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_SLIDER", sequenceName = "SEQ_SLIDER")
 @Entity
@@ -49,6 +51,6 @@ public class Slider {
 	private String contentType;
 
 	@ManyToOne
-	@JoinColumn(name = "PRODUCT_ID")
+	@JoinColumn(name = "PRODUCT_ID",nullable = true)
 	private Product product;
 }

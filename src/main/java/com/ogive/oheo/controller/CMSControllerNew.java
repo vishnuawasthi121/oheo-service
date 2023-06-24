@@ -1,7 +1,18 @@
 package com.ogive.oheo.controller;
 
-import static com.ogive.oheo.dto.utils.CMSSpecifications.*;
+import static com.ogive.oheo.dto.utils.CMSSpecifications.filterBuyRequestByEmail;
+import static com.ogive.oheo.dto.utils.CMSSpecifications.filterBuyRequestByName;
+import static com.ogive.oheo.dto.utils.CMSSpecifications.filterBuyRequestByUserId;
+import static com.ogive.oheo.dto.utils.CMSSpecifications.filterChargingProductByName;
+import static com.ogive.oheo.dto.utils.CMSSpecifications.filterChargingProductByStatus;
+import static com.ogive.oheo.dto.utils.CMSSpecifications.filterLiveChargingProduct;
+import static com.ogive.oheo.dto.utils.CMSSpecifications.filterLiveProduct;
+import static com.ogive.oheo.dto.utils.CMSSpecifications.filterMaintenanceRecordByName;
+import static com.ogive.oheo.dto.utils.CMSSpecifications.filterMaintenanceRecordByStatus;
+import static com.ogive.oheo.dto.utils.CMSSpecifications.filterProductByName;
 import static com.ogive.oheo.dto.utils.CMSSpecifications.filterProductByStatus;
+import static com.ogive.oheo.dto.utils.CMSSpecifications.onlyFetchLoggedInUserChargingProduct;
+import static com.ogive.oheo.dto.utils.CMSSpecifications.onlyFetchLoggedInUserProduct;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -435,7 +446,6 @@ public class CMSControllerNew {
 				dto.add(linkTo(methodOn(CMSControllerNew.class).getProduct(product.getUserDetail().getId(),product.getId())).withRel("Product"));
 				allDTO.add(dto);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
@@ -462,11 +472,23 @@ public class CMSControllerNew {
 
 	}
 
+	@Transactional
 	@ApiOperation(value = "Deletes the entity with the given id", notes = "If the entity is not found in the persistence store it is silently ignored.", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@DeleteMapping(path = "/products/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Object> deleteProduct(@PathVariable Long id) {
 		LOG.info("deleteProduct request received @@   {}", id);
-		productRepository.deleteById(id);
+		Optional<Product> entityData = productRepository.findById(id);
+
+		if (entityData.isPresent()) {
+			//Delete Image
+			imagesRepository.deleteByProductId(id);
+			//Delete Slider 
+			sliderRepository.deleteByProductId(id);
+			//Now delete product			
+			productRepository.delete(entityData.get());
+		} else {
+			LOG.info("Did not find an Product entity to delete");
+		}
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
 
