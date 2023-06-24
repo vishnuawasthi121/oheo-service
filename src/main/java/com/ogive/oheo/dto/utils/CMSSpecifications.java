@@ -19,6 +19,7 @@ import com.ogive.oheo.persistence.entities.VehicleMaintenanceRecord;
 
 public class CMSSpecifications {
 
+	
 	public static Specification<Product> filterLiveProduct() {
 
 		return new Specification<Product>() {
