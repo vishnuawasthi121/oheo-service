@@ -487,7 +487,7 @@ public class CMSControllerNew {
 			//Delete product features 
 			featuresRepository.deleteByProductId(id);
 			//Now delete product			
-			productRepository.delete(entityData.get());
+			productRepository.deleteByProductId(id);
 			
 		} else {
 			LOG.info("Did not find an Product entity to delete");

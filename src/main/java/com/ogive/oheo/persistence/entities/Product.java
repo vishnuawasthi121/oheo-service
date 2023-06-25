@@ -25,6 +25,7 @@ import lombok.ToString;
 
 @NamedQuery(name="Product.dropDownLive", query="SELECT id ,name FROM Product WHERE isLive = :isLive")
 @NamedQuery(name="Product.findProductByUserIdAndId", query="FROM Product WHERE userDetail.id  = :userId AND id = :id")
+@NamedQuery(name="Product.deleteByProductId", query="delete from Product where id  =:productId")
 
 @Setter
 @Getter
