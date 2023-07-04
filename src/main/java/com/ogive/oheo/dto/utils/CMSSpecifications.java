@@ -14,6 +14,7 @@ import com.ogive.oheo.persistence.entities.BuyRequest;
 import com.ogive.oheo.persistence.entities.ChargingProduct;
 import com.ogive.oheo.persistence.entities.Images;
 import com.ogive.oheo.persistence.entities.Product;
+import com.ogive.oheo.persistence.entities.ServiceProviders;
 import com.ogive.oheo.persistence.entities.UserDetail;
 import com.ogive.oheo.persistence.entities.VehicleMaintenanceRecord;
 
@@ -226,5 +227,33 @@ public class CMSSpecifications {
 			}
 		};
 	}
-
+	
+	// Services - Services menu in website and in admin UI
+	
+	public static Specification<ServiceProviders> filterServiceProvidersByName(FilterCriteria filter) {
+		return new Specification<ServiceProviders>() {
+			@Override
+			public Predicate toPredicate(Root<ServiceProviders> root, CriteriaQuery<?> query,
+					CriteriaBuilder criteriaBuilder) {
+				if (ObjectUtils.isEmpty(filter.getFilterByName())) {
+					return criteriaBuilder.conjunction();
+				}
+				return criteriaBuilder.like(criteriaBuilder.upper(root.get("name")),
+						"%" + filter.getFilterByName().toUpperCase() + "%");
+			}
+		};
+	}
+	
+	public static Specification<ServiceProviders> filterServiceProvidersByStatus(FilterCriteria filter) {
+		return new Specification<ServiceProviders>() {
+			@Override
+			public Predicate toPredicate(Root<ServiceProviders> root, CriteriaQuery<?> query,
+					CriteriaBuilder criteriaBuilder) {
+				if (ObjectUtils.isEmpty(filter.getStatus())) {
+					return criteriaBuilder.conjunction();
+				}
+				return criteriaBuilder.equal(root.get("status"), filter.getStatus());
+			}
+		};
+	}
 }

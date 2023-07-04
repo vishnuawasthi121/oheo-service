@@ -29,6 +29,7 @@ import lombok.ToString;
 
 @NamedQuery(name="Images.deleteB1yChargingProductId", query="delete from Images where chargingProduct.id  =:productId")
 @NamedQuery(name="Images.deleteByProductId", query="delete from Images where product.id  =:productId")
+@NamedQuery(name="Images.deleteByProductIdAndImageTypeIn", query="delete from Images where product.id  =:productId  AND imageType IN (:imageTypes)")
 
 @Table(name = "IMAGES")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_IMAGES", sequenceName = "SEQ_IMAGES")
