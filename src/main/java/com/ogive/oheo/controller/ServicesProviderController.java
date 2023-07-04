@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ogive.oheo.constants.ServiceProviderType;
 import com.ogive.oheo.constants.StatusCode;
 import com.ogive.oheo.dto.ErrorResponseDTO;
 import com.ogive.oheo.dto.FilterCriteria;
@@ -105,14 +106,16 @@ public class ServicesProviderController {
 			@RequestParam(required = false) String filterByName,
 			@RequestParam(required = false, defaultValue = "ASC") Direction sortDirection,
 			@RequestParam(required = false, defaultValue = "id") String[] orderBy,
-			@RequestParam(required = false) StatusCode status) {
+			@RequestParam(required = false) StatusCode status,
+			@RequestParam(required = true) ServiceProviderType type) {
 		LOG.info("getAllProducts request received");
 		FilterCriteria criteria = new FilterCriteria(page, size, filterByName, sortDirection, orderBy, status);
+		criteria.setType(type);
 		Direction sort = sortDirection == null ? Direction.ASC : sortDirection;
 		Pageable paging = PageRequest.of(page, size, Sort.by(sort, orderBy));
 		Map<String, Object> response = new HashMap<>();
 		List<ServiceProviderResponseDTO> allDTO = new ArrayList<>();
-		Page<ServiceProviders> pages = serviceProvidersRepository.findAll(CMSSpecifications.filterServiceProvidersByName(criteria).and(CMSSpecifications.filterServiceProvidersByStatus(criteria)), paging);
+		Page<ServiceProviders> pages = serviceProvidersRepository.findAll(CMSSpecifications.filterServiceProvidersByName(criteria).and(CMSSpecifications.filterServiceProvidersByStatus(criteria).and(CMSSpecifications.filterServiceProvidersByType(criteria))), paging);
 		if (pages.hasContent()) {
 			pages.getContent().forEach(entity -> {
 				ServiceProviderResponseDTO dto = new ServiceProviderResponseDTO();

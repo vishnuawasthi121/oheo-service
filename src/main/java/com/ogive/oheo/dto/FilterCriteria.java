@@ -3,6 +3,7 @@ package com.ogive.oheo.dto;
 import org.springframework.data.domain.Sort.Direction;
 
 import com.ogive.oheo.constants.RoleTypes;
+import com.ogive.oheo.constants.ServiceProviderType;
 import com.ogive.oheo.constants.StatusCode;
 
 import lombok.Getter;
@@ -42,6 +43,8 @@ public class FilterCriteria {
 	private String vehicleTypeName;
 	
 	private RoleTypes role;
+	
+	private ServiceProviderType type;
 	
 
 	public FilterCriteria() {

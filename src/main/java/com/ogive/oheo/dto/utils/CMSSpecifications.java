@@ -256,4 +256,15 @@ public class CMSSpecifications {
 			}
 		};
 	}
+	
+	public static Specification<ServiceProviders> filterServiceProvidersByType(FilterCriteria filter) {
+		return new Specification<ServiceProviders>() {
+			@Override
+			public Predicate toPredicate(Root<ServiceProviders> root, CriteriaQuery<?> query,
+					CriteriaBuilder criteriaBuilder) {
+			
+				return criteriaBuilder.equal(root.get("type"), filter.getType());
+			}
+		};
+	}
 }
