@@ -437,7 +437,7 @@ public class CMSControllerNew {
 			Product product = slider.getProduct();
 			dto.setProductId(product.getId());
 			dto.setName(product.getName());
-
+			dto.setProductType(product.getVehicleType().getName());
 			// TODO - Add logic to pull slider image
 			try {
 				dto.add(linkTo(methodOn(CMSControllerNew.class).getSliderById(slider.getId())).withSelfRel());

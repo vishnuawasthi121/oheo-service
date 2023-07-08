@@ -17,7 +17,10 @@ import lombok.ToString;
 public class SliderResponseDTO extends RepresentationModel<SliderResponseDTO> {
 
 	private Long id;
+
 	private Long productId;
+
+	private String productType;
 
 	private String name;
 
