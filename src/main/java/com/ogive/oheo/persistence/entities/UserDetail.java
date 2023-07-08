@@ -30,8 +30,9 @@ import lombok.ToString;
 @Getter
 @ToString
 @NoArgsConstructor
-
-@NamedQuery(name = "UserDetail.findAllSubUsersByRootId", query = "SELECT u FROM UserDetail u WHERE u.root.id = : rootId")
+@NamedQuery(name = "UserDetail.dropDown", query = "SELECT id ,name FROM UserDetail u WHERE u.role.role =:roleType")
+@NamedQuery(name = "UserDetail.dropDownAllUser", query = "SELECT id ,name FROM UserDetail u")
+@NamedQuery(name = "UserDetail.findAllSubUsersByRootId", query = "SELECT u FROM UserDetail u WHERE u.root.id =:rootId")
 
 @Table(name = "USER_DETAIL")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_USER_DETAIL", sequenceName = "SEQ_USER_DETAIL")
@@ -75,7 +76,7 @@ public class UserDetail {
 	@JoinColumn(name = "role_id", nullable = true)
 	private UserRole role;
 
-	// Region details
+	//Region details
 	@ManyToOne
 	@JoinColumn(name = "zone_id", nullable = true)
 	private ZoneDetail zone;

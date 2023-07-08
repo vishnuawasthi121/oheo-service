@@ -486,4 +486,24 @@ public class UserDetailController {
 		});
 		return new ResponseEntity<Object>(dropDowns, HttpStatus.OK);
 	}
+	
+	
+	@ApiOperation(value = "Retrieves User list along with id &  name", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/dropdown", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> getUserDetailDropDown(@RequestParam(required = false) RoleTypes roleType) {
+		LOG.info("getUserDetailDropDown request received@@");
+		List<Map<Object, Object>> dropDowns = new ArrayList<>();
+		List<Object[]> userData = null;
+		if (Objects.nonNull(roleType)) {
+			userData = userDetailRepository.dropDown(roleType);
+		} else {
+			userData = userDetailRepository.dropDownAllUser();
+		}
+		userData.forEach(data -> {
+			Map<Object, Object> map = new HashMap<>();
+			map.put(data[0], data[1]);
+			dropDowns.add(map);
+		});
+		return new ResponseEntity<Object>(dropDowns, HttpStatus.OK);
+	}
 }

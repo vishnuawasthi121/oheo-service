@@ -7,6 +7,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -41,8 +43,12 @@ public class ServiceProviders {
 	@Enumerated(EnumType.STRING)
 	private ServiceProviderType type;
 
-	// TODO - Company/Group
-
 	private String panNumber;
 
+	@ManyToOne
+	@JoinColumn(name = "user_id", nullable = true)
+	private UserDetail userDetail;
+	
+	private String companyOrGroupName;
+	
 }

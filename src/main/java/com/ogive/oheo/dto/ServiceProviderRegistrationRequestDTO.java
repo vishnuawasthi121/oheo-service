@@ -29,5 +29,9 @@ public class ServiceProviderRegistrationRequestDTO {
 	// TODO - Company/Group
 	
 	private String panNumber;
+	
+	//User Table id. Company or Group is user in admin table.
+	private Long companyOrGroupId;
+	private String companyOrGroupName;
 
 }

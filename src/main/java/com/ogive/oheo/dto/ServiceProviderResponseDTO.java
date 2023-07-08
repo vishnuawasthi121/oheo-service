@@ -25,7 +25,10 @@ public class ServiceProviderResponseDTO extends RepresentationModel<ServiceProvi
 
 	private ServiceProviderType type;
 
-	// TODO - Company/Group
+	
 
 	private String panNumber;
+	//Company/Group - UserDetail
+	private Long companyOrGroupId;
+	private String companyOrGroupName;
 }

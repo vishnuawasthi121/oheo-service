@@ -13,6 +13,7 @@ import com.ogive.oheo.dto.FilterCriteria;
 import com.ogive.oheo.persistence.entities.BuyRequest;
 import com.ogive.oheo.persistence.entities.ChargingProduct;
 import com.ogive.oheo.persistence.entities.Images;
+import com.ogive.oheo.persistence.entities.LogisticRequest;
 import com.ogive.oheo.persistence.entities.Product;
 import com.ogive.oheo.persistence.entities.ServiceProviders;
 import com.ogive.oheo.persistence.entities.UserDetail;
@@ -264,6 +265,21 @@ public class CMSSpecifications {
 					CriteriaBuilder criteriaBuilder) {
 			
 				return criteriaBuilder.equal(root.get("type"), filter.getType());
+			}
+		};
+	}
+	
+	// Service  Request 
+	
+	public static Specification<LogisticRequest> filterLogisticRequestByName(FilterCriteria filter) {
+		return new Specification<LogisticRequest>() {
+			@Override
+			public Predicate toPredicate(Root<LogisticRequest> root, CriteriaQuery<?> query,
+					CriteriaBuilder criteriaBuilder) {
+				if (ObjectUtils.isEmpty(filter.getFilterByName())) {
+					return criteriaBuilder.conjunction();
+				}
+				return criteriaBuilder.like(criteriaBuilder.upper(root.get("name")),"%" + filter.getFilterByName().toUpperCase() + "%");
 			}
 		};
 	}
