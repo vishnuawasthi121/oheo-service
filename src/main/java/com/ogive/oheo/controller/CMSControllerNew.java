@@ -74,6 +74,7 @@ import com.ogive.oheo.dto.SliderResponseDTO;
 import com.ogive.oheo.dto.SpecificationDTO;
 import com.ogive.oheo.dto.TermAndConditionsRequestDTO;
 import com.ogive.oheo.dto.TermAndConditionsResponseDTO;
+import com.ogive.oheo.dto.UpdateProductRequestDTO;
 import com.ogive.oheo.dto.VehicleDetailResponseDTO;
 import com.ogive.oheo.dto.VehicleFuelTypeResponseDTO;
 import com.ogive.oheo.dto.VehicleMaintenanceRecordRequestDTO;
@@ -302,6 +303,85 @@ public class CMSControllerNew {
 		return new ResponseEntity<Object>(productEntity.getId(), HttpStatus.OK);
 	}
 
+	@Transactional
+	@ApiOperation(value = "Updates a existing product.Update on Image,Brochure,Features and Video is clean and create operation. It means all the existing data will be erased if new data exist and new data will be inserted", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PutMapping(path = "/products/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> updateProduct(@PathVariable Long id,@ModelAttribute UpdateProductRequestDTO updateProductRequestDTO) {
+		LOG.info("addProduct request received@@   {}", updateProductRequestDTO);
+		// Product Entity
+		Optional<Product> productEntityData = productRepository.findById(id);
+		if (!productEntityData.isPresent()) {
+			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a Product with id=" + id),HttpStatus.BAD_REQUEST);
+		}
+		Product entity   = productEntityData.get();
+		BeanUtils.copyProperties(updateProductRequestDTO, entity   );
+		
+		// ProductSpecification
+		ProductSpecification specificationEntity = entity.getProductSpecification();
+		SpecificationDTO specificationDTO = updateProductRequestDTO.getSpecification();
+		if(Objects.nonNull(specificationDTO)) {
+			if(Objects.nonNull(specificationEntity)) {
+				BeanUtils.copyProperties(specificationDTO, specificationEntity);	
+				productSpecificationRepository.save(specificationEntity);
+			}
+		}
+		//Update Product
+		Product productEntity = productRepository.save(entity);
+		//Update Image
+		List<MultipartFile> imagesFile = updateProductRequestDTO.getImages();
+		if (null != imagesFile) {
+			List<Images> imagesList = new ArrayList<>();
+			imagesFile.stream().filter(image -> image != null && !image.isEmpty()).forEach(image -> {
+				Images fileEntity = new Images();
+				multiPartToFileEntity(image, fileEntity, updateProductRequestDTO.getImageType());
+				fileEntity.setProduct(productEntity);
+				imagesList.add(fileEntity);
+			});
+			
+			if (!CollectionUtils.isEmpty(imagesList)) {
+				List<ImageType> imageTypes = new ArrayList<>();
+				imageTypes.add(ImageType.Other);
+				imageTypes.add(ImageType.Product);
+				imagesRepository.deleteByProductIdAndImageTypeIn(id, imageTypes);
+				imagesRepository.saveAll(imagesList);
+			}
+		}
+		// Save brochure
+		if (null !=updateProductRequestDTO.getBrochure() && !updateProductRequestDTO.getBrochure().isEmpty()) {
+			List<ImageType> imageTypes = new ArrayList<>();
+			imageTypes.add(ImageType.Brochure);
+			imagesRepository.deleteByProductIdAndImageTypeIn(id, imageTypes);
+			
+			Images brochure = new Images();
+			multiPartToFileEntity(updateProductRequestDTO.getBrochure(), brochure, updateProductRequestDTO.getImageType());
+			brochure.setProduct(productEntity);
+			imagesRepository.save(brochure);
+		}
+		// Save features
+		if (!CollectionUtils.isEmpty(updateProductRequestDTO.getFeatures())) {
+			List<Features> featuresList = new ArrayList<>();
+			updateProductRequestDTO.getFeatures().forEach(featureStr -> {
+				Features features = new Features();
+				features.setName(featureStr);
+				features.setProduct(productEntity);
+				featuresList.add(features);
+			});
+			featuresRepository.deleteByProductId(id);
+			featuresRepository.saveAll(featuresList);
+		}
+		
+		//  Save Video file 
+		if (null != updateProductRequestDTO.getVideo() && !updateProductRequestDTO.getVideo().isEmpty()) {
+			Images video = new Images();
+			multiPartToFileEntity(updateProductRequestDTO.getVideo(), video, ImageType.Video);
+			video.setProduct(productEntity);
+			imagesRepository.deleteByProductId(id);
+			imagesRepository.save(video);
+		}
+		return new ResponseEntity<Object>(productEntity.getId(), HttpStatus.OK);
+	}
+	
+	
 	@Transactional
 	@ApiOperation(value = "Retrieves an entity by its id", notes = "Return Id of the record if saved correctly otherwise null", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/{userId}/products/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
