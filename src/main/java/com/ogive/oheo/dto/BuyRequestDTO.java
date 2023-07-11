@@ -25,6 +25,9 @@ public class BuyRequestDTO {
 	// Dealer Id
 	private Long dealerId;
 
+	@NotNull
+	private Long productId;
+
 	private String initial;
 	@NotEmpty
 	private String name;
@@ -34,10 +37,10 @@ public class BuyRequestDTO {
 	private String mailingStateName;
 	private String mailingCityName;
 	private String zipcode;
-	
+
 	@NotEmpty
 	private String contactNumber;
-	
+
 	@NotEmpty
 	private String email;
 

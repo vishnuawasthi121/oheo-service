@@ -60,7 +60,7 @@ public class ChargingStation {
 	private Zipcode zipcode;
 
 	@ManyToOne
-	@JoinColumn(name = "CHARGING_PART_DEALER_ID", nullable = false)
-	private ChargingPartDealer chargingPartDealer;
+	@JoinColumn(name = "USER_DETAIL_ID", nullable = true)
+	private UserDetail userDetail;
 
 }

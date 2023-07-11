@@ -11,7 +11,9 @@ import org.springframework.util.ObjectUtils;
 
 import com.ogive.oheo.dto.FilterCriteria;
 import com.ogive.oheo.persistence.entities.BuyRequest;
+import com.ogive.oheo.persistence.entities.ChargingPartDealer;
 import com.ogive.oheo.persistence.entities.ChargingProduct;
+import com.ogive.oheo.persistence.entities.ChargingStationBuyRequest;
 import com.ogive.oheo.persistence.entities.Images;
 import com.ogive.oheo.persistence.entities.LogisticRequest;
 import com.ogive.oheo.persistence.entities.Product;
@@ -158,10 +160,11 @@ public class CMSSpecifications {
 		return new Specification<BuyRequest>() {
 			@Override
 			public Predicate toPredicate(Root<BuyRequest> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-				if (ObjectUtils.isEmpty(filter.getStatus())) {
+				if (ObjectUtils.isEmpty(filter.getEmail())) {
 					return criteriaBuilder.conjunction();
 				}
-				return criteriaBuilder.equal(root.get("email"), filter.getEmail());
+				return criteriaBuilder.like(criteriaBuilder.upper(root.get("email")),
+						"%" + filter.getEmail().toUpperCase() + "%");
 			}
 		};
 	}
@@ -181,6 +184,32 @@ public class CMSSpecifications {
 		};
 	}
 	
+	//ChargingStationBuyRequest
+	public static Specification<ChargingStationBuyRequest> filterChargingStationBuyRequestByEmail(FilterCriteria filter) {
+		return new Specification<ChargingStationBuyRequest>() {
+			@Override
+			public Predicate toPredicate(Root<ChargingStationBuyRequest> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+				if (ObjectUtils.isEmpty(filter.getEmail())) {
+					return criteriaBuilder.conjunction();
+				}
+				return criteriaBuilder.like(criteriaBuilder.upper(root.get("email")),
+						"%" + filter.getEmail().toUpperCase() + "%");
+			}
+		};
+	}
+	
+	public static Specification<ChargingStationBuyRequest> filterChargingStationBuyRequestByName(FilterCriteria filter) {
+		return new Specification<ChargingStationBuyRequest>() {
+			@Override
+			public Predicate toPredicate(Root<ChargingStationBuyRequest> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+				if (ObjectUtils.isEmpty(filter.getFilterByName())) {
+					return criteriaBuilder.conjunction();
+				}
+				return criteriaBuilder.like(criteriaBuilder.upper(root.get("name")),
+						"%" + filter.getFilterByName().toUpperCase() + "%");
+			}
+		};
+	}
 	
 	// Charging Products 
 	public static Specification<ChargingProduct> filterChargingProductByName(FilterCriteria filter) {

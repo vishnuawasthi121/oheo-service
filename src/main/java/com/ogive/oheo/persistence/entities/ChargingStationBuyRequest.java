@@ -6,29 +6,22 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 @Setter
 @Getter
-@NoArgsConstructor
-@ToString
-@NamedQuery(name="BuyRequest.deleteByProductId", query="delete from BuyRequest where product.id  =:productId")
-@NamedQuery(name="BuyRequest.fetchByRequestByUserId", query="FROM BuyRequest WHERE userDetail.id  = :userId")
 
-@Table(name = "BUY_REQUEST")
-@SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_BUY_REQUEST", sequenceName = "SEQ_BUY_REQUEST")
+@Table(name = "CHARGING_STATION_BUY_REQUEST")
+@SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_CHARGING_STATION_BUY_REQUEST", sequenceName = "SEQ_CHARGING_STATION_BUY_REQUEST")
 @Entity
-public class BuyRequest {
+public class ChargingStationBuyRequest {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BUY_REQUEST")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_CHARGING_STATION_BUY_REQUEST")
 	private Long id;
 
 	@ManyToOne
@@ -46,14 +39,14 @@ public class BuyRequest {
 	@ManyToOne
 	@JoinColumn(name = "CITY_ID")
 	private City city;
-
-	@ManyToOne
-	@JoinColumn(name = "USER_DETAIL_ID",nullable = true)
-	private UserDetail userDetail;
 	
 	@ManyToOne
-	@JoinColumn(name = "PRODUCT_ID",nullable = true)
-	private Product product;
+	@JoinColumn(name = "CHARGING_PRODUCT_ID",nullable = true)
+	private ChargingProduct chargingProduct;
+
+	@ManyToOne
+	@JoinColumn(name = "CHARGING_PART_DEALER_ID", nullable = true)
+	private ChargingPartDealer chargingPartDealer;
 
 	private String initial;
 	private String name;
@@ -66,5 +59,4 @@ public class BuyRequest {
 	private String zipcode;
 	private String contactNumber;
 	private String email;
-
 }

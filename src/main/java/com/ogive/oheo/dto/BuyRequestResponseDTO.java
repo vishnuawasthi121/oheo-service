@@ -39,5 +39,10 @@ public class BuyRequestResponseDTO extends RepresentationModel<BuyRequestRespons
 	private String zipcode;
 	private String contactNumber;
 	private String email;
+	
+	// Product Details 
+	private String productName;
+	private Long productId;
+	
 
 }

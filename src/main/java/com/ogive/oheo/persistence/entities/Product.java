@@ -5,6 +5,7 @@ import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -55,36 +56,36 @@ public class Product {
 	@Enumerated
 	private StatusCode status;
 
-	@OneToMany(mappedBy = "product")
+	@OneToMany(mappedBy = "product",fetch = FetchType.LAZY)
 	private Set<Images> images;
 
-	@OneToOne(mappedBy = "product")
+	@OneToOne(mappedBy = "product",fetch = FetchType.LAZY)
 	private ProductSpecification productSpecification;
 
-	@OneToMany(mappedBy = "product")
+	@OneToMany(mappedBy = "product",fetch = FetchType.LAZY)
 	private Set<Features> features;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "VEHICLE_DETAIL_ID")
 	private VehicleDetail vehicleDetail;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "VEHICLE_MODEL_ID")
 	private VehicleType vehicleType;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "VEHICLE_TYPE_ID")
 	private VehicleModel vehicleModel;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "VEHICLE_FUEL_TYPE_ID")
 	private VehicleFuelType vehicleFuelType;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "VEHICLE_TRANSMISSION_ID")
 	private VehicleTransmission vehicleTransmission;
 	
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "USER_DETAIL_ID")
 	private UserDetail userDetail;
 	

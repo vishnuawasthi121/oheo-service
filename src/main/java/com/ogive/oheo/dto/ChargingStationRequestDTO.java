@@ -43,8 +43,8 @@ public class ChargingStationRequestDTO {
 	@NotNull
 	private Long zipcode;
 
-	// Dealers are charging part dealer
+	// Dealers are user
 	@NotNull
-	private Long chargingPartDealerId;
+	private Long dealerId;
 
 }

@@ -572,6 +572,8 @@ public class CMSControllerNew {
 			productSpecificationRepository.deleteByProductId(id);
 			//Delete product features 
 			featuresRepository.deleteByProductId(id);
+			// Delete Buy Request of the product.
+			buyRequestRepository.deleteByProductId(id);
 			//Now delete product			
 			productRepository.deleteByProductId(id);
 			
@@ -998,6 +1000,13 @@ public class CMSControllerNew {
 		BuyRequest entity = new BuyRequest();
 		BeanUtils.copyProperties(buyRequest, entity);
 
+		
+		Optional<Product> productData = productRepository.findById(buyRequest.getProductId());
+		if(!productData.isPresent()) {
+			return new ResponseEntity<Object>(
+					new ErrorResponseDTO("Did not find a Product with id=" + buyRequest.getProductId()),HttpStatus.BAD_REQUEST);
+		}
+		
 		// userRepository.findById(buyRequest.getDealerId());
 		// Dealer/Distributor 
 		Optional<UserDetail> userDetailData = userDetailRepository.findById(buyRequest.getDealerId());
@@ -1043,6 +1052,7 @@ public class CMSControllerNew {
 		entity.setState(stateData.get());
 		entity.setCompany(companyData.get());
 		entity.setModel(modelData.get());
+		entity.setProduct(productData.get());
 
 		BuyRequest savedEntity = buyRequestRepository.save(entity);
 		return new ResponseEntity<Object>(savedEntity.getId(), HttpStatus.OK);
@@ -1075,7 +1085,10 @@ public class CMSControllerNew {
 				dto.setDealerName(entity.getUserDetail().getName());
 				dto.setDealerId(entity.getUserDetail().getId());
 			}
-
+			if(Objects.nonNull(entity.getProduct())) {
+				dto.setProductId(entity.getProduct().getId());
+				dto.setProductName(entity.getProduct().getName());
+			}
 			dto.add(linkTo(methodOn(CMSControllerNew.class).getBuyRequest(entity.getId())).withSelfRel());
 			return new ResponseEntity<Object>(dto, HttpStatus.OK);
 		}
@@ -1129,6 +1142,11 @@ public class CMSControllerNew {
 				if(Objects.nonNull(entity.getUserDetail())) {
 					dto.setDealerName(entity.getUserDetail().getName());
 					dto.setDealerId(entity.getUserDetail().getId());
+				}
+				
+				if(Objects.nonNull(entity.getProduct())) {
+					dto.setProductId(entity.getProduct().getId());
+					dto.setProductName(entity.getProduct().getName());
 				}
 
 				dto.add(linkTo(methodOn(CMSControllerNew.class).getBuyRequest(entity.getId())).withSelfRel());
