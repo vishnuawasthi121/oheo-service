@@ -41,10 +41,12 @@ public class FilterCriteria {
 	private RoleTypes roleTypes;
 	
 	private String vehicleTypeName;
+	private String fuelType;
 	
 	private RoleTypes role;
 	
 	private ServiceProviderType type;
+	
 	
 
 	public FilterCriteria() {

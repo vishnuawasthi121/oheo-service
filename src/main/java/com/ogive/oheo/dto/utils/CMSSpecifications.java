@@ -17,7 +17,9 @@ import com.ogive.oheo.persistence.entities.LogisticRequest;
 import com.ogive.oheo.persistence.entities.Product;
 import com.ogive.oheo.persistence.entities.ServiceProviders;
 import com.ogive.oheo.persistence.entities.UserDetail;
+import com.ogive.oheo.persistence.entities.VehicleFuelType;
 import com.ogive.oheo.persistence.entities.VehicleMaintenanceRecord;
+import com.ogive.oheo.persistence.entities.VehicleType;
 
 public class CMSSpecifications {
 
@@ -58,6 +60,41 @@ public class CMSSpecifications {
 			}
 		};
 	}
+	
+	// FuelType filter 
+	public static Specification<Product> filterProductByFuelType(FilterCriteria filter) {
+		
+		return new Specification<Product>() {
+		
+			@Override
+			public Predicate toPredicate(Root<Product> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+			
+				if (ObjectUtils.isEmpty(filter.getFuelType())) {
+					return criteriaBuilder.conjunction();
+				}
+				Join<Product, VehicleFuelType> vehicleFuelType = root.join("vehicleFuelType");
+				return criteriaBuilder.like(criteriaBuilder.upper(vehicleFuelType.get("name")),"%" + filter.getFuelType().toUpperCase() + "%");
+			}
+		};
+	}
+	
+	public static Specification<Product> filterProductByVehicleType(FilterCriteria filter) {
+
+		return new Specification<Product>() {
+			@Override
+			public Predicate toPredicate(Root<Product> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+
+				if (ObjectUtils.isEmpty(filter.getVehicleTypeName())) {
+					return criteriaBuilder.conjunction();
+				}
+				// VehicleType vehicleType
+				Join<Product, VehicleType> vehicleType = root.join("vehicleType");
+				return criteriaBuilder.like(criteriaBuilder.upper(vehicleType.get("name")),
+						"%" + filter.getVehicleTypeName().toUpperCase() + "%");
+			}
+		};
+	}
+	
 	
 	public static Specification<Product> onlyFetchLoggedInUserProduct(FilterCriteria filter) {
 		

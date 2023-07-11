@@ -81,6 +81,7 @@ import com.ogive.oheo.dto.VehicleMaintenanceRecordRequestDTO;
 import com.ogive.oheo.dto.VehicleMaintenanceRecordResponseDTO;
 import com.ogive.oheo.dto.VehicleModelResponseDTO;
 import com.ogive.oheo.dto.VehicleTypeResponseDTO;
+import com.ogive.oheo.dto.utils.CMSSpecifications;
 import com.ogive.oheo.exception.ValidationException;
 import com.ogive.oheo.persistence.entities.BuyRequest;
 import com.ogive.oheo.persistence.entities.ChargingProduct;
@@ -442,14 +443,19 @@ public class CMSControllerNew {
 			@RequestParam(required = false) String filterByName,
 			@RequestParam(required = false, defaultValue = "ASC") Direction sortDirection,
 			@RequestParam(required = false, defaultValue = "id") String[] orderBy,
-			@RequestParam(required = false) StatusCode status) {
+			@RequestParam(required = false) StatusCode status,
+			@RequestParam(required = false) String fuelType,
+			@RequestParam(required = false) String vehicleType
+			) {
 		LOG.info("getAllProducts request received");
 		FilterCriteria criteria = new FilterCriteria(page, size, filterByName, sortDirection, orderBy, status);
+		criteria.setVehicleTypeName(vehicleType);
+		criteria.setFuelType(fuelType);
 		Direction sort = sortDirection == null ? Direction.ASC : sortDirection;
 		Pageable paging = PageRequest.of(page, size, Sort.by(sort, orderBy));
 		Map<String, Object> response = new HashMap<>();
 		List<ProductResponseDTO> allDTO = new ArrayList<>();
-		Page<Product> pages = productRepository.findAll(filterProductByName(criteria).and(filterProductByStatus(criteria).and(filterLiveProduct())), paging);
+		Page<Product> pages = productRepository.findAll(filterProductByName(criteria).and(filterProductByStatus(criteria).and(CMSSpecifications.filterProductByFuelType(criteria).and(CMSSpecifications.filterProductByVehicleType(criteria))).and(filterLiveProduct())), paging);
 
 		if (pages.hasContent()) {
 			pages.getContent().forEach(entity -> {
