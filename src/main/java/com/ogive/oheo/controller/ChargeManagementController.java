@@ -297,7 +297,7 @@ public class ChargeManagementController {
 					HttpStatus.BAD_REQUEST);
 		}
 
-		Zipcode zipcode = zipcodeRepository.findByCode(null);
+		Zipcode zipcode = zipcodeRepository.findByCode(requestBody.getZipcode());
 		if (Objects.isNull(zipcode)) {
 			return new ResponseEntity<Object>(
 					new ErrorResponseDTO("Did not find a Zipcode with zipcode=" + requestBody.getZipcode()),
@@ -341,7 +341,8 @@ public class ChargeManagementController {
 			ChargingStationResponseDTO dto = new ChargingStationResponseDTO();
 			ChargingStation entity = entityData.get();
 			BeanUtils.copyProperties(entity, dto);
-			
+			String vehicleType =	entity.getVehicleType() == null ? "" :  entity.getVehicleType().getName();
+			dto.setVehicleType(vehicleType);
 			String cityName= entity.getCity() == null ?      "": entity.getCity().getName();
 			dto.setCityName(cityName);
 			
@@ -386,7 +387,8 @@ public class ChargeManagementController {
 			pages.getContent().forEach(entity -> {
 				ChargingStationResponseDTO dto = new ChargingStationResponseDTO();
 											BeanUtils.copyProperties(entity, dto);
-											
+											String vehicleType =	entity.getVehicleType() == null ? "" :  entity.getVehicleType().getName();
+											dto.setVehicleType(vehicleType);
 											String cityName= entity.getCity() == null ?      "": entity.getCity().getName();
 											dto.setCityName(cityName);
 											
