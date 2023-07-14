@@ -39,7 +39,7 @@ public class UserRole {
 	@Enumerated(EnumType.STRING)
 	private RoleTypes role;
 
-	@Enumerated
+	@Enumerated(EnumType.STRING)
 	private StatusCode status;
 
 }

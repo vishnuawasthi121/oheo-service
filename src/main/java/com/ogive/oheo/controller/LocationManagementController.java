@@ -460,7 +460,6 @@ public class LocationManagementController {
 
 		City city = new City();
 		BeanUtils.copyProperties(cityDTO, city);
-		city.setStatus(cityDTO.getStatus());
 		Optional<State> stateOptional = stateRepository.findById(cityDTO.getStateId());
 
 		if (!stateOptional.isPresent()) {
@@ -612,7 +611,9 @@ public class LocationManagementController {
 	@PostMapping(path = "/zipcodes", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> addZipcode(@Valid @RequestBody ZipcodeRequestDTO zipcodeDTO) {
 		LOG.info("addZipcode request received@@   {}", zipcodeDTO);
+		
 		Optional<City> cityData = cityRepository.findById(zipcodeDTO.getCityId());
+		
 		if (!cityData.isPresent()) {
 			return new ResponseEntity<Object>(
 					new ErrorResponseDTO("Did not find a City with cityId=" + zipcodeDTO.getCityId()),

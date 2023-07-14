@@ -4,6 +4,7 @@ import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -28,7 +29,7 @@ public class City {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_CITY")
 	private Long id;
 
-	@Enumerated
+	@Enumerated(EnumType.STRING)
 	private StatusCode status;
 
 	@Column(nullable = false)

@@ -4,6 +4,7 @@ import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -29,7 +30,7 @@ public class Regions {
 	@Column(nullable = false, unique = true)
 	private String name;
 
-	@Enumerated
+	@Enumerated(EnumType.STRING)
 	private StatusCode status;
 
 	@OneToMany(mappedBy = "region")

@@ -3,6 +3,7 @@ package com.ogive.oheo.persistence.entities;
 import java.util.Set;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -36,7 +37,7 @@ public class ChargingProduct {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_CHARGING_PRODUCT")
 	private Long id;
 
-	@Enumerated
+	@Enumerated(EnumType.STRING)
 	private StatusCode status;
 
 	private String name;

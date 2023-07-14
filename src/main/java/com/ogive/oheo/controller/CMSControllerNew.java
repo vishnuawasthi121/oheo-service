@@ -6,7 +6,6 @@ import static com.ogive.oheo.dto.utils.CMSSpecifications.filterBuyRequestByUserI
 import static com.ogive.oheo.dto.utils.CMSSpecifications.filterChargingProductByName;
 import static com.ogive.oheo.dto.utils.CMSSpecifications.filterChargingProductByStatus;
 import static com.ogive.oheo.dto.utils.CMSSpecifications.filterLiveChargingProduct;
-import static com.ogive.oheo.dto.utils.CMSSpecifications.filterLiveProduct;
 import static com.ogive.oheo.dto.utils.CMSSpecifications.filterMaintenanceRecordByName;
 import static com.ogive.oheo.dto.utils.CMSSpecifications.filterMaintenanceRecordByStatus;
 import static com.ogive.oheo.dto.utils.CMSSpecifications.filterProductByName;
@@ -40,6 +39,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.hateoas.Link;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -67,6 +67,7 @@ import com.ogive.oheo.dto.ChargingProductResponseDTO;
 import com.ogive.oheo.dto.ErrorResponseDTO;
 import com.ogive.oheo.dto.FilterCriteria;
 import com.ogive.oheo.dto.ImagesResponseDTO;
+import com.ogive.oheo.dto.LiveProductResponseDTO;
 import com.ogive.oheo.dto.ProductRequestDTO;
 import com.ogive.oheo.dto.ProductResponseDTO;
 import com.ogive.oheo.dto.ProductSpecificationResponseDTO;
@@ -103,6 +104,7 @@ import com.ogive.oheo.persistence.entities.VehicleMaintenanceRecord;
 import com.ogive.oheo.persistence.entities.VehicleModel;
 import com.ogive.oheo.persistence.entities.VehicleTransmission;
 import com.ogive.oheo.persistence.entities.VehicleType;
+import com.ogive.oheo.persistence.entities.ViewLiveProduct;
 import com.ogive.oheo.persistence.repo.BuyRequestRepository;
 import com.ogive.oheo.persistence.repo.ChargingProductRepository;
 import com.ogive.oheo.persistence.repo.CityRepository;
@@ -123,6 +125,7 @@ import com.ogive.oheo.persistence.repo.VehicleMaintenanceRecordRepository;
 import com.ogive.oheo.persistence.repo.VehicleModelRepository;
 import com.ogive.oheo.persistence.repo.VehicleTransmissionRepository;
 import com.ogive.oheo.persistence.repo.VehicleTypeRepository;
+import com.ogive.oheo.persistence.repo.ViewLiveProductRepository;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -194,6 +197,9 @@ public class CMSControllerNew {
 	
 	@Autowired
 	private UserDetailRepository userDetailRepository;
+	
+	@Autowired
+	private ViewLiveProductRepository viewLiveProductRepository;
 
 	// Product API
 	@Transactional
@@ -436,6 +442,45 @@ public class CMSControllerNew {
 	}
 
 	@Transactional
+	@ApiOperation(value = "Fetch live product by Id", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/products-live/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> getLiveProductById(@PathVariable Long id) {
+		Optional<ViewLiveProduct> productData = viewLiveProductRepository.findById(id);
+		if (productData.isPresent()) {
+			ViewLiveProduct entity = productData.get();
+			Set<Images> images = entity.getImages();
+			LiveProductResponseDTO dto = new LiveProductResponseDTO();
+			BeanUtils.copyProperties(entity, dto);
+
+			Set<String> features = new HashSet<String>();
+			if (entity.getFeatures() != null) {
+				entity.getFeatures().stream().forEach(feature -> {
+					features.add(feature.getName());
+				});
+				dto.setFeatures(features);
+			}
+			if (null != images) {
+				 Set<Link> imagesList = new HashSet<>();
+				images.stream().forEach(image -> {
+					imagesList.add(linkTo(methodOn(FileProcessingController.class).readFile(image.getId())).withRel(image.getImageType().name()));
+					if (null == image.getImageType()) {
+						 //dto.add(linkTo(methodOn(FileProcessingController.class).readFile(image.getId())) .withRel("Product - Image"));
+						imagesList.add(linkTo(methodOn(FileProcessingController.class).readFile(image.getId())) .withRel("Product - Image"));
+					} else {
+						//dto.add(linkTo(methodOn(FileProcessingController.class).readFile(image.getId())).withRel(image.getImageType().name()));
+						imagesList.add(linkTo(methodOn(FileProcessingController.class).readFile(image.getId())).withRel(image.getImageType().name()));
+					}
+				});
+				dto.setImages(imagesList);
+			}
+			
+			dto.add(linkTo(methodOn(CMSControllerNew.class).getLiveProductById(entity.getId())).withSelfRel());
+			return new ResponseEntity<Object>(dto, HttpStatus.OK);
+		}
+		return new ResponseEntity<Object>(HttpStatus.OK);
+	}
+
+	@Transactional
 	@ApiOperation(value = "Returns all instances of the type if they are live. Live product are one will be visible to shop", notes = "Returns all instances of the type", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/products-live", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Object> getLiveProduct(
@@ -453,20 +498,46 @@ public class CMSControllerNew {
 		criteria.setVehicleTypeName(vehicleType);
 		criteria.setFuelType(fuelType);
 		criteria.setVehicleBodyType(vehicleBodyType);
-		
+
 		Direction sort = sortDirection == null ? Direction.ASC : sortDirection;
 		Pageable paging = PageRequest.of(page, size, Sort.by(sort, orderBy));
 		Map<String, Object> response = new HashMap<>();
-		List<ProductResponseDTO> allDTO = new ArrayList<>();
-		
-		Specification<Product> filter = filterLiveProduct().and(filterProductByName(criteria)).and(filterProductByStatus(criteria)).and(CMSSpecifications.filterProductByVehicleBodyType(criteria)).and(CMSSpecifications.filterProductByFuelType(criteria)).and(CMSSpecifications.filterProductByVehicleType(criteria));
-		
-		Page<Product> pages = productRepository.findAll(filter, paging);
+		List<LiveProductResponseDTO> allDTO = new ArrayList<>();
+
+		Specification<ViewLiveProduct> filter = CMSSpecifications.filterLiveProductByName(criteria)
+																.and(CMSSpecifications.filterLiveProductByFuelType(criteria))
+																.and(CMSSpecifications.filterLiveProductByVehicleBodyType(criteria))
+																.and(CMSSpecifications.filterLiveProductByVehicleType(criteria))
+																
+																.and(CMSSpecifications.filterLiveProductByStatus(criteria));
+		Page<ViewLiveProduct> pages = viewLiveProductRepository.findAll(filter, paging);
 
 		if (pages.hasContent()) {
 			pages.getContent().forEach(entity -> {
-				ProductResponseDTO dto = new ProductResponseDTO();
-				populateProductEntityToDTO(entity, dto);
+				Set<Images> images = entity.getImages();
+				LiveProductResponseDTO dto = new LiveProductResponseDTO();
+				BeanUtils.copyProperties(entity, dto);
+				Set<String> features = new HashSet<String>();
+
+				if (entity.getFeatures() != null) {
+					entity.getFeatures().stream().forEach(feature -> {features.add(feature.getName());});
+					dto.setFeatures(features);
+				}
+				if (null != images) {
+					 Set<Link> imagesList = new HashSet<>();
+					images.stream().forEach(image -> {
+						imagesList.add(linkTo(methodOn(FileProcessingController.class).readFile(image.getId())).withRel(image.getImageType().name()));
+						if (null == image.getImageType()) {
+							 //dto.add(linkTo(methodOn(FileProcessingController.class).readFile(image.getId())) .withRel("Product - Image"));
+							imagesList.add(linkTo(methodOn(FileProcessingController.class).readFile(image.getId())) .withRel("Product - Image"));
+						} else {
+							//dto.add(linkTo(methodOn(FileProcessingController.class).readFile(image.getId())).withRel(image.getImageType().name()));
+							imagesList.add(linkTo(methodOn(FileProcessingController.class).readFile(image.getId())).withRel(image.getImageType().name()));
+						}
+					});
+					dto.setImages(imagesList);
+				}
+				dto.add(linkTo(methodOn(CMSControllerNew.class).getLiveProductById(entity.getId())).withSelfRel());
 				allDTO.add(dto);
 			});
 		}

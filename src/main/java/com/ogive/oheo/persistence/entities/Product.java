@@ -4,6 +4,7 @@ import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -53,7 +54,7 @@ public class Product {
 	@Column(name = "IS_LIVE")
 	private String isLive = "N";
 
-	@Enumerated
+	@Enumerated(EnumType.STRING)
 	private StatusCode status;
 
 	@OneToMany(mappedBy = "product",fetch = FetchType.LAZY)
@@ -70,11 +71,11 @@ public class Product {
 	private VehicleDetail vehicleDetail;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "VEHICLE_MODEL_ID")
-	private VehicleType vehicleType;
-
-	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "VEHICLE_TYPE_ID")
+	private VehicleType vehicleType;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "VEHICLE_MODEL_ID")
 	private VehicleModel vehicleModel;
 
 	@ManyToOne(fetch = FetchType.LAZY)

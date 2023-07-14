@@ -1,6 +1,7 @@
 package com.ogive.oheo.persistence.entities;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -46,6 +47,7 @@ public class Slider {
 
 	private String description;
 
+	@Enumerated(EnumType.STRING)
 	private StatusCode status;
 	
 	private String contentType;

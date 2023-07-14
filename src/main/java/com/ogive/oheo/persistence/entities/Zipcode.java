@@ -2,6 +2,7 @@ package com.ogive.oheo.persistence.entities;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -26,7 +27,7 @@ public class Zipcode {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_ZIPCODE")
 	private Long id;
 
-	@Enumerated
+	@Enumerated(EnumType.STRING)
 	private StatusCode status;
 
 	@Column(nullable = false, unique = true)

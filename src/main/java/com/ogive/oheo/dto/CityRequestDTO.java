@@ -5,38 +5,22 @@ import javax.validation.constraints.NotNull;
 
 import com.ogive.oheo.constants.StatusCode;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+@Setter
+@Getter
+@ToString
 public class CityRequestDTO {
 
 	@NotEmpty(message = "name is mandatory")
 	private String name;
-
+	
 	private StatusCode status;
 
 	@NotNull(message = "stateId is mandatory")
 	private Long stateId;
 
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public StatusCode getStatus() {
-		return status;
-	}
-
-	public void setStatus(StatusCode status) {
-		this.status = status;
-	}
-
-	public Long getStateId() {
-		return stateId;
-	}
-
-	public void setStateId(Long stateId) {
-		this.stateId = stateId;
-	}
-
+	
 }

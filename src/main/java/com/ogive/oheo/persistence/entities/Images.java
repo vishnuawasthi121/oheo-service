@@ -1,6 +1,7 @@
 package com.ogive.oheo.persistence.entities;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -49,7 +50,7 @@ public class Images {
 	@Lob
 	private byte[] data;
 
-	@Enumerated
+	@Enumerated(EnumType.STRING)
 	private ImageType imageType;
 
 	@JsonIgnore

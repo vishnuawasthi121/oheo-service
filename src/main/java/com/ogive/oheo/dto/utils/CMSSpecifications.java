@@ -13,7 +13,6 @@ import org.springframework.util.ObjectUtils;
 
 import com.ogive.oheo.dto.FilterCriteria;
 import com.ogive.oheo.persistence.entities.BuyRequest;
-import com.ogive.oheo.persistence.entities.ChargingPartDealer;
 import com.ogive.oheo.persistence.entities.ChargingProduct;
 import com.ogive.oheo.persistence.entities.ChargingStationBuyRequest;
 import com.ogive.oheo.persistence.entities.Images;
@@ -26,6 +25,7 @@ import com.ogive.oheo.persistence.entities.VehicleDetail;
 import com.ogive.oheo.persistence.entities.VehicleFuelType;
 import com.ogive.oheo.persistence.entities.VehicleMaintenanceRecord;
 import com.ogive.oheo.persistence.entities.VehicleType;
+import com.ogive.oheo.persistence.entities.ViewLiveProduct;
 
 public class CMSSpecifications {
 
@@ -127,6 +127,11 @@ public class CMSSpecifications {
 			}
 		};
 	}
+	//
+	
+	
+	
+	
 	
 	
 	public static Specification<Product> onlyFetchLoggedInUserProduct(FilterCriteria filter) {
@@ -380,4 +385,81 @@ public class CMSSpecifications {
 			}
 		};
 	}
+	
+	
+	// ViewLiveProduct 
+	
+	public static Specification<ViewLiveProduct> filterLiveProductByName(FilterCriteria filter) {
+
+		return new Specification<ViewLiveProduct>() {
+			@Override
+			public Predicate toPredicate(Root<ViewLiveProduct> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+				if (ObjectUtils.isEmpty(filter.getFilterByName())) {
+					return criteriaBuilder.conjunction();
+				}
+				return criteriaBuilder.like(criteriaBuilder.upper(root.get("name")),
+						"%" + filter.getFilterByName().toUpperCase() + "%");
+			}
+		};
+	}
+	
+	
+	public static Specification<ViewLiveProduct> filterLiveProductByStatus(FilterCriteria filter) {
+		return new Specification<ViewLiveProduct>() {
+			@Override
+			public Predicate toPredicate(Root<ViewLiveProduct> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+				if (ObjectUtils.isEmpty(filter.getStatus())) {
+					return criteriaBuilder.conjunction();
+				}
+				return criteriaBuilder.equal(root.get("status"), filter.getStatus());
+			}
+		};
+	}
+	
+	
+	public static Specification<ViewLiveProduct> filterLiveProductByFuelType(FilterCriteria filter) {
+		return new Specification<ViewLiveProduct>() {
+			@Override
+			public Predicate toPredicate(Root<ViewLiveProduct> root, CriteriaQuery<?> query,
+					CriteriaBuilder criteriaBuilder) {
+
+				if (ObjectUtils.isEmpty(filter.getFuelType())) {
+					return criteriaBuilder.conjunction();
+				}
+				return criteriaBuilder.like(criteriaBuilder.upper(root.get("fuelType")),
+						"%" + filter.getFuelType().toUpperCase() + "%");
+			}
+		};
+	}
+	
+	public static Specification<ViewLiveProduct> filterLiveProductByVehicleType(FilterCriteria filter) {
+		return new Specification<ViewLiveProduct>() {
+			@Override
+			public Predicate toPredicate(Root<ViewLiveProduct> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+				if (ObjectUtils.isEmpty(filter.getVehicleTypeName())) {
+					return criteriaBuilder.conjunction();
+				}
+				return criteriaBuilder.like(criteriaBuilder.upper( root.get("vehicleType")),
+						"%" + filter.getVehicleTypeName().toUpperCase() + "%");
+			}
+		};
+	}
+	
+	// Filter product based on the Vehicle Body Type.
+	//Product->VehicleDetail->VehicleBodyType
+	public static Specification<ViewLiveProduct> filterLiveProductByVehicleBodyType(FilterCriteria filter) {
+
+		return new Specification<ViewLiveProduct>() {
+			@Override
+			public Predicate toPredicate(Root<ViewLiveProduct> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+
+				if (ObjectUtils.isEmpty(filter.getVehicleBodyType())) {
+					return criteriaBuilder.conjunction();
+				}
+				return criteriaBuilder.like(criteriaBuilder.upper(root.get("vehicleBodyType")),
+						"%" + filter.getVehicleBodyType().toUpperCase() + "%");
+			}
+		};
+	}
+	
 }

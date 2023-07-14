@@ -4,7 +4,9 @@ import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -45,21 +47,21 @@ public class State {
 	@Column(name = "STATE_CODE", nullable = false, unique = true)
 	private String stateCode;
 
-	@Enumerated
+	@Enumerated(EnumType.STRING)
 	private StatusCode status;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "COUNTRY_ID", nullable = false)
 	private Country country;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "REGION_ID")
 	private Regions region;
 
-	@OneToMany(mappedBy = "state")
+	@OneToMany(mappedBy = "state", fetch = FetchType.LAZY)
 	private Set<City> cities;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "ZONE_ID")
 	private ZoneDetail zone;
 
