@@ -39,6 +39,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -445,17 +446,22 @@ public class CMSControllerNew {
 			@RequestParam(required = false, defaultValue = "id") String[] orderBy,
 			@RequestParam(required = false) StatusCode status,
 			@RequestParam(required = false) String fuelType,
-			@RequestParam(required = false) String vehicleType
-			) {
+			@RequestParam(required = false) String vehicleType,
+			@RequestParam(required = false) String vehicleBodyType) {
 		LOG.info("getAllProducts request received");
 		FilterCriteria criteria = new FilterCriteria(page, size, filterByName, sortDirection, orderBy, status);
 		criteria.setVehicleTypeName(vehicleType);
 		criteria.setFuelType(fuelType);
+		criteria.setVehicleBodyType(vehicleBodyType);
+		
 		Direction sort = sortDirection == null ? Direction.ASC : sortDirection;
 		Pageable paging = PageRequest.of(page, size, Sort.by(sort, orderBy));
 		Map<String, Object> response = new HashMap<>();
 		List<ProductResponseDTO> allDTO = new ArrayList<>();
-		Page<Product> pages = productRepository.findAll(filterProductByName(criteria).and(filterProductByStatus(criteria).and(CMSSpecifications.filterProductByFuelType(criteria).and(CMSSpecifications.filterProductByVehicleType(criteria))).and(filterLiveProduct())), paging);
+		
+		Specification<Product> filter = filterLiveProduct().and(filterProductByName(criteria)).and(filterProductByStatus(criteria)).and(CMSSpecifications.filterProductByVehicleBodyType(criteria)).and(CMSSpecifications.filterProductByFuelType(criteria)).and(CMSSpecifications.filterProductByVehicleType(criteria));
+		
+		Page<Product> pages = productRepository.findAll(filter, paging);
 
 		if (pages.hasContent()) {
 			pages.getContent().forEach(entity -> {

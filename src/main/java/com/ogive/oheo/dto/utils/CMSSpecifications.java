@@ -1,5 +1,7 @@
 package com.ogive.oheo.dto.utils;
 
+import java.util.Objects;
+
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
@@ -19,6 +21,8 @@ import com.ogive.oheo.persistence.entities.LogisticRequest;
 import com.ogive.oheo.persistence.entities.Product;
 import com.ogive.oheo.persistence.entities.ServiceProviders;
 import com.ogive.oheo.persistence.entities.UserDetail;
+import com.ogive.oheo.persistence.entities.VehicleBodyType;
+import com.ogive.oheo.persistence.entities.VehicleDetail;
 import com.ogive.oheo.persistence.entities.VehicleFuelType;
 import com.ogive.oheo.persistence.entities.VehicleMaintenanceRecord;
 import com.ogive.oheo.persistence.entities.VehicleType;
@@ -93,6 +97,33 @@ public class CMSSpecifications {
 				Join<Product, VehicleType> vehicleType = root.join("vehicleType");
 				return criteriaBuilder.like(criteriaBuilder.upper(vehicleType.get("name")),
 						"%" + filter.getVehicleTypeName().toUpperCase() + "%");
+			}
+		};
+	}
+	
+	// Filter product based on the Vehicle Body Type.
+	//Product->VehicleDetail->VehicleBodyType
+	public static Specification<Product> filterProductByVehicleBodyType(FilterCriteria filter) {
+
+		return new Specification<Product>() {
+			@Override
+			public Predicate toPredicate(Root<Product> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+
+				if (ObjectUtils.isEmpty(filter.getVehicleBodyType())) {
+					return criteriaBuilder.conjunction();
+				}
+				// VehicleDetail vehicleDetail
+				Join<Product, VehicleDetail> vehicleDetail = root.join("vehicleDetail");
+				if(Objects.isNull(vehicleDetail)) {
+					return criteriaBuilder.conjunction();
+				}
+				//VehicleBodyType vehicleBodyType
+				Join<VehicleDetail, VehicleBodyType> vehicleBodyType = vehicleDetail.join("vehicleBodyType");
+				if(Objects.isNull(vehicleBodyType)) {
+					return criteriaBuilder.conjunction();
+				}
+				return criteriaBuilder.like(criteriaBuilder.upper(vehicleBodyType.get("name")),
+						"%" + filter.getVehicleBodyType().toUpperCase() + "%");
 			}
 		};
 	}
