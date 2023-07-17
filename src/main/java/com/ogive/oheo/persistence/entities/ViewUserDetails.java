@@ -35,7 +35,7 @@ public class ViewUserDetails {
 	private String isValidated;
 	private String password;
 
-	@Enumerated
+	@Enumerated(EnumType.STRING)
 	private StatusCode status;
 	
 	private String zonename;
