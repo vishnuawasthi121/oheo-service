@@ -12,6 +12,13 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.ogive.oheo.constants.StatusCode;
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
+
 @NamedQuery(name="VehicleBodyType.dropDown", query="SELECT id , name FROM VehicleBodyType")
 @Table(name = "VEHICLE_BODY_TYPE")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_VEHICLE_BODY_TYPE", sequenceName = "SEQ_VEHICLE_BODY_TYPE")
@@ -28,28 +35,6 @@ public class VehicleBodyType {
 	@Enumerated(EnumType.STRING)
 	private StatusCode status;
 
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public StatusCode getStatus() {
-		return status;
-	}
-
-	public void setStatus(StatusCode status) {
-		this.status = status;
-	}
+	
 
 }

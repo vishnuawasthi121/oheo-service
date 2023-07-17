@@ -25,6 +25,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+@NamedQuery(name = "Product.upadateVehicleType", query = "UPDATE Product SET vehicleType.id =:toVehicleTypeId WHERE vehicleType.id =:fromVehicleTypeId")
+
 @NamedQuery(name="Product.dropDownLive", query="SELECT id ,name FROM Product WHERE isLive = :isLive")
 @NamedQuery(name="Product.findProductByUserIdAndId", query="FROM Product WHERE userDetail.id  = :userId AND id = :id")
 @NamedQuery(name="Product.deleteByProductId", query="delete from Product where id  =:productId")
@@ -71,23 +73,23 @@ public class Product {
 	private VehicleDetail vehicleDetail;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "VEHICLE_TYPE_ID")
+	@JoinColumn(name = "VEHICLE_TYPE_ID",nullable = true)
 	private VehicleType vehicleType;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "VEHICLE_MODEL_ID")
+	@JoinColumn(name = "VEHICLE_MODEL_ID",nullable = true)
 	private VehicleModel vehicleModel;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "VEHICLE_FUEL_TYPE_ID")
+	@JoinColumn(name = "VEHICLE_FUEL_TYPE_ID",nullable = true)
 	private VehicleFuelType vehicleFuelType;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "VEHICLE_TRANSMISSION_ID")
+	@JoinColumn(name = "VEHICLE_TRANSMISSION_ID",nullable = true)
 	private VehicleTransmission vehicleTransmission;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "USER_DETAIL_ID")
+	@JoinColumn(name = "USER_DETAIL_ID",nullable = true)
 	private UserDetail userDetail;
 	
 	private String availableForLease;

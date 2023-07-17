@@ -31,6 +31,8 @@ import lombok.ToString;
 @Getter
 @ToString
 @NoArgsConstructor
+@NamedQuery(name = "UserDetail.upadateVehicleType", query = "UPDATE UserDetail SET vehicleType.id =:toVehicleTypeId WHERE vehicleType.id =:fromVehicleTypeId")
+
 @NamedQuery(name = "UserDetail.dropDown", query = "SELECT id ,name FROM UserDetail u WHERE u.role.role =:roleType")
 @NamedQuery(name = "UserDetail.dropDownAllUser", query = "SELECT id ,name FROM UserDetail u")
 @NamedQuery(name = "UserDetail.findAllSubUsersByRootId", query = "SELECT u FROM UserDetail u WHERE u.root.id =:rootId")

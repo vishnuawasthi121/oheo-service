@@ -3,6 +3,7 @@ package com.ogive.oheo.persistence.repo;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.repository.CrudRepository;
 
 import com.ogive.oheo.constants.RoleTypes;
@@ -18,4 +19,7 @@ public interface UserDetailRepository extends CrudRepository<UserDetail, Long>, 
 
 	List<Object[]> dropDown(RoleTypes roleType);
 	List<Object[]> dropDownAllUser();
+	
+	@Modifying
+	void upadateVehicleType(Long toVehicleTypeId,Long fromVehicleTypeId);
 }

@@ -16,4 +16,7 @@ public interface ProductRepository  extends CrudRepository<Product, Long>, JpaSp
 	
 	@Modifying
 	void deleteByProductId(long productId);
+	
+	@Modifying
+	void upadateVehicleType(Long toVehicleTypeId,Long fromVehicleTypeId);
 }

@@ -1,7 +1,5 @@
 /*
 DROP VIEW IF EXISTS view_user_details;
-
-
 CREATE VIEW view_user_details (id, name, contact, email, is_validated, password, status, gst_number, root_id,VEHICLE_TYPE_ID ,zonename, statename, cityname, code, role_name, roleid,vehicleTypeName) AS  SELECT u.id,
     u.name,
     u.contact,
@@ -26,14 +24,11 @@ CREATE VIEW view_user_details (id, name, contact, email, is_validated, password,
      JOIN zipcode zipcode ON u.zipcode_id = zipcode.id
      JOIN user_role ur ON u.role_id = ur.id
      JOIN VEHICLE_TYPE  vt ON u.VEHICLE_TYPE_ID = vt.id;
-
-
-
 */
 
 
 /**
-
+DROP VIEW IF EXISTS view_live_product;
 CREATE VIEW view_live_product (id, engine, is_live, name, no_of_seats, price, status, available_for_lease, vehicle_body_type, vehicle_fuel_type, vehicle_model_name, vehicle_type_name, vehicle_tras_name, userdetails_name, chassis_number, color, displacement, engine_type, front_brake_type, fuel_supply_system, gear_box, height, is_turbo_charger, length, no_ofcylinder, power, rear_brake_type, seating_capacity, steering_type, torque, tyre_type, values_configuration, values_per_cylinder, wheel_base, width) AS  SELECT p.id,
     p.engine,
     p.is_live,

@@ -9,6 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -23,6 +24,8 @@ import lombok.ToString;
 @Getter
 @ToString
 @NoArgsConstructor
+
+@NamedQuery(name = "VehicleDetail.upadateVehicleType", query = "UPDATE VehicleDetail SET vehicleType.id =:toVehicleTypeId WHERE vehicleType.id =:fromVehicleTypeId")
 
 @Table(name = "VEHICLE_DETAIL")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_VEHICLE_DETAIL", sequenceName = "SEQ_VEHICLE_DETAIL")
@@ -43,11 +46,11 @@ public class VehicleDetail {
 	private StatusCode status;
 
 	@ManyToOne()
-	@JoinColumn(name = "VEHICLE_TYPE_ID", nullable = false)
+	@JoinColumn(name = "VEHICLE_TYPE_ID", nullable = true)
 	private VehicleType vehicleType;
 	
 	@ManyToOne()
-	@JoinColumn(name = "VEHICLE_BODY_TYPE_ID", nullable = false)
+	@JoinColumn(name = "VEHICLE_BODY_TYPE_ID", nullable = true)
 	private VehicleBodyType vehicleBodyType;
 	
 }

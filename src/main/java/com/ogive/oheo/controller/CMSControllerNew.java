@@ -67,6 +67,7 @@ import com.ogive.oheo.dto.ChargingProductResponseDTO;
 import com.ogive.oheo.dto.ErrorResponseDTO;
 import com.ogive.oheo.dto.FilterCriteria;
 import com.ogive.oheo.dto.ImagesResponseDTO;
+import com.ogive.oheo.dto.LeaseDetailRequestDTO;
 import com.ogive.oheo.dto.LiveProductResponseDTO;
 import com.ogive.oheo.dto.ProductRequestDTO;
 import com.ogive.oheo.dto.ProductResponseDTO;
@@ -91,6 +92,7 @@ import com.ogive.oheo.persistence.entities.City;
 import com.ogive.oheo.persistence.entities.Company;
 import com.ogive.oheo.persistence.entities.Features;
 import com.ogive.oheo.persistence.entities.Images;
+import com.ogive.oheo.persistence.entities.LeaseDetail;
 import com.ogive.oheo.persistence.entities.PrivacyPolicy;
 import com.ogive.oheo.persistence.entities.Product;
 import com.ogive.oheo.persistence.entities.ProductSpecification;
@@ -111,6 +113,7 @@ import com.ogive.oheo.persistence.repo.CityRepository;
 import com.ogive.oheo.persistence.repo.CompanyRepository;
 import com.ogive.oheo.persistence.repo.FeaturesRepository;
 import com.ogive.oheo.persistence.repo.ImagesRepository;
+import com.ogive.oheo.persistence.repo.LeaseDetailRepository;
 import com.ogive.oheo.persistence.repo.PrivacyPolicyRepository;
 import com.ogive.oheo.persistence.repo.ProductRepository;
 import com.ogive.oheo.persistence.repo.ProductSpecificationRepository;
@@ -200,6 +203,9 @@ public class CMSControllerNew {
 	
 	@Autowired
 	private ViewLiveProductRepository viewLiveProductRepository;
+	
+	@Autowired
+	private LeaseDetailRepository leaseDetailRepository;
 
 	// Product API
 	@Transactional
@@ -232,25 +238,26 @@ public class CMSControllerNew {
 		// VehicleFuelType
 		Long vehicleFuelTypeId = productRequestDTO.getVehicleFuelTypeId();
 		Optional<VehicleFuelType> vehicleFuelTypeData = vehicleFuelTypeRepository.findById(vehicleFuelTypeId);
+		
 		if (!vehicleFuelTypeData.isPresent()) {
 			return new ResponseEntity<Object>(
 					new ErrorResponseDTO("Did not find a Entity with id=" + vehicleFuelTypeId), HttpStatus.BAD_REQUEST);
 		}
 		// VehicleTransmission
 		Long vehicleTransmissionId = productRequestDTO.getVehicleTransmissionId();
-		Optional<VehicleTransmission> vehicleTransmissionData = vehicleTransmissionRepository
-				.findById(vehicleTransmissionId);
+		Optional<VehicleTransmission> vehicleTransmissionData = vehicleTransmissionRepository.findById(vehicleTransmissionId);
 
 		if (!vehicleTransmissionData.isPresent()) {
 			return new ResponseEntity<Object>(
-					new ErrorResponseDTO("Did not find a Entity with id=" + vehicleFuelTypeId), HttpStatus.BAD_REQUEST);
+					new ErrorResponseDTO("Did not find a Entity with id=" + vehicleTransmissionId), HttpStatus.BAD_REQUEST);
 		}
 		// VehicleModel
 		Long vehicleModelId = productRequestDTO.getVehicleModelId();
 		Optional<VehicleModel> vehicleModelData = vehicleModelRepository.findById(vehicleModelId);
+		
 		if (!vehicleModelData.isPresent()) {
 			return new ResponseEntity<Object>(
-					new ErrorResponseDTO("Did not find a Entity with id=" + vehicleFuelTypeId), HttpStatus.BAD_REQUEST);
+					new ErrorResponseDTO("Did not find a Entity with id=" + vehicleModelId), HttpStatus.BAD_REQUEST);
 		}
 		// VehicleType
 		Long vehicleTypeId = productRequestDTO.getVehicleTypeId();
@@ -1502,5 +1509,40 @@ public class CMSControllerNew {
 		chargingProductRepository.deleteById(id);
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
+	
+	
+	// Add Lease to product
+	@Transactional
+	@ApiOperation(value = "Add Lease detail on a Vehicle product", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = "/products/{productId}/lease-details", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> addLeaseDetail(@PathVariable Long productId,
+			@ModelAttribute LeaseDetailRequestDTO requestBody) {
+		LOG.info("addLeaseDetail request received@@   {}", requestBody);
+		// Product Entity
+		Optional<Product> productEntityData = productRepository.findById(productId);
+		Product product = productEntityData.get();
+
+		if (!productEntityData.isPresent()) {
+			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a Product with id=" + productId),
+					HttpStatus.BAD_REQUEST);
+		}
+		// Create lease on a product
+		LeaseDetail entity = new LeaseDetail();
+		BeanUtils.copyProperties(requestBody, entity);
+		entity.setProduct(product);
+		entity = leaseDetailRepository.save(entity);
+		if (null != requestBody.getImage() && !requestBody.getImage().isEmpty()) {
+			Images leaveImage = new Images();
+			multiPartToFileEntity(requestBody.getImage(), leaveImage, ImageType.Lease);
+			leaveImage.setProduct(product);
+			imagesRepository.save(leaveImage);
+		}
+		product.setAvailableForLease("Y");
+		// Update Product to mark availableForLease = Y;
+		productRepository.save(product);
+		return new ResponseEntity<Object>(entity.getId(), HttpStatus.OK);
+	}
+	
+	
 	
 }

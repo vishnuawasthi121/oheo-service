@@ -25,6 +25,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
@@ -37,6 +42,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -71,7 +77,9 @@ import com.ogive.oheo.dto.VehicleTypeRequestDTO;
 import com.ogive.oheo.dto.VehicleTypeResponseDTO;
 import com.ogive.oheo.dto.utils.CommonsUtil;
 import com.ogive.oheo.persistence.entities.Company;
+import com.ogive.oheo.persistence.entities.Product;
 import com.ogive.oheo.persistence.entities.PurchaseType;
+import com.ogive.oheo.persistence.entities.UserDetail;
 import com.ogive.oheo.persistence.entities.VehicleBodyType;
 import com.ogive.oheo.persistence.entities.VehicleDetail;
 import com.ogive.oheo.persistence.entities.VehicleFuelType;
@@ -82,9 +90,11 @@ import com.ogive.oheo.persistence.repo.AddressRepository;
 import com.ogive.oheo.persistence.repo.CityRepository;
 import com.ogive.oheo.persistence.repo.CompanyRepository;
 import com.ogive.oheo.persistence.repo.ImagesRepository;
+import com.ogive.oheo.persistence.repo.ProductRepository;
 import com.ogive.oheo.persistence.repo.PurchaseTypeRepository;
 import com.ogive.oheo.persistence.repo.StateRepository;
 import com.ogive.oheo.persistence.repo.TermAndConditionsRepository;
+import com.ogive.oheo.persistence.repo.UserDetailRepository;
 import com.ogive.oheo.persistence.repo.VehicleBodyTypeRepository;
 import com.ogive.oheo.persistence.repo.VehicleDetailRepository;
 import com.ogive.oheo.persistence.repo.VehicleFuelTypeRepository;
@@ -148,6 +158,12 @@ public class VehicleSetupController {
 	
 	@Autowired
 	private TermAndConditionsRepository termAndConditionsRepository;
+	
+	@Autowired
+	private UserDetailRepository userDetailRepository;
+	
+	@Autowired
+	private ProductRepository productRepository;
 
 	// Vehicle company api
 	@ApiOperation(value = "Saves a given entity. Use the returned instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -481,7 +497,6 @@ public class VehicleSetupController {
 			pages.getContent().forEach(entity -> {
 				VehicleTypeResponseDTO dto = new VehicleTypeResponseDTO();
 				BeanUtils.copyProperties(entity, dto);
-				dto.setStatus(entity.getStatus());
 				dto.add(linkTo(methodOn(VehicleSetupController.class).getVehicleType(entity.getId())).withSelfRel());
 				vehicleTypeDTOList.add(dto);
 			});
@@ -494,10 +509,29 @@ public class VehicleSetupController {
 		return new ResponseEntity<Object>(response, HttpStatus.OK);
 	}
 
+	@Transactional
 	@ApiOperation(value = "Deletes the entity with the given id", notes = "If the entity is not found in the persistence store it is silently ignored.", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@DeleteMapping(path = "/vehicle-types/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Object> deleteVehicleType(@PathVariable Long id) {
 		LOG.info("deleteVehicleType request received @@   {}", id);
+		
+		/*
+		 * List<UserDetail> allVehicleTypeUsers = userDetailRepository.findAll(new
+		 * Specification<UserDetail>() {
+		 * 
+		 * @Override public Predicate toPredicate(Root<UserDetail> root,
+		 * CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) { Join<UserDetail,
+		 * VehicleType> vehicleType = root.join("vehicleType"); return
+		 * criteriaBuilder.equal(vehicleType.get("id"), id); } });
+		 * 
+		 * allVehicleTypeUsers.forEach(user -> { user.setVehicleType(null); });
+		 * userDetailRepository.saveAll(allVehicleTypeUsers);
+		 */
+		Long toVehicleTypeId = null;
+		
+		userDetailRepository.upadateVehicleType(toVehicleTypeId,id);
+		vehicleDetailRepository.upadateVehicleType(toVehicleTypeId,id);
+		productRepository.upadateVehicleType(toVehicleTypeId, id); 
 		vehicleTypeRepository.deleteById(id);
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
