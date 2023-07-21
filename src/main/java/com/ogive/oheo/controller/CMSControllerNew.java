@@ -17,6 +17,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -55,6 +56,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -413,6 +415,19 @@ public class CMSControllerNew {
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
 
+	@ApiOperation(value = "Return list of ACTIVE product filtered by Vehicle Type.Get prouct dropdown by vehicle type - Manage shop", notes = "Returns all instances of the type", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/{userId}/products/{vehicleTypeId}/dropdown", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> getProductDropdownByvVehicleType(@PathVariable Long userId, @PathVariable Long vehicleTypeId) {
+		List<Object[]> productData = productRepository.fetchProductDropDownByVehicleType(userId, vehicleTypeId,StatusCode.ACTIVE);
+		List<Map<Object, Object>> dropDowns = new ArrayList<>();
+		productData.forEach(data -> {
+			Map<Object, Object> map = new HashMap<>();
+			map.put(data[0], data[1]);
+			dropDowns.add(map);
+		});
+		return new ResponseEntity<Object>(dropDowns, HttpStatus.OK);
+	}
+	
 	@Transactional
 	@ApiOperation(value = "Returns all instances of the type", notes = "Returns all instances of the type", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/{userId}/products", produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -1281,34 +1296,43 @@ public class CMSControllerNew {
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
 
-	// Privacy Policy
 	@ApiOperation(value = "Saves a given entity. Use the returned instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	@PostMapping(path = "/privacy-policies", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> addPrivacyPolicy(@Valid @RequestBody TermAndConditionsRequestDTO requestBody) {
-		LOG.info("addVehicleCompany request received@@   {}", requestBody);
+	@PostMapping(path = "/privacy-policies", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<Object> addPrivacyPolicy(@RequestPart("file") MultipartFile file) {
+		LOG.info("addVehicleCompany request received@@   {}", file);
 		PrivacyPolicy entity = new PrivacyPolicy();
-		BeanUtils.copyProperties(requestBody, entity);
-		PrivacyPolicy saved = privacyPolicyRepository.save(entity);
-		LOG.info("Saved @@   {}", saved);
-		return new ResponseEntity<Object>(saved.getId(), HttpStatus.OK);
+		entity.setName(StringUtils.cleanPath(file.getOriginalFilename()));
+		entity.setContentType(file.getContentType());
+		try {
+			entity.setData(file.getBytes());
+			entity.setImageType(ImageType.PrivacyPolicy);
+			entity.setSize(file.getSize());
+			entity.setCreatedDate(new Date());
+			privacyPolicyRepository.save(entity);
+			return new ResponseEntity<Object>(HttpStatus.OK);
+		} catch (IOException e) {
+			LOG.error("@@@@@ Exception during reading file bytes data", e);
+			throw new ValidationException(e.getMessage());
+		}
 	}
 
 	@Transactional
 	@ApiOperation(value = "Retrieves an entity by its id", notes = "Return Id of the record if saved correctly otherwise null", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	@GetMapping(path = "/privacy-policies", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<Object> GetPrivacyPolicy() {
-		LOG.info("getTermsAndConditions request received@@   {}");
+	@GetMapping(path = "/privacy-policies")
+	public ResponseEntity<Object> getPrivacyPolicy() {
+		LOG.info("getPrivacyPolicy request received@@ ");
 		Optional<PrivacyPolicy> entityData = privacyPolicyRepository.findFirstByOrderByCreatedDateDesc();
-		if (entityData.isPresent()) {
-			PrivacyPolicy entity = entityData.get();
-			TermAndConditionsResponseDTO dto = new TermAndConditionsResponseDTO();
-			entity.setCreatedDate(new java.util.Date());
-			BeanUtils.copyProperties(entity, dto);
-			return new ResponseEntity<Object>(dto, HttpStatus.OK);
+		if (!entityData.isPresent()) {
+			return ResponseEntity.notFound().build();
 		}
-		return new ResponseEntity<Object>(HttpStatus.OK);
+		PrivacyPolicy policy = entityData.get();
+		return ResponseEntity.ok()
+				// Use below to enable download
+				// .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" +
+				// images.getName() + "\"")
+				.header(HttpHeaders.CONTENT_DISPOSITION, "filename=\"" + policy.getName() + "\"")
+				.contentType(MediaType.valueOf(policy.getContentType())).body(policy.getData());
 	}
-
 	// Charging product api
 	@Transactional
 	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)

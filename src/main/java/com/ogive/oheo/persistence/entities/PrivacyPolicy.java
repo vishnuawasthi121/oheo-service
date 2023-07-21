@@ -2,14 +2,17 @@ package com.ogive.oheo.persistence.entities;
 
 import java.util.Date;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+
+import com.ogive.oheo.constants.ImageType;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,9 +33,18 @@ public class PrivacyPolicy {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_PRIVACY_POLICY")
 	private Long id;
 
-	@Lob
-	@Column(nullable = false)
-	private String contents;
-
 	private Date createdDate;
+	
+	
+	private String name;
+
+	private String contentType;
+
+	private Long size;
+
+	@Lob
+	private byte[] data;
+
+	@Enumerated(EnumType.STRING)
+	private ImageType imageType;
 }

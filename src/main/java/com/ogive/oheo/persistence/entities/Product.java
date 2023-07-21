@@ -25,6 +25,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+@NamedQuery(name="Product.fetchProductDropDownByVehicleType", query="SELECT id ,name FROM Product WHERE userDetail.id =:userId AND vehicleType.id =:vehicleTypeId AND status = :status" )
+
 @NamedQuery(name = "Product.upadateVehicleType", query = "UPDATE Product SET vehicleType.id =:toVehicleTypeId WHERE vehicleType.id =:fromVehicleTypeId")
 
 @NamedQuery(name="Product.dropDownLive", query="SELECT id ,name FROM Product WHERE isLive = :isLive")
@@ -62,14 +64,14 @@ public class Product {
 	@OneToMany(mappedBy = "product",fetch = FetchType.LAZY)
 	private Set<Images> images;
 
-	@OneToOne(mappedBy = "product",fetch = FetchType.LAZY)
-	private ProductSpecification productSpecification;
-
 	@OneToMany(mappedBy = "product",fetch = FetchType.LAZY)
 	private Set<Features> features;
 
+	@OneToOne(mappedBy = "product",fetch = FetchType.LAZY)
+	private ProductSpecification productSpecification;
+	
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "VEHICLE_DETAIL_ID")
+	@JoinColumn(name = "VEHICLE_DETAIL_ID",nullable = true)
 	private VehicleDetail vehicleDetail;
 
 	@ManyToOne(fetch = FetchType.LAZY)

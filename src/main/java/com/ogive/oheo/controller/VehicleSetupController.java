@@ -508,6 +508,9 @@ public class VehicleSetupController {
 		LOG.info("Total vehicleTypeDTOList count {}", vehicleTypeDTOList.size());
 		return new ResponseEntity<Object>(response, HttpStatus.OK);
 	}
+	
+	
+	
 
 	@Transactional
 	@ApiOperation(value = "Deletes the entity with the given id", notes = "If the entity is not found in the persistence store it is silently ignored.", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
