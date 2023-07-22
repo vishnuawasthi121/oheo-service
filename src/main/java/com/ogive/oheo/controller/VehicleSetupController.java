@@ -539,7 +539,7 @@ public class VehicleSetupController {
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
 	
-	@ApiOperation(value = "Retrieves VehicleModel dropdown list", notes = "Retrieves VehicleModel dropdown list", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@ApiOperation(value = "Vehicle Type dropdown list", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/vehicle-types/dropdown", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Object> vehicleTypeDropdown() {
 		LOG.info("vehicleTypeDropdown request received@@");

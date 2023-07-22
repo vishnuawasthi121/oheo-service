@@ -76,4 +76,22 @@ CREATE VIEW view_live_product (id, engine, is_live, name, no_of_seats, price, st
   WHERE p.status::text = 'ACTIVE'::text;
 
 
+
+DROP VIEW IF EXISTS view_product_lease;
+CREATE VIEW view_product_lease (product_id, product_name, status, lease_id, description, down_payment, duration, km_validity, monthly_emi, created_date, updated_date, image_id) AS  SELECT p.id AS product_id,
+    p.name AS product_name,
+    p.status,
+    lease.id AS lease_id,
+    lease.description,
+    lease.down_payment,
+    lease.duration,
+    lease.km_validity,
+    lease.monthly_emi,
+    lease.created_date,
+    lease.updated_date,
+    image.id AS image_id
+   FROM lease_detail lease
+     JOIN product p ON lease.product_id = p.id
+     JOIN images image ON image.lease_id = lease.id;
+
 */

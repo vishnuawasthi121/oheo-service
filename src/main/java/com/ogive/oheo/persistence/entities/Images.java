@@ -27,10 +27,10 @@ import lombok.ToString;
 @ToString
 @NoArgsConstructor
 
-
-@NamedQuery(name="Images.deleteB1yChargingProductId", query="delete from Images where chargingProduct.id  =:productId")
-@NamedQuery(name="Images.deleteByProductId", query="delete from Images where product.id  =:productId")
-@NamedQuery(name="Images.deleteByProductIdAndImageTypeIn", query="delete from Images where product.id  =:productId  AND imageType IN (:imageTypes)")
+@NamedQuery(name = "Images.deleteB1yChargingProductId", query = "delete from Images where chargingProduct.id  =:productId")
+@NamedQuery(name = "Images.deleteByProductId", query = "delete from Images where product.id  =:productId")
+@NamedQuery(name = "Images.deleteByProductIdAndImageTypeIn", query = "delete from Images where product.id  =:productId  AND imageType IN (:imageTypes)")
+@NamedQuery(name = "Images.deleteByLeaseDetailAndImageTypeIn", query = "delete from Images where leaseDetail.id  =:leaseId  AND imageType IN (:imageTypes)")
 
 @Table(name = "IMAGES")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_IMAGES", sequenceName = "SEQ_IMAGES")
@@ -55,7 +55,7 @@ public class Images {
 
 	@JsonIgnore
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "VEHICLE_DETAIL_ID")
+	@JoinColumn(name = "VEHICLE_DETAIL_ID", nullable = true)
 	private VehicleDetail vehicleDetail;
 
 	public Product getProduct() {
@@ -68,11 +68,15 @@ public class Images {
 
 	@JsonIgnore
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "PRODUCT_ID")
+	@JoinColumn(name = "PRODUCT_ID", nullable = true)
 	private Product product;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "CHARGING_PRODUCT_ID")
+	@JoinColumn(name = "CHARGING_PRODUCT_ID", nullable = true)
 	private ChargingProduct chargingProduct;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "LEASE_ID", nullable = true)
+	private LeaseDetail leaseDetail;
 
 }

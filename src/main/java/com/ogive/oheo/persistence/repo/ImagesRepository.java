@@ -19,4 +19,8 @@ public interface ImagesRepository extends CrudRepository<Images, Long> , JpaSpec
 	
 	@Modifying
 	void deleteByProductIdAndImageTypeIn(Long productId, List<ImageType> imageTypes);
+	
+	
+	@Modifying
+	void deleteByLeaseDetailAndImageTypeIn(Long leaseId, List<ImageType> imageTypes);
 }

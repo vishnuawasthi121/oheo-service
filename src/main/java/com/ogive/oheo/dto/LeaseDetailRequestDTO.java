@@ -28,4 +28,6 @@ public class LeaseDetailRequestDTO {
 
 	private MultipartFile image;
 
+	private Long leaseId;
+
 }

@@ -28,6 +28,7 @@ import lombok.ToString;
 @NamedQuery(name="Product.fetchProductDropDownByVehicleType", query="SELECT id ,name FROM Product WHERE userDetail.id =:userId AND vehicleType.id =:vehicleTypeId AND status = :status" )
 
 @NamedQuery(name = "Product.upadateVehicleType", query = "UPDATE Product SET vehicleType.id =:toVehicleTypeId WHERE vehicleType.id =:fromVehicleTypeId")
+@NamedQuery(name = "Product.upadateSetAvailableForLease", query = "UPDATE Product SET availableForLease =:availableForLease WHERE id =:id")
 
 @NamedQuery(name="Product.dropDownLive", query="SELECT id ,name FROM Product WHERE isLive = :isLive")
 @NamedQuery(name="Product.findProductByUserIdAndId", query="FROM Product WHERE userDetail.id  = :userId AND id = :id")

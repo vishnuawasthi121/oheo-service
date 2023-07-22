@@ -69,7 +69,6 @@ import com.ogive.oheo.dto.ChargingProductResponseDTO;
 import com.ogive.oheo.dto.ErrorResponseDTO;
 import com.ogive.oheo.dto.FilterCriteria;
 import com.ogive.oheo.dto.ImagesResponseDTO;
-import com.ogive.oheo.dto.LeaseDetailRequestDTO;
 import com.ogive.oheo.dto.LiveProductResponseDTO;
 import com.ogive.oheo.dto.ProductRequestDTO;
 import com.ogive.oheo.dto.ProductResponseDTO;
@@ -87,6 +86,7 @@ import com.ogive.oheo.dto.VehicleMaintenanceRecordResponseDTO;
 import com.ogive.oheo.dto.VehicleModelResponseDTO;
 import com.ogive.oheo.dto.VehicleTypeResponseDTO;
 import com.ogive.oheo.dto.utils.CMSSpecifications;
+import com.ogive.oheo.dto.utils.CommonsUtil;
 import com.ogive.oheo.exception.ValidationException;
 import com.ogive.oheo.persistence.entities.BuyRequest;
 import com.ogive.oheo.persistence.entities.ChargingProduct;
@@ -94,7 +94,6 @@ import com.ogive.oheo.persistence.entities.City;
 import com.ogive.oheo.persistence.entities.Company;
 import com.ogive.oheo.persistence.entities.Features;
 import com.ogive.oheo.persistence.entities.Images;
-import com.ogive.oheo.persistence.entities.LeaseDetail;
 import com.ogive.oheo.persistence.entities.PrivacyPolicy;
 import com.ogive.oheo.persistence.entities.Product;
 import com.ogive.oheo.persistence.entities.ProductSpecification;
@@ -286,7 +285,7 @@ public class CMSControllerNew {
 		if (null != imagesFile) {
 			imagesFile.stream().filter(image -> image != null && !image.isEmpty()).forEach(image -> {
 				Images fileEntity = new Images();
-				multiPartToFileEntity(image, fileEntity, productRequestDTO.getImageType());
+				CommonsUtil.multiPartToFileEntity(image, fileEntity, productRequestDTO.getImageType());
 				fileEntity.setProduct(productEntity);
 				imagesRepository.save(fileEntity);
 			});
@@ -294,7 +293,7 @@ public class CMSControllerNew {
 		// Save brochure
 		if (null !=productRequestDTO.getBrochure() && !productRequestDTO.getBrochure().isEmpty()) {
 			Images brochure = new Images();
-			multiPartToFileEntity(productRequestDTO.getBrochure(), brochure, productRequestDTO.getImageType());
+			CommonsUtil.multiPartToFileEntity(productRequestDTO.getBrochure(), brochure, productRequestDTO.getImageType());
 			brochure.setProduct(productEntity);
 			imagesRepository.save(brochure);
 		}
@@ -313,7 +312,7 @@ public class CMSControllerNew {
 		//  Save Video file 
 		if (null != productRequestDTO.getVideo() && !productRequestDTO.getVideo().isEmpty()) {
 			Images video = new Images();
-			multiPartToFileEntity(productRequestDTO.getVideo(), video, ImageType.Video);
+			CommonsUtil.multiPartToFileEntity(productRequestDTO.getVideo(), video, ImageType.Video);
 			video.setProduct(productEntity);
 			imagesRepository.save(video);
 		}
@@ -350,7 +349,7 @@ public class CMSControllerNew {
 			List<Images> imagesList = new ArrayList<>();
 			imagesFile.stream().filter(image -> image != null && !image.isEmpty()).forEach(image -> {
 				Images fileEntity = new Images();
-				multiPartToFileEntity(image, fileEntity, updateProductRequestDTO.getImageType());
+				CommonsUtil.multiPartToFileEntity(image, fileEntity, updateProductRequestDTO.getImageType());
 				fileEntity.setProduct(productEntity);
 				imagesList.add(fileEntity);
 			});
@@ -370,7 +369,7 @@ public class CMSControllerNew {
 			imagesRepository.deleteByProductIdAndImageTypeIn(id, imageTypes);
 			
 			Images brochure = new Images();
-			multiPartToFileEntity(updateProductRequestDTO.getBrochure(), brochure, updateProductRequestDTO.getImageType());
+			CommonsUtil.multiPartToFileEntity(updateProductRequestDTO.getBrochure(), brochure, updateProductRequestDTO.getImageType());
 			brochure.setProduct(productEntity);
 			imagesRepository.save(brochure);
 		}
@@ -390,7 +389,7 @@ public class CMSControllerNew {
 		//  Save Video file 
 		if (null != updateProductRequestDTO.getVideo() && !updateProductRequestDTO.getVideo().isEmpty()) {
 			Images video = new Images();
-			multiPartToFileEntity(updateProductRequestDTO.getVideo(), video, ImageType.Video);
+			CommonsUtil.multiPartToFileEntity(updateProductRequestDTO.getVideo(), video, ImageType.Video);
 			video.setProduct(productEntity);
 			imagesRepository.deleteByProductId(id);
 			imagesRepository.save(video);
@@ -748,19 +747,7 @@ public class CMSControllerNew {
 		dto.add(linkTo(methodOn(CMSControllerNew.class).getProduct(entity.getUserDetail().getId(),entity.getId())).withSelfRel());
 	}
 
-	public void multiPartToFileEntity(MultipartFile file, Images fileEntity, ImageType imageType) {
-		fileEntity.setName(StringUtils.cleanPath(file.getOriginalFilename()));
-		fileEntity.setContentType(file.getContentType());
-		try {
-			fileEntity.setData(file.getBytes());
-		} catch (IOException e) {
-			LOG.error("@@@@@ Exception during reading file bytes data", e);
-			throw new ValidationException(e.getMessage());
-		}
-		fileEntity.setImageType(imageType);
-		fileEntity.setSize(file.getSize());
-	}
-
+	
 	// Manage Vehicle Maintenance record
 	@Transactional
 	@ApiOperation(value = "Vehicle maintenace record - CMS Admin", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -828,7 +815,7 @@ public class CMSControllerNew {
 		MultipartFile image = requestBody.getImage();
 		if (null != image   && !image.isEmpty()) {
 			Images fileEntity = new Images();
-			multiPartToFileEntity(image, fileEntity, ImageType.Other);
+			CommonsUtil.multiPartToFileEntity(image, fileEntity, ImageType.Other);
 			Images savedImage = imagesRepository.save(fileEntity);
 			entity.setImage(savedImage);
 		}
@@ -910,7 +897,7 @@ public class CMSControllerNew {
 			MultipartFile image = requestBody.getImage();
 			if (null != image && !image.isEmpty()) {
 				Images fileEntity = entity.getImage() == null ? new Images() : entity.getImage();
-				multiPartToFileEntity(image, fileEntity, ImageType.Other);
+				CommonsUtil.multiPartToFileEntity(image, fileEntity, ImageType.Other);
 				imagesRepository.save(fileEntity);
 			}
 			VehicleMaintenanceRecord savedEntity = vehicleMaintenanceRecordRepository.save(entity);
@@ -1315,9 +1302,42 @@ public class CMSControllerNew {
 			throw new ValidationException(e.getMessage());
 		}
 	}
+	
+	@ApiOperation(value = "Returns all instances of the type", notes = "Returns all instances of the type", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/privacy-policies-list", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> getAllPrivacyPolicy() {
+		List<ImagesResponseDTO> allDTO = new ArrayList<>();
+		Iterable<PrivacyPolicy> data = privacyPolicyRepository.findAll();
+		data.forEach(entity -> {
+			ImagesResponseDTO dto = new ImagesResponseDTO();
+			BeanUtils.copyProperties(entity, dto);
+			dto.add(linkTo(methodOn(CMSControllerNew.class).getPrivacyPolicy(entity.getId())).withSelfRel());
+			allDTO.add(dto);
+		});
+		return new ResponseEntity<Object>(allDTO, HttpStatus.OK);
+	}
+	
+	@Transactional
+	@ApiOperation(value = "Fetch Privacy policy document based on id", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/privacy-policies/{id}")
+	public ResponseEntity<Object> getPrivacyPolicy(@PathVariable Long id) {
+		LOG.info("getPrivacyPolicy request received@@ ");
+		Optional<PrivacyPolicy> entityData = privacyPolicyRepository.findById(id);
+		if (!entityData.isPresent()) {
+			return ResponseEntity.notFound().build();
+		}
+		PrivacyPolicy policy = entityData.get();
+		return ResponseEntity.ok()
+				// Use below to enable download
+				// .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" +
+				// images.getName() + "\"")
+				.header(HttpHeaders.CONTENT_DISPOSITION, "filename=\"" + policy.getName() + "\"")
+				.contentType(MediaType.valueOf(policy.getContentType())).body(policy.getData());
+	}
+	
 
 	@Transactional
-	@ApiOperation(value = "Retrieves an entity by its id", notes = "Return Id of the record if saved correctly otherwise null", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@ApiOperation(value = "Privacy policy file upload works in such a way it will only give you a recently uploaded file to render on the website", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/privacy-policies")
 	public ResponseEntity<Object> getPrivacyPolicy() {
 		LOG.info("getPrivacyPolicy request received@@ ");
@@ -1358,7 +1378,7 @@ public class CMSControllerNew {
 
 		if (null != imagesFile) {
 			Images fileEntity = new Images();
-			multiPartToFileEntity(imagesFile, fileEntity, chargingProductRequestDTO.getImageType());
+			CommonsUtil.multiPartToFileEntity(imagesFile, fileEntity, chargingProductRequestDTO.getImageType());
 			fileEntity.setChargingProduct(savedEntity);
 			imagesRepository.save(fileEntity);
 
@@ -1398,7 +1418,7 @@ public class CMSControllerNew {
 				
 				if (null != fileEntities) {
 					fileEntities.forEach(fileEntity -> {
-						multiPartToFileEntity(imagesFile, fileEntity, chargingProductRequestDTO.getImageType());
+						CommonsUtil.multiPartToFileEntity(imagesFile, fileEntity, chargingProductRequestDTO.getImageType());
 						fileEntity.setChargingProduct(savedEntity);
 						imagesRepository.save(fileEntity);
 					});
@@ -1535,38 +1555,6 @@ public class CMSControllerNew {
 	}
 	
 	
-	// Add Lease to product
-	@Transactional
-	@ApiOperation(value = "Add Lease detail on a Vehicle product", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	@PostMapping(path = "/products/{productId}/lease-details", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> addLeaseDetail(@PathVariable Long productId,
-			@ModelAttribute LeaseDetailRequestDTO requestBody) {
-		LOG.info("addLeaseDetail request received@@   {}", requestBody);
-		// Product Entity
-		Optional<Product> productEntityData = productRepository.findById(productId);
-		Product product = productEntityData.get();
+	
 
-		if (!productEntityData.isPresent()) {
-			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a Product with id=" + productId),
-					HttpStatus.BAD_REQUEST);
-		}
-		// Create lease on a product
-		LeaseDetail entity = new LeaseDetail();
-		BeanUtils.copyProperties(requestBody, entity);
-		entity.setProduct(product);
-		entity = leaseDetailRepository.save(entity);
-		if (null != requestBody.getImage() && !requestBody.getImage().isEmpty()) {
-			Images leaveImage = new Images();
-			multiPartToFileEntity(requestBody.getImage(), leaveImage, ImageType.Lease);
-			leaveImage.setProduct(product);
-			imagesRepository.save(leaveImage);
-		}
-		product.setAvailableForLease("Y");
-		// Update Product to mark availableForLease = Y;
-		productRepository.save(product);
-		return new ResponseEntity<Object>(entity.getId(), HttpStatus.OK);
-	}
-	
-	
-	
 }

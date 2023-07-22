@@ -26,6 +26,7 @@ import com.ogive.oheo.persistence.entities.VehicleFuelType;
 import com.ogive.oheo.persistence.entities.VehicleMaintenanceRecord;
 import com.ogive.oheo.persistence.entities.VehicleType;
 import com.ogive.oheo.persistence.entities.ViewLiveProduct;
+import com.ogive.oheo.persistence.entities.ViewProductLeaseDetail;
 
 public class CMSSpecifications {
 
@@ -462,4 +463,33 @@ public class CMSSpecifications {
 		};
 	}
 	
+	//Filter Lease Detail
+	public static Specification<ViewProductLeaseDetail> filterLeaseDetailByProductName(FilterCriteria filter) {
+		return new Specification<ViewProductLeaseDetail>() {
+			@Override
+			public Predicate toPredicate(Root<ViewProductLeaseDetail> root, CriteriaQuery<?> query,
+					CriteriaBuilder criteriaBuilder) {
+				if (ObjectUtils.isEmpty(filter.getFilterByName())) {
+					return criteriaBuilder.conjunction();
+				}
+				return criteriaBuilder.like(criteriaBuilder.upper(root.get("productName")),
+						"%" + filter.getFilterByName().toUpperCase() + "%");
+				// return criteriaBuilder.like(root.get("name"), "%" + filter.getFilterByName()
+				// + "%");
+			}
+		};
+	}
+
+	public static Specification<ViewProductLeaseDetail> filterLeaseDetailByProductStatus(FilterCriteria filter) {
+		return new Specification<ViewProductLeaseDetail>() {
+			@Override
+			public Predicate toPredicate(Root<ViewProductLeaseDetail> root, CriteriaQuery<?> query,
+					CriteriaBuilder criteriaBuilder) {
+				if (ObjectUtils.isEmpty(filter.getStatus())) {
+					return criteriaBuilder.conjunction();
+				}
+				return criteriaBuilder.equal(root.get("status"), filter.getStatus());
+			}
+		};
+	}
 }

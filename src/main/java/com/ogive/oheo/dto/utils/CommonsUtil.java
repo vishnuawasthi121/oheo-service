@@ -3,6 +3,7 @@ package com.ogive.oheo.dto.utils;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -14,11 +15,16 @@ import org.apache.commons.text.RandomStringGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.ogive.oheo.constants.ImageType;
 import com.ogive.oheo.controller.VehicleSetupController;
 import com.ogive.oheo.dto.VehicleBodyTypeResponseDTO;
 import com.ogive.oheo.dto.VehicleDetailResponseDTO;
 import com.ogive.oheo.dto.VehicleTypeResponseDTO;
+import com.ogive.oheo.exception.ValidationException;
+import com.ogive.oheo.persistence.entities.Images;
 import com.ogive.oheo.persistence.entities.VehicleBodyType;
 import com.ogive.oheo.persistence.entities.VehicleDetail;
 import com.ogive.oheo.persistence.entities.VehicleType;
@@ -79,4 +85,17 @@ public class CommonsUtil {
 			System.out.println(id);
 	  }
 	 
+	  public static  void multiPartToFileEntity(MultipartFile file, Images fileEntity, ImageType imageType) {
+			fileEntity.setName(StringUtils.cleanPath(file.getOriginalFilename()));
+			fileEntity.setContentType(file.getContentType());
+			try {
+				fileEntity.setData(file.getBytes());
+			} catch (IOException e) {
+				LOG.error("@@@@@ Exception during reading file bytes data", e);
+				throw new ValidationException(e.getMessage());
+			}
+			fileEntity.setImageType(imageType);
+			fileEntity.setSize(file.getSize());
+		}
+
 }

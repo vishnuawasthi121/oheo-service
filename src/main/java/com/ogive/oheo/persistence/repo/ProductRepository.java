@@ -23,4 +23,7 @@ public interface ProductRepository  extends CrudRepository<Product, Long>, JpaSp
 	
 	@Modifying
 	void upadateVehicleType(Long toVehicleTypeId,Long fromVehicleTypeId);
+	
+	@Modifying
+	void upadateSetAvailableForLease(String availableForLease, Long id);
 }
