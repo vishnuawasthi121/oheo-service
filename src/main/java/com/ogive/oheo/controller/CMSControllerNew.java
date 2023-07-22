@@ -335,11 +335,11 @@ public class CMSControllerNew {
 		// ProductSpecification
 		ProductSpecification specificationEntity = entity.getProductSpecification();
 		SpecificationDTO specificationDTO = updateProductRequestDTO.getSpecification();
-		if(Objects.nonNull(specificationDTO)) {
-			if(Objects.nonNull(specificationEntity)) {
-				BeanUtils.copyProperties(specificationDTO, specificationEntity);	
-				productSpecificationRepository.save(specificationEntity);
-			}
+		if (Objects.nonNull(specificationDTO)) {
+			specificationEntity = specificationEntity == null ? new ProductSpecification() : specificationEntity;
+			BeanUtils.copyProperties(specificationDTO, specificationEntity);
+			productSpecificationRepository.save(specificationEntity);
+
 		}
 		//Update Product
 		Product productEntity = productRepository.save(entity);
