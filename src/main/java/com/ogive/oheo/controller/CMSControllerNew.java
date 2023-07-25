@@ -427,6 +427,10 @@ public class CMSControllerNew {
 		return new ResponseEntity<Object>(dropDowns, HttpStatus.OK);
 	}
 	
+	
+	
+	
+	
 	@Transactional
 	@ApiOperation(value = "Returns all instances of the type", notes = "Returns all instances of the type", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/{userId}/products", produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -601,9 +605,7 @@ public class CMSControllerNew {
 		entity.setData(sliderRequest.getSlider().getBytes());
 		entity.setContentType(sliderRequest.getSlider().getContentType());
 		entity.setName(StringUtils.cleanPath(sliderRequest.getSlider().getOriginalFilename()));
-
 		entity.setProduct(productData.get());
-
 		Slider savedData = sliderRepository.save(entity);
 		LOG.info("Saved @@   {}", savedData);
 		return new ResponseEntity<Object>(savedData.getId(), HttpStatus.OK);
@@ -1555,6 +1557,17 @@ public class CMSControllerNew {
 	}
 	
 	
-	
+	@ApiOperation(value = "All active products dropdown", notes = "Returns all instances of the type", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/products/dropdown", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> getActiveProductDropdown() {
+		List<Object[]> productData = productRepository.dropDown(StatusCode.ACTIVE);
+		List<Map<Object, Object>> dropDowns = new ArrayList<>();
+		productData.forEach(data -> {
+			Map<Object, Object> map = new HashMap<>();
+			map.put(data[0], data[1]);
+			dropDowns.add(map);
+		});
+		return new ResponseEntity<Object>(dropDowns, HttpStatus.OK);
+	}
 
 }
