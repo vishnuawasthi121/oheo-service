@@ -484,7 +484,6 @@ public class VehicleSetupController {
 			@RequestParam(required = false, defaultValue = "id") String[] orderBy,
 			@RequestParam(required = false) StatusCode status) {
 		LOG.info("getVehicleTypees request received");
-
 		FilterCriteria filterCriteria = new FilterCriteria(page, size, filterByName, sortDirection, orderBy, status);
 		LOG.info("filterCriteria    {} ", filterCriteria);
 		Direction sort = sortDirection == null ? Direction.ASC : sortDirection;
@@ -493,10 +492,12 @@ public class VehicleSetupController {
 		List<VehicleTypeResponseDTO> vehicleTypeDTOList = new ArrayList<>();
 		Page<VehicleType> pages = vehicleTypeRepository.findAll(
 				filterVehicleTypeByName(filterCriteria).and(filterVehicleTypeByStatus(filterCriteria)), paging);
+		
 		if (pages.hasContent()) {
 			pages.getContent().forEach(entity -> {
 				VehicleTypeResponseDTO dto = new VehicleTypeResponseDTO();
 				BeanUtils.copyProperties(entity, dto);
+				dto.setDescription(entity.getName()+" Descrption");
 				dto.add(linkTo(methodOn(VehicleSetupController.class).getVehicleType(entity.getId())).withSelfRel());
 				vehicleTypeDTOList.add(dto);
 			});

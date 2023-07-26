@@ -78,7 +78,7 @@ public class ManageLeaseController {
 	@PostMapping(path = "/products/{productId}/lease-details", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> addLeaseDetail(@PathVariable Long productId,@ModelAttribute LeaseDetailRequestDTO requestBody) {
 		LOG.info("addLeaseDetail request received@@   {}", requestBody);
-		// Product Entity
+		//Product Entity
 		Optional<Product> productEntityData = productRepository.findById(productId);
 		Product product = productEntityData.get();
 
@@ -107,8 +107,6 @@ public class ManageLeaseController {
 			leaseImage.setLeaseDetail(entity);
 			imagesRepository.save(leaseImage);
 		}
-		product.setAvailableForLease("Y");
-		// Update Product to mark availableForLease = Y;
 		productRepository.save(product);
 		return new ResponseEntity<Object>(entity.getId(), HttpStatus.OK);
 
@@ -152,7 +150,7 @@ public class ManageLeaseController {
 		imageTypes.add(ImageType.Lease);
 		imagesRepository.deleteByLeaseDetailAndImageTypeIn(leaseId, imageTypes);
 		leaseDetailRepository.deleteById(leaseId);
-		productRepository.upadateSetAvailableForLease("N", productId);
+		//productRepository.upadateSetAvailableForLease("N", productId);
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
 

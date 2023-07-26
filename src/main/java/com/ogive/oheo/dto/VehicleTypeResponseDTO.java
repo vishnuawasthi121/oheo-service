@@ -4,6 +4,12 @@ import org.springframework.hateoas.RepresentationModel;
 
 import com.ogive.oheo.constants.StatusCode;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
+
 public class VehicleTypeResponseDTO extends RepresentationModel<VehicleTypeResponseDTO> {
 
 	private String name;
@@ -12,28 +18,6 @@ public class VehicleTypeResponseDTO extends RepresentationModel<VehicleTypeRespo
 
 	private StatusCode status;
 
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public StatusCode getStatus() {
-		return status;
-	}
-
-	public void setStatus(StatusCode status) {
-		this.status = status;
-	}
+	private String description;
 
 }

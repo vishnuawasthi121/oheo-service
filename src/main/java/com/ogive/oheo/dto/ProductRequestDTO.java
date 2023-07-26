@@ -9,6 +9,7 @@ import javax.validation.constraints.NotNull;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ogive.oheo.constants.ImageType;
+import com.ogive.oheo.constants.LeaseAvailability;
 import com.ogive.oheo.constants.StatusCode;
 
 import lombok.Getter;
@@ -64,6 +65,6 @@ public class ProductRequestDTO {
 	
 	private MultipartFile video;
 
-	private String availableForLease;
+	private LeaseAvailability availableForLease;
 
 }

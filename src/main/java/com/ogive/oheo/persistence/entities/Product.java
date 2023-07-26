@@ -18,6 +18,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.ogive.oheo.constants.LeaseAvailability;
 import com.ogive.oheo.constants.StatusCode;
 
 import lombok.Getter;
@@ -31,7 +32,7 @@ import lombok.ToString;
 @NamedQuery(name = "Product.upadateSetAvailableForLease", query = "UPDATE Product SET availableForLease =:availableForLease WHERE id =:id")
 
 
-@NamedQuery(name="Product.dropDown", query="SELECT id ,name FROM Product WHERE status = :status")
+@NamedQuery(name="Product.dropDownIfAvailableForLease", query="SELECT id ,name FROM Product WHERE status = :status  AND availableForLease ='Y'")
 @NamedQuery(name="Product.dropDownLive", query="SELECT id ,name FROM Product WHERE isLive = :isLive")
 @NamedQuery(name="Product.findProductByUserIdAndId", query="FROM Product WHERE userDetail.id  = :userId AND id = :id")
 @NamedQuery(name="Product.deleteByProductId", query="delete from Product where id  =:productId")
@@ -97,6 +98,7 @@ public class Product {
 	@JoinColumn(name = "USER_DETAIL_ID",nullable = true)
 	private UserDetail userDetail;
 	
-	private String availableForLease;
+	@Enumerated(EnumType.STRING)
+	private LeaseAvailability availableForLease;
 
 }

@@ -17,6 +17,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,10 +31,12 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
+import org.assertj.core.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -79,6 +82,7 @@ import com.ogive.oheo.dto.SpecificationDTO;
 import com.ogive.oheo.dto.TermAndConditionsRequestDTO;
 import com.ogive.oheo.dto.TermAndConditionsResponseDTO;
 import com.ogive.oheo.dto.UpdateProductRequestDTO;
+import com.ogive.oheo.dto.UpdateShopCategoryRequest;
 import com.ogive.oheo.dto.VehicleDetailResponseDTO;
 import com.ogive.oheo.dto.VehicleFuelTypeResponseDTO;
 import com.ogive.oheo.dto.VehicleMaintenanceRecordRequestDTO;
@@ -97,6 +101,7 @@ import com.ogive.oheo.persistence.entities.Images;
 import com.ogive.oheo.persistence.entities.PrivacyPolicy;
 import com.ogive.oheo.persistence.entities.Product;
 import com.ogive.oheo.persistence.entities.ProductSpecification;
+import com.ogive.oheo.persistence.entities.ShopCategory;
 import com.ogive.oheo.persistence.entities.Slider;
 import com.ogive.oheo.persistence.entities.State;
 import com.ogive.oheo.persistence.entities.TermAndConditions;
@@ -118,6 +123,7 @@ import com.ogive.oheo.persistence.repo.LeaseDetailRepository;
 import com.ogive.oheo.persistence.repo.PrivacyPolicyRepository;
 import com.ogive.oheo.persistence.repo.ProductRepository;
 import com.ogive.oheo.persistence.repo.ProductSpecificationRepository;
+import com.ogive.oheo.persistence.repo.ShopCategoryRepository;
 import com.ogive.oheo.persistence.repo.SliderRepository;
 import com.ogive.oheo.persistence.repo.StateRepository;
 import com.ogive.oheo.persistence.repo.TermAndConditionsRepository;
@@ -133,6 +139,7 @@ import com.ogive.oheo.persistence.repo.ViewLiveProductRepository;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Api(tags = "CMS-V2")
 @RestController
@@ -207,6 +214,12 @@ public class CMSControllerNew {
 	
 	@Autowired
 	private LeaseDetailRepository leaseDetailRepository;
+	
+	@Autowired
+	private ShopCategoryRepository shopCategoryRepository;
+	
+	@Value("${website.excluded.shopcategory.names}")
+	private String excludedShopCategories;
 
 	// Product API
 	@Transactional
@@ -330,7 +343,7 @@ public class CMSControllerNew {
 			return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a Product with id=" + id),HttpStatus.BAD_REQUEST);
 		}
 		Product entity   = productEntityData.get();
-		BeanUtils.copyProperties(updateProductRequestDTO, entity   );
+		BeanUtils.copyProperties(updateProductRequestDTO, entity);
 		
 		// ProductSpecification
 		ProductSpecification specificationEntity = entity.getProductSpecification();
@@ -426,10 +439,6 @@ public class CMSControllerNew {
 		});
 		return new ResponseEntity<Object>(dropDowns, HttpStatus.OK);
 	}
-	
-	
-	
-	
 	
 	@Transactional
 	@ApiOperation(value = "Returns all instances of the type", notes = "Returns all instances of the type", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -1557,10 +1566,10 @@ public class CMSControllerNew {
 	}
 	
 	
-	@ApiOperation(value = "All active products dropdown", notes = "Returns all instances of the type", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@ApiOperation(value = "Active products dropdown if available on lease", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/products/dropdown", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Object> getActiveProductDropdown() {
-		List<Object[]> productData = productRepository.dropDown(StatusCode.ACTIVE);
+		List<Object[]> productData = productRepository.dropDownIfAvailableForLease(StatusCode.ACTIVE);
 		List<Map<Object, Object>> dropDowns = new ArrayList<>();
 		productData.forEach(data -> {
 			Map<Object, Object> map = new HashMap<>();
@@ -1570,4 +1579,88 @@ public class CMSControllerNew {
 		return new ResponseEntity<Object>(dropDowns, HttpStatus.OK);
 	}
 
+	
+	//Shop Management 
+	@Tag(name = "Shop Management  - CMS")
+	@ApiOperation(value = "Fetch all shop category - Shop Management", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/shop-management", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> getAllShopCategory(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size, 
+			@RequestParam(required = false) String filterByName,
+			@RequestParam(required = false, defaultValue = "ASC") Direction sortDirection,
+			@RequestParam(required = false, defaultValue = "id") String[] orderBy,
+			@RequestParam(required = false) StatusCode status) {
+		FilterCriteria filter = new FilterCriteria();
+		Direction sort = sortDirection == null ? Direction.ASC : sortDirection;
+		Pageable paging = PageRequest.of(page, size, Sort.by(sort, orderBy));
+		Page<ShopCategory> pages = shopCategoryRepository.findAll(CMSSpecifications.filterShopCategoryByName(filter),
+				paging);
+		Map<String, Object> response = new HashMap<>();
+		List<ShopCategory> allData = new ArrayList<>();
+
+		if (pages.hasContent()) {
+			pages.getContent().forEach(entity -> {
+				allData.add(entity);
+			});
+		}
+		response.put("categories", allData);
+		response.put("currentPage", pages.getNumber());
+		response.put("totalElements", pages.getTotalElements());
+		response.put("totalPages", pages.getTotalPages());
+		return new ResponseEntity<Object>(response, HttpStatus.OK);
+
+	}
+	
+	@Tag(name = "Shop Management  - CMS")
+	@ApiOperation(value = "Update shop category by id", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PutMapping(path = "/shop-management/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> updateShopCategoryStatus(@PathVariable Long id, UpdateShopCategoryRequest request) {
+		Optional<ShopCategory> entityData = shopCategoryRepository.findById(id);
+		if (entityData.isPresent()) {
+			ShopCategory entity = entityData.get();
+			entity.setStatus(request.getStatus());
+			shopCategoryRepository.save(entity);
+			return new ResponseEntity<Object>(entity.getId(), HttpStatus.OK);
+		}
+		return new ResponseEntity<Object>(new ErrorResponseDTO("Did not find a ShopCategory with id=" + id),HttpStatus.BAD_REQUEST);
+	}
+	
+	@Tag(name = "Shop Management  - CMS")
+	@ApiOperation(value = "Delete shop category by id", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@DeleteMapping(path = "/shop-management/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> deleteShopCategoryStatus(@PathVariable Long id) {
+		shopCategoryRepository.deleteById(id);
+		return new ResponseEntity<Object>(HttpStatus.OK);
+	}
+	
+	/**
+	@Tag(name = "Shop Management  - CMS")
+	@ApiOperation(value = "Return ACTIVE  Shop sub category to populate in Shop section in website", notes = "", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/shop-management/dropdown", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> dropDownShopCategory() {
+		List<Object> excludedShopCategoriesList = Arrays.asList(excludedShopCategories.split(";"));
+		List<Object[]> categoryData = shopCategoryRepository.dropDownAvailableShopSections(excludedShopCategoriesList);
+		List<Map<Object, Object>> dropDowns = new ArrayList<>();
+		categoryData.forEach(data -> {
+			Map<Object, Object> map = new HashMap<>();
+			map.put(data[0], data[1]);
+			dropDowns.add(map);
+		});
+		return new ResponseEntity<Object>(dropDowns, HttpStatus.OK);
+	}
+	*/
+	
+	@Tag(name = "Shop Management  - CMS")
+	@ApiOperation(value = "Return ACTIVE  Shop sub category to populate in Shop section in website", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/shop-management/sub-categories", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> shopSubCategories() {
+		List<Object> excludedShopCategoriesList = Arrays.asList(excludedShopCategories.split(";"));
+		List<Object[]> categoryData = shopCategoryRepository.dropDownAvailableShopSections(excludedShopCategoriesList);
+		Map<Object, Object> map = new HashMap<>();
+		List<String> dropDownsNames = categoryData.stream().map(obj -> (String) obj[1]).collect(Collectors.toList());
+		Collections.sort(dropDownsNames);
+		map.put("subCategories",dropDownsNames);
+		return new ResponseEntity<Object>(map, HttpStatus.OK);
+	}
+	
 }

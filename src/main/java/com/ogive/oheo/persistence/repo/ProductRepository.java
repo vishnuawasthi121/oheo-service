@@ -13,7 +13,7 @@ public interface ProductRepository  extends CrudRepository<Product, Long>, JpaSp
 
 	List<Object[]>	dropDownLive(String isLive);
 	
-	List<Object[]>	dropDown(StatusCode status);
+	List<Object[]>	dropDownIfAvailableForLease(StatusCode status);
 	
 	List<Object[]>	fetchProductDropDownByVehicleType(Long userId,Long vehicleTypeId,StatusCode status);
 	

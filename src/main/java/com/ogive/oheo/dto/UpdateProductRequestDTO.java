@@ -8,6 +8,7 @@ import javax.validation.constraints.NotEmpty;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ogive.oheo.constants.ImageType;
+import com.ogive.oheo.constants.LeaseAvailability;
 import com.ogive.oheo.constants.StatusCode;
 
 import groovyjarjarantlr4.v4.runtime.misc.NotNull;
@@ -48,5 +49,7 @@ public class UpdateProductRequestDTO {
 	private MultipartFile brochure;
 
 	private MultipartFile video;
+	
+	private LeaseAvailability availableForLease;
 
 }

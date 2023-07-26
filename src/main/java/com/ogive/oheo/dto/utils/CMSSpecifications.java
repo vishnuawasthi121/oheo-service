@@ -19,6 +19,7 @@ import com.ogive.oheo.persistence.entities.Images;
 import com.ogive.oheo.persistence.entities.LogisticRequest;
 import com.ogive.oheo.persistence.entities.Product;
 import com.ogive.oheo.persistence.entities.ServiceProviders;
+import com.ogive.oheo.persistence.entities.ShopCategory;
 import com.ogive.oheo.persistence.entities.UserDetail;
 import com.ogive.oheo.persistence.entities.VehicleBodyType;
 import com.ogive.oheo.persistence.entities.VehicleDetail;
@@ -489,6 +490,20 @@ public class CMSSpecifications {
 					return criteriaBuilder.conjunction();
 				}
 				return criteriaBuilder.equal(root.get("status"), filter.getStatus());
+			}
+		};
+	}
+	
+	public static Specification<ShopCategory> filterShopCategoryByName(FilterCriteria filter) {
+		return new Specification<ShopCategory>() {
+			@Override
+			public Predicate toPredicate(Root<ShopCategory> root, CriteriaQuery<?> query,
+					CriteriaBuilder criteriaBuilder) {
+				if (ObjectUtils.isEmpty(filter.getFilterByName())) {
+					return criteriaBuilder.conjunction();
+				}
+				return criteriaBuilder.like(criteriaBuilder.upper(root.get("name")),
+						"%" + filter.getFilterByName().toUpperCase() + "%");
 			}
 		};
 	}
