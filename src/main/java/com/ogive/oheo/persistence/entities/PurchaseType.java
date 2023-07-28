@@ -13,7 +13,7 @@ import javax.persistence.Table;
 
 import com.ogive.oheo.constants.StatusCode;
 
-@NamedQuery(name="PurchaseType.dropDown", query="SELECT id , name FROM PurchaseType")
+@NamedQuery(name="PurchaseType.dropDown", query="SELECT id , name FROM PurchaseType  WHERE status = 'ACTIVE'")
 
 @Table(name = "PURCHASE_TYPE")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_PURCHASE_TYPE", sequenceName = "SEQ_PURCHASE_TYPE")

@@ -1,6 +1,6 @@
 /*
 DROP VIEW IF EXISTS view_user_details;
-CREATE VIEW view_user_details (id, name, contact, email, is_validated, password, status, gst_number, root_id,VEHICLE_TYPE_ID ,zonename, statename, cityname, code, role_name, roleid,vehicleTypeName) AS  SELECT u.id,
+CREATE VIEW view_user_details (id, name, contact, email, is_validated, password, status, gst_number, root_id, vehicle_type_id, zonename, statename, cityname, code, role_name, roleid, vehicletypename) AS  SELECT u.id,
     u.name,
     u.contact,
     u.email,
@@ -9,21 +9,23 @@ CREATE VIEW view_user_details (id, name, contact, email, is_validated, password,
     u.status,
     u.gst_number,
     u.root_id,
-    u.VEHICLE_TYPE_ID,
+    u.vehicle_type_id,
     z.name AS zonename,
     s.state_name AS statename,
     city.name AS cityname,
     zipcode.code,
     ur.role AS role_name,
     ur.id AS roleid,
-    vt.name AS  vehicleTypeName
+    vt.name AS vehicletypename
    FROM user_detail u
-     JOIN zone z ON u.zone_id = z.id
-     JOIN state s ON u.state_id = s.state_id
-     JOIN city city ON u.city_id = city.id
-     JOIN zipcode zipcode ON u.zipcode_id = zipcode.id
-     JOIN user_role ur ON u.role_id = ur.id
-     JOIN VEHICLE_TYPE  vt ON u.VEHICLE_TYPE_ID = vt.id;
+     LEFT JOIN zone z ON u.zone_id = z.id
+     LEFT JOIN state s ON u.state_id = s.state_id
+     LEFT JOIN city city ON u.city_id = city.id
+     LEFT JOIN zipcode zipcode ON u.zipcode_id = zipcode.id
+     LEFT JOIN user_role ur ON u.role_id = ur.id
+     LEFT JOIN vehicle_type vt ON u.vehicle_type_id = vt.id
+     AND u.status = 'ACTIVE';
+
 */
 
 
@@ -65,16 +67,15 @@ CREATE VIEW view_live_product (id, engine, is_live, name, no_of_seats, price, st
     ps.wheel_base,
     ps.width
    FROM product p
-     JOIN vehicle_detail vd ON p.vehicle_detail_id = vd.id
-     JOIN vehicle_fuel_type vft ON p.vehicle_fuel_type_id = vft.id
-     JOIN vehicle_model vm ON p.vehicle_model_id = vm.id
-     JOIN vehicle_type vtype ON p.vehicle_type_id = vtype.id
-     JOIN vehicle_transmission vtras ON p.vehicle_transmission_id = vtras.id
-     JOIN product_specification ps ON p.id = ps.product_id
-     JOIN user_detail userdetails ON p.user_detail_id = userdetails.id
-     JOIN vehicle_body_type   vby ON vby.id =  vd.vehicle_body_type_id
+     LEFT JOIN vehicle_detail vd ON p.vehicle_detail_id = vd.id
+     LEFT JOIN vehicle_fuel_type vft ON p.vehicle_fuel_type_id = vft.id
+     LEFT JOIN vehicle_model vm ON p.vehicle_model_id = vm.id
+     LEFT JOIN vehicle_type vtype ON p.vehicle_type_id = vtype.id
+     LEFT JOIN vehicle_transmission vtras ON p.vehicle_transmission_id = vtras.id
+     LEFT JOIN product_specification ps ON p.id = ps.product_id
+     LEFT JOIN user_detail userdetails ON p.user_detail_id = userdetails.id
+     LEFT JOIN vehicle_body_type   vby ON vby.id =  vd.vehicle_body_type_id
   WHERE p.status::text = 'ACTIVE'::text;
-
 
 
 DROP VIEW IF EXISTS view_product_lease;
@@ -93,5 +94,14 @@ CREATE VIEW view_product_lease (product_id, product_name, status, lease_id, desc
    FROM lease_detail lease
      JOIN product p ON lease.product_id = p.id
      JOIN images image ON image.lease_id = lease.id;
+
+
+INSERT INTO shop_category (id, description, name, status) VALUES (100, 'Slider section', 'Slider', 'ACTIVE');
+INSERT INTO shop_category (id, description, name, status) VALUES (101, 'Two Wheeler section', 'Two Wheeler', 'ACTIVE');
+INSERT INTO shop_category (id, description, name, status) VALUES (102, 'Three Wheeler section', 'Three Wheeler', 'ACTIVE');
+INSERT INTO shop_category (id, description, name, status) VALUES (103, 'Four Wheeler section', 'Four Wheeler', 'ACTIVE');
+INSERT INTO shop_category (id, description, name, status) VALUES (104, 'Spare Parts section', 'Spare Parts', 'ACTIVE');
+select * from shop_category;
+
 
 */

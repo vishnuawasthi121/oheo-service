@@ -69,6 +69,7 @@ import com.ogive.oheo.services.EmailServiceImpl;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Api(tags = "User Setup")
 @RestController
@@ -488,6 +489,7 @@ public class UserDetailController {
 	}
 	
 	
+	@Tag(name = "Buy Request - Shop",description = "This drop down populated from USER_DETAIL. They are our system users like , Distributor,Dealer, Sub dealer etc")
 	@ApiOperation(value = "Retrieves User list along with id &  name", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/dropdown", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Object> getUserDetailDropDown(@RequestParam(required = false) RoleTypes roleType) {

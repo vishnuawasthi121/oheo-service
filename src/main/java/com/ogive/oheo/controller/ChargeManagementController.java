@@ -1,6 +1,5 @@
 package com.ogive.oheo.controller;
 
-import static com.ogive.oheo.dto.utils.CMSSpecifications.filterBuyRequestByName;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -77,6 +76,7 @@ import com.ogive.oheo.persistence.repo.ZoneDetailRepository;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Api(tags = "Charging Management")
 @RestController
@@ -223,20 +223,6 @@ public class ChargeManagementController {
 		chargingPartDealerRepository.deleteById(id);
 		LOG.info("Deleted ChargingPartDealer successfully by id {}", id);
 		return new ResponseEntity<Object>(HttpStatus.OK);
-	}
-
-	@ApiOperation(value = "Retrieves all parts dealer along with id,name in key value pair", notes = "Retrieves cities list along with city name", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	@GetMapping(path = "/part-dealers/dropdown", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<Object> partDealersDropdown() {
-		LOG.info("citiesDropdown request received@@");
-		List<Object[]> dealersData = chargingPartDealerRepository.dropDown();
-		List<Map<Object, Object>> dropDowns = new ArrayList<>();
-		dealersData.forEach(data -> {
-			Map<Object, Object> map = new HashMap<>();
-			map.put(data[0], data[1]);
-			dropDowns.add(map);
-		});
-		return new ResponseEntity<Object>(dropDowns, HttpStatus.OK);
 	}
 	
 	//Charging Station API
@@ -465,10 +451,15 @@ public class ChargeManagementController {
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
 	
+	
+	
+	
+	// ###################################  CHARGING - BUY REQUEST ################################
 	//Charging station buy request
 	//Buy Request Api
+	@Tag(name = "Buy Request - Charging")
 	@Transactional
-	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@ApiOperation(value = "Create Buy request for a charging product.", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@PostMapping(path = "/charging-stations/buy-requests", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Object> addBuyRequest(@Valid @RequestBody BuyRequestDTO buyRequest) {
 		LOG.info("addBuyRequest request received@@   {}", buyRequest);
@@ -532,15 +523,72 @@ public class ChargeManagementController {
 		ChargingStationBuyRequest savedEntity = chargingStationBuyRequestRepository.save(entity);
 		return new ResponseEntity<Object>(savedEntity.getId(), HttpStatus.OK);
 	}
+	
+	
+	
+	@Tag(name = "Buy Request - Charging")
+	@Transactional
+	@ApiOperation(value = "Retrieves an entity by its id", notes = "Return Id of the record if saved correctly otherwise null", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/charging-stations/buy-requests/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> getBuyRequest(@PathVariable Long id) {
+		LOG.info("getBuyRequest request received@@   {}", id);
+		Optional<ChargingStationBuyRequest> entityData = chargingStationBuyRequestRepository.findById(id);
+		if (entityData.isPresent()) {
+			ChargingStationBuyRequest entity = entityData.get();
+			BuyRequestResponseDTO dto = new BuyRequestResponseDTO();
+			BeanUtils.copyProperties(entity, dto);
+			// Requested City
+			dto.setRequestedCityId(entity.getCity().getId());
+			dto.setRequestedCityName(entity.getCity().getName());
+			// State
+			dto.setRequestedStateId(entity.getState().getId());
+			dto.setRequestedStateName(entity.getState().getStateName());
+			// Model
+			dto.setModelId(entity.getModel().getId());
+			dto.setModelName(entity.getModel().getModelName());
+			// Company
+			dto.setCompanyId(entity.getCompany().getId());
+			dto.setCompanyName(entity.getCompany().getCompanyName());
+			// ChargingPartDealer Mapping
+			if (Objects.nonNull(entity.getChargingPartDealer())) {
+				dto.setDealerName(entity.getChargingPartDealer().getName());
+				dto.setDealerId(entity.getChargingPartDealer().getId());
+			}
+			if (Objects.nonNull(entity.getChargingProduct())) {
+				dto.setProductId(entity.getChargingProduct().getId());
+				dto.setProductName(entity.getChargingProduct().getName());
+			}
+			dto.add(linkTo(methodOn(ChargeManagementController.class).getBuyRequest(entity.getId())).withSelfRel());
+			return new ResponseEntity<Object>(dto, HttpStatus.OK);
+		}
+		return new ResponseEntity<Object>(HttpStatus.OK);
+	}
 
-		@Transactional
-		@ApiOperation(value = "Retrieves an entity by its id", notes = "Return Id of the record if saved correctly otherwise null", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-		@GetMapping(path = "/charging-stations/buy-requests/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
-		public ResponseEntity<Object> getBuyRequest(@PathVariable Long id) {
-			LOG.info("getBuyRequest request received@@   {}", id);
-			Optional<ChargingStationBuyRequest> entityData = chargingStationBuyRequestRepository.findById(id);
-			if (entityData.isPresent()) {
-				ChargingStationBuyRequest entity = entityData.get();
+	@Tag(name = "Buy Request - Charging")
+	@Transactional
+	@ApiOperation(value = "Returns all instances of the type", notes = "Returns all instances of the type", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/charging-stations/buy-requests", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> getAllBuyRequest(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size, @RequestParam(required = false) String filterByName,
+			@RequestParam(required = false, defaultValue = "ASC") Direction sortDirection,
+			@RequestParam(required = false, defaultValue = "id") String[] orderBy,
+			@RequestParam(required = false) String email) {
+		LOG.info("getAllVehicleDetails request received");
+		FilterCriteria filterCriteria = new FilterCriteria(page, size, filterByName, sortDirection, orderBy, null);
+		filterCriteria.setEmail(email);
+
+		LOG.info("filterCriteria    {} ", filterCriteria);
+		Direction sort = sortDirection == null ? Direction.ASC : sortDirection;
+		Pageable paging = PageRequest.of(page, size, Sort.by(sort, orderBy));
+		Map<String, Object> response = new HashMap<>();
+		List<BuyRequestResponseDTO> buyRequestDTOList = new ArrayList<>();
+
+		Page<ChargingStationBuyRequest> pages = chargingStationBuyRequestRepository
+				.findAll(CMSSpecifications.filterChargingStationBuyRequestByEmail(filterCriteria)
+						.and(CMSSpecifications.filterChargingStationBuyRequestByName(filterCriteria)), paging);
+
+		if (pages.hasContent()) {
+			pages.getContent().forEach(entity -> {
 				BuyRequestResponseDTO dto = new BuyRequestResponseDTO();
 				BeanUtils.copyProperties(entity, dto);
 				// Requested City
@@ -560,85 +608,46 @@ public class ChargeManagementController {
 					dto.setDealerName(entity.getChargingPartDealer().getName());
 					dto.setDealerId(entity.getChargingPartDealer().getId());
 				}
-				if(Objects.nonNull(entity.getChargingProduct())) {
+				if (Objects.nonNull(entity.getChargingProduct())) {
 					dto.setProductId(entity.getChargingProduct().getId());
 					dto.setProductName(entity.getChargingProduct().getName());
 				}
+
 				dto.add(linkTo(methodOn(ChargeManagementController.class).getBuyRequest(entity.getId())).withSelfRel());
-				return new ResponseEntity<Object>(dto, HttpStatus.OK);
-			}
-			return new ResponseEntity<Object>(HttpStatus.OK);
+				buyRequestDTOList.add(dto);
+
+			});
 		}
+		response.put("buyRequests", buyRequestDTOList);
+		response.put("currentPage", pages.getNumber());
+		response.put("totalElements", pages.getTotalElements());
+		response.put("totalPages", pages.getTotalPages());
+		return new ResponseEntity<Object>(response, HttpStatus.OK);
+	}
 
-		@Transactional
-		@ApiOperation(value = "Returns all instances of the type", notes = "Returns all instances of the type", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-		@GetMapping(path = "/charging-stations/buy-requests", produces = { MediaType.APPLICATION_JSON_VALUE })
-		public ResponseEntity<Object> getAllBuyRequest(
-				@RequestParam(defaultValue = "0") int page,
-				@RequestParam(defaultValue = "10") int size, 
-				@RequestParam(required = false) String filterByName,
-				@RequestParam(required = false, defaultValue = "ASC") Direction sortDirection,
-				@RequestParam(required = false, defaultValue = "id") String[] orderBy,
-				@RequestParam(required = false) String email) {
-			LOG.info("getAllVehicleDetails request received");
-			FilterCriteria filterCriteria = new FilterCriteria(page, size, filterByName, sortDirection, orderBy, null);
-			filterCriteria.setEmail(email);
-			
-			LOG.info("filterCriteria    {} ", filterCriteria);
-			Direction sort = sortDirection == null ? Direction.ASC : sortDirection;
-			Pageable paging = PageRequest.of(page, size, Sort.by(sort, orderBy));
-			Map<String, Object> response = new HashMap<>();
-			List<BuyRequestResponseDTO> buyRequestDTOList = new ArrayList<>();
-
-			Page<ChargingStationBuyRequest> pages = chargingStationBuyRequestRepository
-					.findAll(CMSSpecifications.filterChargingStationBuyRequestByEmail(filterCriteria).and(CMSSpecifications.filterChargingStationBuyRequestByName(filterCriteria)), paging);
-
-			if (pages.hasContent()) {
-				pages.getContent().forEach(entity -> {
-					BuyRequestResponseDTO dto = new BuyRequestResponseDTO();
-					BeanUtils.copyProperties(entity, dto);
-					// Requested City
-					dto.setRequestedCityId(entity.getCity().getId());
-					dto.setRequestedCityName(entity.getCity().getName());
-					// State
-					dto.setRequestedStateId(entity.getState().getId());
-					dto.setRequestedStateName(entity.getState().getStateName());
-					// Model
-					dto.setModelId(entity.getModel().getId());
-					dto.setModelName(entity.getModel().getModelName());
-					// Company
-					dto.setCompanyId(entity.getCompany().getId());
-					dto.setCompanyName(entity.getCompany().getCompanyName());
-					// ChargingPartDealer Mapping
-					if (Objects.nonNull(entity.getChargingPartDealer())) {
-						dto.setDealerName(entity.getChargingPartDealer().getName());
-						dto.setDealerId(entity.getChargingPartDealer().getId());
-					}
-					if(Objects.nonNull(entity.getChargingProduct())) {
-						dto.setProductId(entity.getChargingProduct().getId());
-						dto.setProductName(entity.getChargingProduct().getName());
-					}
-
-					dto.add(linkTo(methodOn(ChargeManagementController.class).getBuyRequest(entity.getId())).withSelfRel());
-					buyRequestDTOList.add(dto);
-
-				});
-			}
-			response.put("buyRequests", buyRequestDTOList);
-			response.put("currentPage", pages.getNumber());
-			response.put("totalElements", pages.getTotalElements());
-			response.put("totalPages", pages.getTotalPages());
-			return new ResponseEntity<Object>(response, HttpStatus.OK);
-		}
-
-		@ApiOperation(value = "Deletes the entity with the given id", notes = "If the entity is not found in the persistence store it is silently ignored.", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-		@DeleteMapping(path = "/charging-stations/buy-requests/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
-		public ResponseEntity<Object> deleteBuyRequest(@PathVariable Long id) {
-			LOG.info("deleteBuyRequest request received @@   {}", id);
-			chargingStationBuyRequestRepository.deleteById(id);
-			return new ResponseEntity<Object>(HttpStatus.OK);
-		}
-
+	@Tag(name = "Buy Request - Charging")
+	@ApiOperation(value = "Deletes the entity with the given id", notes = "If the entity is not found in the persistence store it is silently ignored.", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@DeleteMapping(path = "/charging-stations/buy-requests/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> deleteBuyRequest(@PathVariable Long id) {
+		LOG.info("deleteBuyRequest request received @@   {}", id);
+		chargingStationBuyRequestRepository.deleteById(id);
+		return new ResponseEntity<Object>(HttpStatus.OK);
+	}
+	
+	@Tag(name = "Buy Request - Charging",description = "These are ChargingPartDealer records")
+	@ApiOperation(value = "Retrieves all parts dealer along with id,name in key value pair", notes = "Retrieves cities list along with city name", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/part-dealers/dropdown", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> partDealersDropdown() {
+		LOG.info("citiesDropdown request received@@");
+		List<Object[]> dealersData = chargingPartDealerRepository.dropDown();
+		List<Map<Object, Object>> dropDowns = new ArrayList<>();
+		dealersData.forEach(data -> {
+			Map<Object, Object> map = new HashMap<>();
+			map.put(data[0], data[1]);
+			dropDowns.add(map);
+		});
+		return new ResponseEntity<Object>(dropDowns, HttpStatus.OK);
+	}
 	
 	
 }

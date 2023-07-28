@@ -9,6 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -22,7 +23,7 @@ import lombok.ToString;
 @ToString
 @Setter
 @Getter
-
+@NamedQuery(name="LeaseDetail.deleteByProductId", query="delete from LeaseDetail where product.id  =:productId")
 @Table(name = "LEASE_DETAIL")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_LEASE_DETAIL", sequenceName = "SEQ_LEASE_DETAIL")
 @Entity
@@ -46,6 +47,8 @@ public class LeaseDetail {
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "product_id", referencedColumnName = "id", nullable = true)
 	private Product product;
+	
+	
 
 	private Date createdDate;
 	private Date updatedDate;

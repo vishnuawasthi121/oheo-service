@@ -19,7 +19,7 @@ import lombok.Setter;
 @Setter
 @Getter
 
-@NamedQuery(name="VehicleBodyType.dropDown", query="SELECT id , name FROM VehicleBodyType")
+@NamedQuery(name="VehicleBodyType.dropDown", query="SELECT id , name FROM VehicleBodyType WHERE status = 'ACTIVE'")
 @Table(name = "VEHICLE_BODY_TYPE")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_VEHICLE_BODY_TYPE", sequenceName = "SEQ_VEHICLE_BODY_TYPE")
 @Entity

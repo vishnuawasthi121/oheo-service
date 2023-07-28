@@ -13,7 +13,7 @@ import javax.persistence.Table;
 
 import com.ogive.oheo.constants.StatusCode;
 
-@NamedQuery(name="VehicleTransmission.dropDown", query="SELECT id , name FROM VehicleTransmission")
+@NamedQuery(name="VehicleTransmission.dropDown", query="SELECT id , name FROM VehicleTransmission WHERE status = 'ACTIVE'")
 
 @Table(name = "VEHICLE_TRANSMISSION")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_VEHICLE_TRANSMISSION", sequenceName = "SEQ_VEHICLE_TRANSMISSION")

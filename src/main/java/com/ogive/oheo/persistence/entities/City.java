@@ -18,8 +18,8 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ogive.oheo.constants.StatusCode;
-@NamedQuery(name="City.dropDown", query="SELECT id ,name FROM City")
-@NamedQuery(name="City.dropDownByStateId", query="SELECT id ,name FROM City WHERE state.id = : stateId")
+@NamedQuery(name="City.dropDown", query="SELECT id ,name FROM City WHERE status = 'ACTIVE'")
+@NamedQuery(name="City.dropDownByStateId", query="SELECT id ,name FROM City WHERE state.id = : stateId AND status = 'ACTIVE'")
 @Table(name = "CITY")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_CITY", sequenceName = "SEQ_CITY")
 @Entity

@@ -11,4 +11,7 @@ public interface LeaseDetailRepository
 
 	@Modifying
 	void deleteById(Long leaseId);
+	
+	@Modifying
+	void deleteByProductId(Long productId);
 }

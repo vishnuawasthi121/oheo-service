@@ -21,7 +21,7 @@ import lombok.Setter;
 
 
 
-@NamedQuery(name = "VehicleType.dropDown", query = "SELECT id , name FROM VehicleType")
+@NamedQuery(name = "VehicleType.dropDown", query = "SELECT id , name FROM VehicleType WHERE status = 'ACTIVE'")
 @Table(name = "VEHICLE_TYPE")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_VEHICLE_TYPE", sequenceName = "SEQ_VEHICLE_TYPE")
 @Entity

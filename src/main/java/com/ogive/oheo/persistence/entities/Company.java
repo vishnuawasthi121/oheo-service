@@ -24,7 +24,7 @@ import com.ogive.oheo.constants.StatusCode;
  * @author Vishnu Awasthi
  *
  */
-@NamedQuery(name="Company.dropDown", query="SELECT id , companyName FROM Company")
+@NamedQuery(name="Company.dropDown", query="SELECT id , companyName FROM Company WHERE status = 'ACTIVE'")
 
 @Table(name = "VEHICLE_COMPANY")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_VEHICLE_COMPANY", sequenceName = "SEQ_VEHICLE_COMPANY")

@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@NamedQuery(name = "State.dropDown", query = "SELECT id ,stateName FROM State")
+@NamedQuery(name = "State.dropDown", query = "SELECT id ,stateName FROM State WHERE status = 'ACTIVE'")
 
 @Setter
 @Getter

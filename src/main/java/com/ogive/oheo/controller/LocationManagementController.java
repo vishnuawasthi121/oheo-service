@@ -342,7 +342,6 @@ public class LocationManagementController {
 		LOG.info("addZone request received@@   {}", zoneDetailDTO);
 		ZoneDetail zone = new ZoneDetail();
 		BeanUtils.copyProperties(zoneDetailDTO, zone);
-
 		Country findByCountryCode = countryRepository.findByCountryCode(countryCode);
 
 		if (null == findByCountryCode) {
@@ -361,7 +360,6 @@ public class LocationManagementController {
 			@Valid @RequestBody ZoneDetailRequestDTO zoneDetailDTO) {
 		LOG.info("updateZone requested record id {} ", id);
 		LOG.info("updateZone request body@@   {}", zoneDetailDTO);
-
 		Optional<ZoneDetail> zoneData = zoneDetailRepository.findById(id);
 
 		if (zoneData.isPresent()) {

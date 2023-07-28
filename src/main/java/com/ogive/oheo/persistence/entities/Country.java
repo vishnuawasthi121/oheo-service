@@ -19,7 +19,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ogive.oheo.constants.StatusCode;
 
 
-@NamedQuery(name="Country.dropDown", query="SELECT countryCode ,countryName FROM Country")
+@NamedQuery(name="Country.dropDown", query="SELECT countryCode ,countryName FROM Country WHERE status = 'ACTIVE'")
 @Table(name = "COUNTRY")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_COUNTRY", sequenceName = "SEQ_COUNTRY")
 @Entity

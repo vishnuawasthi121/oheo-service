@@ -16,7 +16,7 @@ import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ogive.oheo.constants.StatusCode;
 
-@NamedQuery(name="Zipcode.dropDown", query="SELECT zipcode.code AS code , city.name AS cityName FROM Zipcode zipcode join City city ON zipcode.city.id = city.id ")
+@NamedQuery(name="Zipcode.dropDown", query="SELECT zipcode.code AS code , city.name AS cityName FROM Zipcode zipcode join City city ON zipcode.city.id = city.id WHERE zipcode.status = 'ACTIVE' ")
 
 @Table(name = "ZIPCODE")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_ZIPCODE", sequenceName = "SEQ_ZIPCODE")

@@ -18,7 +18,7 @@ import lombok.Setter;
 
 @Setter
 @Getter
-@NamedQuery(name="ChargingPartDealer.dropDown", query="SELECT id ,name FROM ChargingPartDealer")
+@NamedQuery(name="ChargingPartDealer.dropDown", query="SELECT id ,name FROM ChargingPartDealer WHERE status ='ACTIVE'")
 @Table(name = "CHARGING_PART_DEALER")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_CHARGING_PART_DEALER", sequenceName = "SEQ_CHARGING_PART_DEALER")
 @Entity

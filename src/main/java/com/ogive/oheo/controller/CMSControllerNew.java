@@ -683,6 +683,10 @@ public class CMSControllerNew {
 			featuresRepository.deleteByProductId(id);
 			// Delete Buy Request of the product.
 			buyRequestRepository.deleteByProductId(id);
+			
+			//Delete LeaseDetail if any
+			leaseDetailRepository.deleteByProductId(id);
+			
 			//Now delete product			
 			productRepository.deleteByProductId(id);
 			
@@ -1086,8 +1090,8 @@ public class CMSControllerNew {
 
 		return new ResponseEntity<Object>(allDTO, HttpStatus.OK);
 	}
-
-	// Buy Request Api
+    //##########################################   BUY REQUEST - SHOP ##########################################################
+	@Tag(name = "Buy Request - Shop")
 	@Transactional
 	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@PostMapping(path = "/buy-requests", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -1096,8 +1100,6 @@ public class CMSControllerNew {
 		// BuyRequest Entity
 		BuyRequest entity = new BuyRequest();
 		BeanUtils.copyProperties(buyRequest, entity);
-
-		
 		Optional<Product> productData = productRepository.findById(buyRequest.getProductId());
 		if(!productData.isPresent()) {
 			return new ResponseEntity<Object>(
@@ -1155,6 +1157,7 @@ public class CMSControllerNew {
 		return new ResponseEntity<Object>(savedEntity.getId(), HttpStatus.OK);
 	}
 
+	@Tag(name = "Buy Request - Shop")
 	@Transactional
 	@ApiOperation(value = "Retrieves an entity by its id", notes = "Return Id of the record if saved correctly otherwise null", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/buy-requests/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -1192,6 +1195,7 @@ public class CMSControllerNew {
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
 
+	@Tag(name = "Buy Request - Shop")
 	@Transactional
 	@ApiOperation(value = "Returns all instances of the type", notes = "Returns all instances of the type", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/{userId}/buy-requests", produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -1258,6 +1262,7 @@ public class CMSControllerNew {
 		return new ResponseEntity<Object>(response, HttpStatus.OK);
 	}
 
+	@Tag(name = "Buy Request - Shop")
 	@ApiOperation(value = "Deletes the entity with the given id", notes = "If the entity is not found in the persistence store it is silently ignored.", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@DeleteMapping(path = "/buy-requests/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Object> deleteBuyRequest(@PathVariable Long id) {
@@ -1265,7 +1270,7 @@ public class CMSControllerNew {
 		buyRequestRepository.deleteById(id);
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
-
+	 //##########################################   BUY REQUEST - SHOP  - END ######################################################
 	// Terms & Conditions
 	@ApiOperation(value = "Saves a given entity. Use the returned instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@PostMapping(path = "/terms-and-conditions", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -1579,7 +1584,7 @@ public class CMSControllerNew {
 		return new ResponseEntity<Object>(dropDowns, HttpStatus.OK);
 	}
 
-	
+	//################################ SHOP MANAGEMENT ################################################
 	//Shop Management 
 	@Tag(name = "Shop Management  - CMS")
 	@ApiOperation(value = "Fetch all shop category - Shop Management", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -1662,5 +1667,5 @@ public class CMSControllerNew {
 		map.put("subCategories",dropDownsNames);
 		return new ResponseEntity<Object>(map, HttpStatus.OK);
 	}
-	
+	//################################ SHOP MANAGEMENT  -END ################################################
 }
