@@ -140,9 +140,24 @@
 
 	<build>
 		<plugins>
+
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<configuration>
+							<mainClass>com.ogive.oheo.Application</mainClass>
+						</configuration>
+					</execution>
+				</executions>
+				<configuration>
+					<executable>true</executable>
+					<jvmArguments>
+                -Xms500m
+				-Xmx1G
+            </jvmArguments>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
