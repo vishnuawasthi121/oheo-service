@@ -31,7 +31,7 @@ public class VehicleType {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_VEHICLE_TYPE")
 	private Long id;
 
-	@Column(nullable = false)
+	@Column(nullable = false,unique = true)
 	private String name;
 
 	@Enumerated(EnumType.STRING)

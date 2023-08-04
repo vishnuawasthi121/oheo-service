@@ -139,7 +139,7 @@ public class ViewLiveProduct {
 	@OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
 	private Set<Features> features;
 
-	@OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "product", fetch = FetchType.EAGER)
 	private Set<Images> images;
 
 }

@@ -306,7 +306,7 @@ public class CMSControllerNew {
 		// Save brochure
 		if (null !=productRequestDTO.getBrochure() && !productRequestDTO.getBrochure().isEmpty()) {
 			Images brochure = new Images();
-			CommonsUtil.multiPartToFileEntity(productRequestDTO.getBrochure(), brochure, productRequestDTO.getImageType());
+			CommonsUtil.multiPartToFileEntity(productRequestDTO.getBrochure(), brochure,ImageType.Brochure );
 			brochure.setProduct(productEntity);
 			imagesRepository.save(brochure);
 		}
@@ -382,7 +382,7 @@ public class CMSControllerNew {
 			imagesRepository.deleteByProductIdAndImageTypeIn(id, imageTypes);
 			
 			Images brochure = new Images();
-			CommonsUtil.multiPartToFileEntity(updateProductRequestDTO.getBrochure(), brochure, updateProductRequestDTO.getImageType());
+			CommonsUtil.multiPartToFileEntity(updateProductRequestDTO.getBrochure(), brochure,ImageType.Brochure);
 			brochure.setProduct(productEntity);
 			imagesRepository.save(brochure);
 		}
@@ -482,7 +482,6 @@ public class CMSControllerNew {
 		Optional<ViewLiveProduct> productData = viewLiveProductRepository.findById(id);
 		if (productData.isPresent()) {
 			ViewLiveProduct entity = productData.get();
-			Set<Images> images = entity.getImages();
 			LiveProductResponseDTO dto = new LiveProductResponseDTO();
 			BeanUtils.copyProperties(entity, dto);
 
@@ -493,21 +492,33 @@ public class CMSControllerNew {
 				});
 				dto.setFeatures(features);
 			}
-			if (null != images) {
-				 Set<Link> imagesList = new HashSet<>();
-				images.stream().forEach(image -> {
-					imagesList.add(linkTo(methodOn(FileProcessingController.class).readFile(image.getId())).withRel(image.getImageType().name()));
-					if (null == image.getImageType()) {
-						 //dto.add(linkTo(methodOn(FileProcessingController.class).readFile(image.getId())) .withRel("Product - Image"));
-						imagesList.add(linkTo(methodOn(FileProcessingController.class).readFile(image.getId())) .withRel("Product - Image"));
-					} else {
-						//dto.add(linkTo(methodOn(FileProcessingController.class).readFile(image.getId())).withRel(image.getImageType().name()));
-						imagesList.add(linkTo(methodOn(FileProcessingController.class).readFile(image.getId())).withRel(image.getImageType().name()));
-					}
-				});
-				dto.setImages(imagesList);
-			}
 			
+			Set<Images> images = entity.getImages();
+			
+			List<Long> productImagesId = images.stream().filter(image ->  ImageType.Product.equals( image.getImageType())).map(image -> image.getId()).collect(Collectors.toList());
+			List<Long> productBrochureId = images.stream().filter(image ->  ImageType.Brochure.equals( image.getImageType())).map(image -> image.getId()).collect(Collectors.toList());
+			List<Long> productVideoId = images.stream().filter(image ->  ImageType.Video.equals( image.getImageType())).map(image -> image.getId()).collect(Collectors.toList());
+			
+			 Set<Link> productImageLink = new HashSet<>();
+			 Set<Link> productBrochareLink = new HashSet<>();
+			 Set<Link> productVideoLink = new HashSet<>();
+			 
+			 productImagesId.stream().forEach(imageId ->{
+				 productImageLink.add(linkTo(methodOn(FileProcessingController.class).readFile(imageId)).withRel( ImageType.Product.name()));
+			 });
+			 dto.setImages(productImageLink);
+			 
+			 productBrochureId.stream().forEach(imageId ->{
+				 productBrochareLink.add(linkTo(methodOn(FileProcessingController.class).readFile(imageId)).withRel( ImageType.Brochure.name()));
+			 });
+			 dto.setBrochure(productBrochareLink);
+			 
+			 productVideoId.stream().forEach(imageId ->{
+				 productVideoLink.add(linkTo(methodOn(FileProcessingController.class).readFile(imageId)).withRel( ImageType.Video.name()));
+			 });
+			 dto.setVideos(productVideoLink);
+			 
+			 
 			dto.add(linkTo(methodOn(CMSControllerNew.class).getLiveProductById(entity.getId())).withSelfRel());
 			return new ResponseEntity<Object>(dto, HttpStatus.OK);
 		}
@@ -557,20 +568,29 @@ public class CMSControllerNew {
 					entity.getFeatures().stream().forEach(feature -> {features.add(feature.getName());});
 					dto.setFeatures(features);
 				}
-				if (null != images) {
-					 Set<Link> imagesList = new HashSet<>();
-					images.stream().forEach(image -> {
-						imagesList.add(linkTo(methodOn(FileProcessingController.class).readFile(image.getId())).withRel(image.getImageType().name()));
-						if (null == image.getImageType()) {
-							 //dto.add(linkTo(methodOn(FileProcessingController.class).readFile(image.getId())) .withRel("Product - Image"));
-							imagesList.add(linkTo(methodOn(FileProcessingController.class).readFile(image.getId())) .withRel("Product - Image"));
-						} else {
-							//dto.add(linkTo(methodOn(FileProcessingController.class).readFile(image.getId())).withRel(image.getImageType().name()));
-							imagesList.add(linkTo(methodOn(FileProcessingController.class).readFile(image.getId())).withRel(image.getImageType().name()));
-						}
-					});
-					dto.setImages(imagesList);
-				}
+				
+				List<Long> productImagesId = images.stream().filter(image ->  ImageType.Product.equals( image.getImageType())).map(image -> image.getId()).collect(Collectors.toList());
+				List<Long> productBrochureId = images.stream().filter(image ->  ImageType.Brochure.equals( image.getImageType())).map(image -> image.getId()).collect(Collectors.toList());
+				List<Long> productVideoId = images.stream().filter(image ->  ImageType.Video.equals( image.getImageType())).map(image -> image.getId()).collect(Collectors.toList());
+				
+				 Set<Link> productImageLink = new HashSet<>();
+				 Set<Link> productBrochareLink = new HashSet<>();
+				 Set<Link> productVideoLink = new HashSet<>();
+				 
+				 productImagesId.stream().forEach(imageId ->{
+					 productImageLink.add(linkTo(methodOn(FileProcessingController.class).readFile(imageId)).withRel( ImageType.Product.name()));
+				 });
+				 dto.setImages(productImageLink);
+				 
+				 productBrochureId.stream().forEach(imageId ->{
+					 productBrochareLink.add(linkTo(methodOn(FileProcessingController.class).readFile(imageId)).withRel( ImageType.Brochure.name()));
+				 });
+				 dto.setBrochure(productBrochareLink);
+				 
+				 productVideoId.stream().forEach(imageId ->{
+					 productVideoLink.add(linkTo(methodOn(FileProcessingController.class).readFile(imageId)).withRel( ImageType.Video.name()));
+				 });
+				 dto.setVideos(productVideoLink);
 				dto.add(linkTo(methodOn(CMSControllerNew.class).getLiveProductById(entity.getId())).withSelfRel());
 				allDTO.add(dto);
 			});

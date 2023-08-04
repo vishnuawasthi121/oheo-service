@@ -93,5 +93,7 @@ public class LiveProductResponseDTO extends RepresentationModel<LiveProductRespo
 	private Set<String> features = new HashSet<>();
 
 	private Set<Link> images = new HashSet<>();
+	private Set<Link> videos = new HashSet<>();
+	private Set<Link> brochure = new HashSet<>();
 
 }
