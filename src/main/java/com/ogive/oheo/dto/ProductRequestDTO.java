@@ -39,6 +39,7 @@ public class ProductRequestDTO {
 
 	private String engine;
 
+	@NotNull
 	private StatusCode status;
 
 	@Valid

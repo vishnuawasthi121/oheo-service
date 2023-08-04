@@ -225,16 +225,11 @@ public class CMSControllerNew {
 	@Transactional
 	@ApiOperation(value = "Saves a given entity. Use the latest instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@PostMapping(path = "/{userId}/products", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> addProduct(@PathVariable Long userId,@ModelAttribute ProductRequestDTO productRequestDTO) {
+	public ResponseEntity<Object> addProduct(@PathVariable Long userId  , @Valid  @ModelAttribute ProductRequestDTO productRequestDTO) {
 		LOG.info("addProduct request received@@   {}", productRequestDTO);
 		// Product Entity
 		Product entity = new Product();
 		BeanUtils.copyProperties(productRequestDTO, entity);
-		// ProductSpecification
-		SpecificationDTO SpecificationDTO = productRequestDTO.getSpecification();
-		ProductSpecification specificationEntity = new ProductSpecification();
-		BeanUtils.copyProperties(SpecificationDTO, specificationEntity);
-		
 		
 		Optional<UserDetail> userDetailData = userDetailRepository.findById(userId);
 		if (!userDetailData.isPresent()) {
@@ -290,9 +285,16 @@ public class CMSControllerNew {
 
 		// Save Product
 		Product productEntity = productRepository.save(entity);
-		specificationEntity.setProduct(productEntity);
-		// Save product specification
-		productSpecificationRepository.save(specificationEntity);
+		//ProductSpecification
+		SpecificationDTO SpecificationDTO = productRequestDTO.getSpecification();
+		if (Objects.nonNull(SpecificationDTO)) {
+			ProductSpecification specificationEntity = new ProductSpecification();
+			BeanUtils.copyProperties(SpecificationDTO, specificationEntity);
+			specificationEntity.setProduct(productEntity);
+			// Save product specification
+			productSpecificationRepository.save(specificationEntity);
+		}
+
 		// Save Image
 		List<MultipartFile> imagesFile = productRequestDTO.getImages();
 		if (null != imagesFile) {

@@ -51,4 +51,6 @@ public class ProductResponseDTO extends RepresentationModel<ProductResponseDTO> 
 	private VehicleTransmissionResponseDTO vehicleTransmission;
 
 	private String availableForLease;
+	
+	
 }
