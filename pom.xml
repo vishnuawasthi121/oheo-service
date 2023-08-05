@@ -151,13 +151,13 @@
 						</configuration>
 					</execution>
 				</executions>
-				<configuration>
+		<!-- 		<configuration>
 					<executable>true</executable>
 					<jvmArguments>
-                -Xms200m
-				-Xmx500m
+                -Xms10m
+				-Xmx100m
             </jvmArguments>
-				</configuration>
+				</configuration>   -->
 			</plugin>
 		</plugins>
 	</build>
