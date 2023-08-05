@@ -40,6 +40,8 @@ import com.ogive.oheo.dto.BuyRequestDTO;
 import com.ogive.oheo.dto.BuyRequestResponseDTO;
 import com.ogive.oheo.dto.ChargingPartDealerRequestDTO;
 import com.ogive.oheo.dto.ChargingPartDealerResponseDTO;
+import com.ogive.oheo.dto.ChargingSlotBookingRequestDTO;
+import com.ogive.oheo.dto.ChargingSlotBookingResponseDTO;
 import com.ogive.oheo.dto.ChargingStationRequestDTO;
 import com.ogive.oheo.dto.ChargingStationResponseDTO;
 import com.ogive.oheo.dto.ErrorResponseDTO;
@@ -48,6 +50,7 @@ import com.ogive.oheo.dto.utils.CMSSpecifications;
 import com.ogive.oheo.dto.utils.ChargingMngtSpec;
 import com.ogive.oheo.persistence.entities.ChargingPartDealer;
 import com.ogive.oheo.persistence.entities.ChargingProduct;
+import com.ogive.oheo.persistence.entities.ChargingSlotBookingRequest;
 import com.ogive.oheo.persistence.entities.ChargingStation;
 import com.ogive.oheo.persistence.entities.ChargingStationBuyRequest;
 import com.ogive.oheo.persistence.entities.City;
@@ -60,6 +63,7 @@ import com.ogive.oheo.persistence.entities.Zipcode;
 import com.ogive.oheo.persistence.entities.ZoneDetail;
 import com.ogive.oheo.persistence.repo.ChargingPartDealerRepository;
 import com.ogive.oheo.persistence.repo.ChargingProductRepository;
+import com.ogive.oheo.persistence.repo.ChargingSlotBookingRequestRepository;
 import com.ogive.oheo.persistence.repo.ChargingStationBuyRequestRepository;
 import com.ogive.oheo.persistence.repo.ChargingStationRepository;
 import com.ogive.oheo.persistence.repo.CityRepository;
@@ -130,6 +134,9 @@ public class ChargeManagementController {
 	
 	@Autowired
 	private ChargingStationBuyRequestRepository chargingStationBuyRequestRepository;
+	
+	@Autowired
+	private ChargingSlotBookingRequestRepository chargingSlotBookingRequestRepository;
 	
 
 	// ChargingPartDealer - API
@@ -648,6 +655,98 @@ public class ChargeManagementController {
 		});
 		return new ResponseEntity<Object>(dropDowns, HttpStatus.OK);
 	}
+	
+	//BOOK YOUR CHARGING SLOT
+	//Web site -> Charging -> BOOK YOUR CHARGING SLOT
+	
+	@Tag(name = "Charging Management - Book your charging slot")
+	@ApiOperation(value = "Saves a given entity. Use the returned instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = "/charging-requests", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> addChargingRequest(@Valid @RequestBody ChargingSlotBookingRequestDTO requestBody) {
+		LOG.info("addChargingRequest request received@@   {}", requestBody);
+		ChargingSlotBookingRequest entity = new ChargingSlotBookingRequest();
+		BeanUtils.copyProperties(requestBody, entity);
+		Optional<ChargingStation> chargingStationData = chargingStationRepository.findById(requestBody.getChargingStationId());
+				
+		if (!chargingStationData.isPresent()) {
+			return new ResponseEntity<Object>(
+					new ErrorResponseDTO(
+							"Did not find a ChargingStation with id=" + requestBody.getChargingStationId()),HttpStatus.BAD_REQUEST);
+		}
+		entity.setChargingStation(chargingStationData.get());
+		ChargingSlotBookingRequest savedEntity = chargingSlotBookingRequestRepository.save(entity);
+		LOG.info("Saved @@   {}", savedEntity.getId());
+		return new ResponseEntity<Object>(savedEntity.getId(), HttpStatus.OK);
+	}
+	
+	@Tag(name = "Charging Management - Manage booking request")
+	@ApiOperation(value = "Accept charging request", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PutMapping(path = "/charging-requests/{id}/accept",  produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> acceptChargingRequest(@PathVariable Long id) {
+		LOG.info("acceptChargingRequest received@@   {}", id);
+		Optional<ChargingSlotBookingRequest> data = chargingSlotBookingRequestRepository.findById(id);
+		if (!data.isPresent()) {
+			return new ResponseEntity<Object>(
+					new ErrorResponseDTO("Did not find a ChargingSlotBookingRequest with id=" + id),
+					HttpStatus.BAD_REQUEST);
+		}
+		ChargingSlotBookingRequest entity = data.get();
+		entity.setIsAccepted("Y");
+		ChargingSlotBookingRequest updatedEntity = chargingSlotBookingRequestRepository.save(entity);
+		LOG.info("Saved @@   {}", updatedEntity.getId());
+		return new ResponseEntity<Object>(updatedEntity.getId(), HttpStatus.OK);
+	}
+	
+	@Tag(name = "Charging Management - Manage booking request")
+	@ApiOperation(value = "reject charging request", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PutMapping(path = "/charging-requests/{id}/reject",produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> rejectChargingRequest(@PathVariable Long id) {
+		LOG.info("acceptChargingRequest received@@   {}", id);
+		Optional<ChargingSlotBookingRequest> data = chargingSlotBookingRequestRepository.findById(id);
+		if (!data.isPresent()) {
+			return new ResponseEntity<Object>(
+					new ErrorResponseDTO("Did not find a ChargingSlotBookingRequest with id=" + id),
+					HttpStatus.BAD_REQUEST);
+		}
+		ChargingSlotBookingRequest entity = data.get();
+		entity.setIsAccepted("N");
+		ChargingSlotBookingRequest updatedEntity = chargingSlotBookingRequestRepository.save(entity);
+		LOG.info("Saved @@   {}", updatedEntity.getId());
+		return new ResponseEntity<Object>(updatedEntity.getId(), HttpStatus.OK);
+	}
+	
+	
+	@Tag(name = "Charging Management - Manage booking request")
+	@ApiOperation(value = "Accept charging request", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/charging-requests", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Object> getAllChargingRequest() {
+		LOG.info("acceptChargingRequest received@@");
+		Iterable<ChargingSlotBookingRequest> allData = chargingSlotBookingRequestRepository.findAll();
+		List<ChargingSlotBookingResponseDTO> allDTO = new ArrayList<>();
+		allData.forEach(entity -> {
+			ChargingSlotBookingResponseDTO dto = new ChargingSlotBookingResponseDTO();
+			BeanUtils.copyProperties(entity, dto);
+			if (entity.getChargingStation() != null) {
+				dto.setChargingStation(entity.getChargingStation().getName());
+			}
+			dto.add(linkTo(methodOn(ChargeManagementController.class).acceptChargingRequest(entity.getId())).withRel("Accept"));
+			dto.add(linkTo(methodOn(ChargeManagementController.class).rejectChargingRequest(entity.getId())).withRel("Reject"));
+			dto.add(linkTo(methodOn(ChargeManagementController.class).deleteChargingRequest(entity.getId())).withRel("Delete"));
+			allDTO.add(dto);
+		});
+		return new ResponseEntity<Object>(allDTO, HttpStatus.OK);
+	}
+
+	@Tag(name = "Charging Management - Manage booking request")
+	@ApiOperation(value = "Delete the charging request", notes = "If the entity is not found in the persistence store it is silently ignored.", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@DeleteMapping(path = "/charging-requests/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> deleteChargingRequest(@PathVariable Long id) {
+		LOG.info("deleteChargingRequest received @@   {}", id);
+		chargingSlotBookingRequestRepository.deleteById(id);
+		LOG.info("Deleted ChargingSlotBookingRequest successfully by id {}", id);
+		return new ResponseEntity<Object>(HttpStatus.OK);
+	}
+
 	
 	
 }
