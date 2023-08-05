@@ -154,8 +154,8 @@
 				<configuration>
 					<executable>true</executable>
 					<jvmArguments>
-                -Xms500m
-				-Xmx1G
+                -Xms200m
+				-Xmx500m
             </jvmArguments>
 				</configuration>
 			</plugin>
