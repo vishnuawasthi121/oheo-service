@@ -325,10 +325,9 @@ public class LocationManagementController {
 
 	@ApiOperation(value = "Deletes the entity with the given id", notes = "If the entity is not found in the persistence store it is silently ignored.", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@DeleteMapping(path = "/states/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<Object> deleteState(@PathVariable String countryCode, @PathVariable Long id) {
-		LOG.info("deleteCountry request received@@   {}", id);
-		Country country = countryRepository.findByCountryCode(countryCode);
-		stateRepository.deleteByCountryAndId(country, id);
+	public ResponseEntity<Object> deleteState(@PathVariable Long id) {
+		LOG.info("deleteState request received@@   {}", id);
+		stateRepository.deleteById(id);
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
 
@@ -568,7 +567,12 @@ public class LocationManagementController {
 	@DeleteMapping(path = "/cities/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Object> deleteCity(@PathVariable Long id) {
 		LOG.info("deleteCity request received@@   {}", id);
-		cityRepository.deleteById(id);
+		Optional<City> cityData = cityRepository.findById(id);
+
+		if (cityData.isPresent()) {
+			cityRepository.delete(cityData.get());
+
+		}
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}
 	
@@ -733,6 +737,12 @@ public class LocationManagementController {
 	@DeleteMapping(path = "/zipcodes/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<Object> deleteZipcode(@PathVariable Long id) {
 		LOG.info("deleteCity request received@@   {}", id);
+		/*
+		 * Optional<Zipcode> zipcodeData = zipcodeRepository.findById(id);
+		 * if(zipcodeData.isPresent()) { zipcodeRepository.delete(zipcodeData.get());
+		 * 
+		 * }
+		 */
 		zipcodeRepository.deleteById(id);
 		return new ResponseEntity<Object>(HttpStatus.OK);
 	}

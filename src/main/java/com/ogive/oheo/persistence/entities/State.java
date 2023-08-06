@@ -2,6 +2,7 @@ package com.ogive.oheo.persistence.entities;
 
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -14,6 +15,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.PreRemove;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -55,14 +57,59 @@ public class State {
 	private Country country;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "REGION_ID")
-	private Regions region;
+	@JoinColumn(name = "ZONE_ID",nullable = true)
+	private ZoneDetail zone;
 
 	@OneToMany(mappedBy = "state", fetch = FetchType.LAZY)
 	private Set<City> cities;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "ZONE_ID")
-	private ZoneDetail zone;
+	@OneToMany(mappedBy = "state", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+	private Set<BuyRequest> buyRequests;
 
+	@OneToMany(mappedBy = "state", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+	private Set<VehicleMaintenanceRecord> vehicleMaintenanceRecords;
+
+	@OneToMany(mappedBy = "state", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+	private Set<UserDetail> userDetails;
+
+	@OneToMany(mappedBy = "state", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+	private Set<ChargingStation> chargingStations;
+
+	@OneToMany(mappedBy = "state", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+	private Set<ChargingStationBuyRequest> chargingStationBuyRequests;
+
+	@OneToMany(mappedBy = "state", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+	private Set<Address> addresses;
+
+	@PreRemove
+	private void preRemove() {
+
+		if (null != buyRequests) {
+			buyRequests.forEach(request -> request.setState(null));
+		}
+
+		if (null != vehicleMaintenanceRecords) {
+			vehicleMaintenanceRecords.forEach(request -> request.setState(null));
+		}
+		if (null != userDetails) {
+			userDetails.forEach(request -> request.setState(null));
+		}
+
+		if (null != chargingStations) {
+			chargingStations.forEach(request -> request.setState(null));
+		}
+
+		if (null != chargingStationBuyRequests) {
+			chargingStationBuyRequests.forEach(request -> request.setState(null));
+		}
+
+		if (null != addresses) {
+			addresses.forEach(request -> request.setState(null));
+		}
+
+		if (null != cities) {
+			cities.forEach(request -> request.setState(null));
+		}
+
+	}
 }
