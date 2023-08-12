@@ -15,6 +15,7 @@ import org.thymeleaf.templatemode.TemplateMode;
 @Configuration
 public class AppConfig {
 
+	
 	@Value("${app.email.sender.username}")
 	private String sender;
 
