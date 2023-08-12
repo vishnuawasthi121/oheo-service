@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -68,6 +69,7 @@ import com.ogive.oheo.persistence.repo.ChargingStationBuyRequestRepository;
 import com.ogive.oheo.persistence.repo.ChargingStationRepository;
 import com.ogive.oheo.persistence.repo.CityRepository;
 import com.ogive.oheo.persistence.repo.CompanyRepository;
+import com.ogive.oheo.persistence.repo.ProductRepository;
 import com.ogive.oheo.persistence.repo.StateRepository;
 import com.ogive.oheo.persistence.repo.UserDetailRepository;
 import com.ogive.oheo.persistence.repo.VehicleBodyTypeRepository;
@@ -138,6 +140,11 @@ public class ChargeManagementController {
 	@Autowired
 	private ChargingSlotBookingRequestRepository chargingSlotBookingRequestRepository;
 	
+	@Autowired
+	private ProductRepository productRepository;
+	
+	@Value("${website.electric.vehicle.fuel-type}")
+	private String electricVehicleFuelTypeName;
 
 	// ChargingPartDealer - API
 	@ApiOperation(value = "Saves a given entity. Use the returned instance for further operations as the save operation might have changed the entity instance completely", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -678,6 +685,21 @@ public class ChargeManagementController {
 		LOG.info("Saved @@   {}", savedEntity.getId());
 		return new ResponseEntity<Object>(savedEntity.getId(), HttpStatus.OK);
 	}
+
+	@Tag(name = "Charging Management - Book your charging slot")
+	@ApiOperation(value = "EV live product dropdown by Vehicle Type like Two Wheelers, Three Wheelers etc", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/products-live/ev/{vehicleTypeId}/dropdown", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<Object> getProductDropdownByvVehicleType(@PathVariable Long vehicleTypeId) {
+		List<Object[]> productData = productRepository.fetchEVProductsDropDown(electricVehicleFuelTypeName,
+				vehicleTypeId);
+		List<Map<Object, Object>> dropDowns = new ArrayList<>();
+		productData.forEach(data -> {
+			Map<Object, Object> map = new HashMap<>();
+			map.put(data[0], data[1]);
+			dropDowns.add(map);
+		});
+		return new ResponseEntity<Object>(dropDowns, HttpStatus.OK);
+	}
 	
 	@Tag(name = "Charging Management - Manage booking request")
 	@ApiOperation(value = "Accept charging request", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -714,6 +736,7 @@ public class ChargeManagementController {
 		LOG.info("Saved @@   {}", updatedEntity.getId());
 		return new ResponseEntity<Object>(updatedEntity.getId(), HttpStatus.OK);
 	}
+	
 	
 	
 	@Tag(name = "Charging Management - Manage booking request")

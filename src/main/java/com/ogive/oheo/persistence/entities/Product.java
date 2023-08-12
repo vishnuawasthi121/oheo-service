@@ -12,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedNativeQuery;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -36,6 +37,8 @@ import lombok.ToString;
 @NamedQuery(name="Product.dropDownLive", query="SELECT id ,name FROM Product WHERE isLive = :isLive")
 @NamedQuery(name="Product.findProductByUserIdAndId", query="FROM Product WHERE userDetail.id  = :userId AND id = :id")
 @NamedQuery(name="Product.deleteByProductId", query="delete from Product where id  =:productId")
+
+@NamedNativeQuery(name = "Product.fetchEVProductsDropDown",query = "SELECT P.id , p.name FROM PRODUCT  P  LEFT JOIN VEHICLE_FUEL_TYPE VFT ON P.VEHICLE_FUEL_TYPE_ID = VFT.ID  LEFT JOIN VEHICLE_TYPE VT ON P.VEHICLE_TYPE_ID=VT.ID WHERE  P.status ='ACTIVE'  AND p.is_live ='Y' AND VFT.name =:vehicleFuelTypeName AND VT.ID =:vehicleTypeId")
 
 @Setter
 @Getter

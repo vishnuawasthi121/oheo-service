@@ -19,7 +19,7 @@ import lombok.ToString;
 @Getter
 @ToString
 @NoArgsConstructor
-@NamedQuery(name="Features.deleteByProductId", query="delete from ProductSpecification where product.id  =:productId")
+@NamedQuery(name="Features.deleteByProductId", query="delete from Features where product.id  =:productId")
 @Table(name = "FEATURES")
 @SequenceGenerator(allocationSize = 1, initialValue = 100, name = "SEQ_FEATURES", sequenceName = "SEQ_FEATURES")
 @Entity

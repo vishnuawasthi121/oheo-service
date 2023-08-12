@@ -17,6 +17,8 @@ public interface ProductRepository  extends CrudRepository<Product, Long>, JpaSp
 	
 	List<Object[]>	fetchProductDropDownByVehicleType(Long userId,Long vehicleTypeId,StatusCode status);
 	
+	List<Object[]> fetchEVProductsDropDown (String vehicleFuelTypeName, Long vehicleTypeId);
+	
 	
 	Product findProductByUserIdAndId(Long userId, Long id);
 	
