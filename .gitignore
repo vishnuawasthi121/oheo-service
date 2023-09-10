@@ -1,0 +1,21 @@
+/charger-2.png
+/.classpath
+/.factorypath
+ logs/
+target/classes/.gitignore
+        target/classes/META-INF/
+        target/classes/application-dev.properties
+        target/classes/application-local.properties
+        target/classes/application.properties
+        target/classes/com/
+        target/classes/data.sql
+        target/classes/logback.xml
+        target/classes/schema.sql
+        target/classes/start.sh
+        target/classes/stop.sh
+        target/maven-archiver/
+        target/maven-status/
+        target/oheo-service-0.0.1-SNAPSHOT.jar
+        target/oheo-service-0.0.1-SNAPSHOT.jar.original
+/target/
+/logs/

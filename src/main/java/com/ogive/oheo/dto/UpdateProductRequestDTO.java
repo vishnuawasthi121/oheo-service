@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -11,7 +12,6 @@ import com.ogive.oheo.constants.ImageType;
 import com.ogive.oheo.constants.LeaseAvailability;
 import com.ogive.oheo.constants.StatusCode;
 
-import groovyjarjarantlr4.v4.runtime.misc.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 

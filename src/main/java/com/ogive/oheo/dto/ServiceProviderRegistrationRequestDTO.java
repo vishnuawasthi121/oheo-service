@@ -1,10 +1,10 @@
 package com.ogive.oheo.dto;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 import com.ogive.oheo.constants.ServiceProviderType;
 
-import groovyjarjarantlr4.v4.runtime.misc.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 

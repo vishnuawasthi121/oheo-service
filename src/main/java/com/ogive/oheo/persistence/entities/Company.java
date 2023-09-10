@@ -20,10 +20,17 @@ import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ogive.oheo.constants.StatusCode;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * @author Vishnu Awasthi
  *
  */
+
+@Setter
+@Getter
+
 @NamedQuery(name="Company.dropDown", query="SELECT id , companyName FROM Company WHERE status = 'ACTIVE'")
 
 @Table(name = "VEHICLE_COMPANY")
@@ -44,37 +51,4 @@ public class Company {
 
 	@Enumerated(EnumType.STRING)
 	private StatusCode status;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getCompanyName() {
-		return companyName;
-	}
-
-	public void setCompanyName(String companyName) {
-		this.companyName = companyName;
-	}
-
-	public StatusCode getStatus() {
-		return status;
-	}
-
-	public void setStatus(StatusCode status) {
-		this.status = status;
-	}
-
-	public Set<VehicleModel> getVehicleModels() {
-		return vehicleModels;
-	}
-
-	public void setVehicleModels(Set<VehicleModel> vehicleModels) {
-		this.vehicleModels = vehicleModels;
-	}
-
 }
