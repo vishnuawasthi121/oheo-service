@@ -23,7 +23,7 @@ public class FreeBeeFilter implements Filter {
 	private String isFreeBeeAllowed;
 
 	@Value("${application.free.bee.allowed.maxdate}")
-	private String isFreeBeeMaxDate;
+	private String freeBeeMaxDate;
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -35,7 +35,7 @@ public class FreeBeeFilter implements Filter {
 
 			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
 			try {
-				Date maxAllowedDate = simpleDateFormat.parse(isFreeBeeMaxDate);
+				Date maxAllowedDate = simpleDateFormat.parse(freeBeeMaxDate);
 				if (currentDate.after(maxAllowedDate)) {
 					//res.setStatus(400);
 					res.setContentType("text/html;charset=UTF-8");
@@ -50,6 +50,7 @@ public class FreeBeeFilter implements Filter {
 			}
 
 		}
+		System.out.println("freeBeeMaxDate    : "+freeBeeMaxDate);
 		chain.doFilter(req, res);
 	}
 
